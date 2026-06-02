@@ -1,0 +1,103 @@
+/**
+ * Skeleton — placeholder card with shimmer wave (premium loading state).
+ * ActivityIndicator yerine: kart şekli + sürekli akan açık gradient bandı.
+ */
+import React, { useEffect, useRef } from "react";
+import { View, Animated, StyleSheet, Easing } from "react-native";
+import { useTheme } from "../../contexts/ThemeContext";
+
+export function Skeleton({ width = "100%", height = 16, radius = 8, style }) {
+  const { c, isDark } = useTheme();
+  const shimmer = useRef(new Animated.Value(-1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1500,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    ).start();
+  }, [shimmer]);
+
+  return (
+    <View
+      style={[
+        s.box,
+        {
+          width,
+          height,
+          borderRadius: radius,
+          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(15,25,37,0.05)",
+        },
+        style,
+      ]}
+    >
+      <Animated.View
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            backgroundColor: isDark
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(15,25,37,0.04)",
+            transform: [
+              {
+                translateX: shimmer.interpolate({
+                  inputRange: [-1, 1],
+                  outputRange: [-200, 200],
+                }),
+              },
+            ],
+          },
+        ]}
+      />
+    </View>
+  );
+}
+
+export function SkeletonListCard() {
+  const { c } = useTheme();
+  return (
+    <View
+      style={[
+        s.card,
+        { backgroundColor: c.bgElevated, borderColor: c.border },
+      ]}
+    >
+      <Skeleton height={72} radius={0} width="100%" />
+      <View style={{ padding: 16, gap: 8 }}>
+        <Skeleton width="65%" height={18} radius={6} />
+        <Skeleton width="40%" height={12} radius={6} />
+        <View style={{ marginTop: 6 }}>
+          <Skeleton width="55%" height={12} radius={6} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+export function SkeletonContinueCard() {
+  return (
+    <View style={{ width: 150 }}>
+      <Skeleton height={86} radius={14} />
+      <View style={{ marginTop: 10, gap: 6 }}>
+        <Skeleton width="80%" height={14} radius={6} />
+        <Skeleton width="55%" height={11} radius={6} />
+        <Skeleton width="100%" height={5} radius={6} style={{ marginTop: 8 }} />
+      </View>
+    </View>
+  );
+}
+
+const s = StyleSheet.create({
+  box: {
+    overflow: "hidden",
+  },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 14,
+  },
+});

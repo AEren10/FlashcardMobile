@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FlashcardMobile — Tasarım</title>
+<link rel="stylesheet" href="app.css" />
+<style>
+  html, body { margin: 0; background: #e9e9ec; }
+  #root { width: 100vw; height: 100vh; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="ui.jsx"></script>
+<script type="text/babel" src="flashcard.jsx"></script>
+<script type="text/babel" src="screens-1.jsx"></script>
+<script type="text/babel" src="screens-2.jsx"></script>
+<script type="text/babel" src="screens-3.jsx"></script>
+<script type="text/babel" src="screens-4.jsx"></script>
+<script type="text/babel" src="screens-5.jsx"></script>
+<script type="text/babel" src="screens-6.jsx"></script>
+<script type="text/babel" src="screens-7.jsx"></script>
+
+<script type="text/babel">
+const { useState } = React;
+
+const ACCENTS = {
+  'Lime':   '#B4FF4F',
+  'Mint':   '#4ADE80',
+  'Cobalt': '#5B7FFF',
+  'Amber':  '#FFB84D',
+};
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "themeMode": "Karşılaştırma",
+  "accent": "#FFB84D",
+  "glow": 27,
+  "displayFont": "Space Grotesk",
+  "reduceMotion": false
+}/*EDITMODE-END*/;
+
+// Wrap a screen in an iPhone frame inside an artboard
+function Frame({ id, label, dark, children }) {
+  return (
+    <DCArtboard id={id} label={label} width={402} height={874}>
+      <IOSDevice dark={dark}>{children}</IOSDevice>
+    </DCArtboard>
+  );
+}
+
+function Brief() {
+  return (
+    <DCArtboard id="brief" label="Brief" width={760} height={874}>
+      <div style={{ width: '100%', height: '100%', background: '#0A1019', color: '#F1F5F9', borderRadius: 20, padding: '44px 48px', boxSizing: 'border-box', fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
+        <div style={{ fontFamily: 'Space Grotesk', fontSize: 13, letterSpacing: '0.12em', color: '#B4FF4F', textTransform: 'uppercase' }}>FlashcardMobile · iOS</div>
+        <div style={{ fontFamily: 'Instrument Serif', fontStyle: 'italic', fontSize: 52, lineHeight: 1.05, margin: '14px 0 8px' }}>Premium SRS<br/>kelime öğrenme</div>
+        <p style={{ color: '#8899AB', fontSize: 16, lineHeight: 1.6, maxWidth: 560 }}>
+          Linear'ın disiplini + Headspace'in sıcaklığı + Apple Notes'un sadeliği. Maskot yok; tüm görsel dil gradient'ler, geometrik şekiller ve lime↔cobalt kontrastı üzerine kurulu.
+        </p>
+        <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '26px 0' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '22px 32px' }}>
+          {[
+            ['Tipografi', 'Instrument Serif (display) · Space Grotesk (başlık/sayı) · Inter (gövde)'],
+            ['Renk', 'Deep navy zemin · lime CTA · cobalt ikincil · glow tabanlı elevation'],
+            ['Tema', 'Dark varsayılan. Light\'ta lime yerine deeper green (#4A8E1F).'],
+            ['Yıldız ekran', 'Flashcard Classic: dokun→çevir, sürükle→cevap, swipe/tutorial state\'leri.'],
+          ].map(([h, b]) => (
+            <div key={h}>
+              <div style={{ fontFamily: 'Space Grotesk', fontWeight: 600, fontSize: 15, marginBottom: 5 }}>{h}</div>
+              <div style={{ color: '#8899AB', fontSize: 13.5, lineHeight: 1.5 }}>{b}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: 30, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {['Onboarding', 'Ana Sayfa', 'Çalış', 'Kütüphane', 'Flashcard + state\'ler', 'Quiz', 'Empty States', 'İstatistik', 'Profil', 'App Icon', 'Components', 'Motion spec'].map((t) => (
+            <span key={t} style={{ fontSize: 12.5, fontFamily: 'Inter', fontWeight: 500, padding: '7px 13px', borderRadius: 999, background: 'rgba(180,255,79,0.12)', color: '#B4FF4F', border: '1px solid rgba(180,255,79,0.2)' }}>{t}</span>
+          ))}
+        </div>
+        <p style={{ color: '#4A5C6E', fontSize: 13, marginTop: 30, lineHeight: 1.6 }}>
+          Her ekran iPhone çerçevesinde, light + dark yan yana. Flashcard ve segmented kontroller canlı — tıkla, çevir, sürükle. Tweaks panelinden tema modu, aksan rengi, parıltı ve fontu değiştir.
+        </p>
+      </div>
+    </DCArtboard>
+  );
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  // theme resolver
+  const dk = (preferred) => t.themeMode === 'Hepsi Dark' ? true : t.themeMode === 'Hepsi Light' ? false : preferred;
+  const reduce = t.reduceMotion ? ' fm-reduce' : '';
+
+  React.useEffect(() => {
+    const el = document.getElementById('tweak-overrides') || (() => { const s = document.createElement('style'); s.id = 'tweak-overrides'; document.head.appendChild(s); return s; })();
+    const fontItalic = t.displayFont === 'Instrument Serif';
+    el.textContent = `
+      .fm-screen[data-theme="dark"]{
+        --accent-primary:${t.accent} !important;
+        --accent-glow: color-mix(in srgb, ${t.accent} ${t.glow}%, transparent) !important;
+        --border-accent: color-mix(in srgb, ${t.accent} 32%, transparent) !important;
+      }
+      .fm-display{ font-family:'${t.displayFont}', Georgia, serif !important; font-style:${fontItalic ? 'italic' : 'normal'} !important; }
+    `;
+  }, [t.accent, t.glow, t.displayFont]);
+
+  return (
+    <div className={'fm-app' + reduce} style={{ width: '100%', height: '100%' }}>
+      <DesignCanvas>
+        <DCSection id="intro" title="FlashcardMobile" subtitle="Tasarım sistemi & ekranlar — light + dark, canlı flashcard">
+          {Brief()}
+        </DCSection>
+
+        <DCSection id="flashcard" title="Flashcard — Study (en kritik)" subtitle="Classic · dokun → 3D çevir · sürükle veya butona bas → cevap. Canlı.">
+          {Frame({ id: 'fc-dark', label: 'Classic — Dark · canlı', dark: dk(true), children: <FlashcardScreen dark={dk(true)} /> })}
+          {Frame({ id: 'fc-light', label: 'Classic — Light · canlı', dark: dk(false), children: <FlashcardScreen dark={dk(false)} deckTitle="Seyahat" /> })}
+        </DCSection>
+
+        <DCSection id="flashcard-states" title="Flashcard — state'ler" subtitle="Storyboard: kart arkası · sağa/sola swipe · doğru/yanlış feedback · tutorial. Donmuş kareler.">
+          {Frame({ id: 'fc-back', label: 'Card Back — çevrilmiş', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="back" wordIdx={0} /> })}
+          {Frame({ id: 'fc-swr', label: 'Swipe sağ — Biliyorum', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="swipe-right" wordIdx={1} /> })}
+          {Frame({ id: 'fc-swl', label: 'Swipe sol — Bilmiyorum', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="swipe-left" wordIdx={2} /> })}
+          {Frame({ id: 'fc-ok', label: 'Doğru — ✓ + konfeti (streak 5)', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="correct" wordIdx={1} /> })}
+          {Frame({ id: 'fc-no', label: 'Yanlış — shake + ✗', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="wrong" wordIdx={2} /> })}
+          {Frame({ id: 'fc-tut', label: 'Tutorial overlay — ilk kart', dark: dk(true), children: <FlashcardState dark={dk(true)} pose="tutorial" wordIdx={0} /> })}
+        </DCSection>
+
+        <DCSection id="onboarding" title="Onboarding" subtitle="3 swipe'lanabilir ekran · CTA'ya bas, ilerlesin">
+          {Frame({ id: 'ob1', label: '1 · Akıllı Tekrar', dark: dk(true), children: <Onboarding dark={dk(true)} start={0} /> })}
+          {Frame({ id: 'ob2', label: '2 · Kendi Listeni Yarat', dark: dk(true), children: <Onboarding dark={dk(true)} start={1} /> })}
+          {Frame({ id: 'ob3', label: '3 · Seriyi Koru', dark: dk(true), children: <Onboarding dark={dk(true)} start={2} /> })}
+          {Frame({ id: 'ob-light', label: 'Light varyant', dark: dk(false), children: <Onboarding dark={dk(false)} start={0} /> })}
+        </DCSection>
+
+        <DCSection id="home" title="Ana Sayfa" subtitle="Selamlama · seri & günlük hedef · günün meydan okuması">
+          {Frame({ id: 'home-d', label: 'Dark', dark: dk(true), children: <Home dark={dk(true)} /> })}
+          {Frame({ id: 'home-l', label: 'Light', dark: dk(false), children: <Home dark={dk(false)} /> })}
+        </DCSection>
+
+        <DCSection id="study" title="Çalış" subtitle="Segmented: Bugün · Zor Kelimeler · Quiz — sekmelere tıkla">
+          {Frame({ id: 'study-d', label: 'Dark', dark: dk(true), children: <Study dark={dk(true)} /> })}
+          {Frame({ id: 'study-l', label: 'Light', dark: dk(false), children: <Study dark={dk(false)} /> })}
+        </DCSection>
+
+        <DCSection id="library" title="Kütüphane" subtitle="Segmented: Listelerim · Favoriler · Keşfet · FAB ile yeni liste">
+          {Frame({ id: 'lib-d', label: 'Dark', dark: dk(true), children: <Library dark={dk(true)} /> })}
+          {Frame({ id: 'lib-l', label: 'Light', dark: dk(false), children: <Library dark={dk(false)} /> })}
+        </DCSection>
+
+        <DCSection id="quiz" title="Quiz Modu" subtitle="Çoktan seçmeli · 2×2 · doğru→yeşil spring + otomatik geç · yanlış→kırmızı + doğru yeşile döner. Canlı.">
+          {Frame({ id: 'quiz-d', label: 'Dark · canlı', dark: dk(true), children: <QuizMode dark={dk(true)} /> })}
+          {Frame({ id: 'quiz-l', label: 'Light · canlı', dark: dk(false), children: <QuizMode dark={dk(false)} /> })}
+          {Frame({ id: 'quiz-wrong', label: 'Yanlış cevap state', dark: dk(true), children: <QuizMode dark={dk(true)} frozenPick={2} /> })}
+        </DCSection>
+
+        <DCSection id="empty" title="Empty State'ler" subtitle="Abstract geometric · maskotsuz. Boş liste · bağlantı yok · sonuç yok.">
+          {Frame({ id: 'empty-list-d', label: 'Boş liste · Dark', dark: dk(true), children: <EmptyState dark={dk(true)} kind="list" /> })}
+          {Frame({ id: 'empty-list-l', label: 'Boş liste · Light', dark: dk(false), children: <EmptyState dark={dk(false)} kind="list" /> })}
+          {Frame({ id: 'empty-net-d', label: 'Bağlantı yok · Dark', dark: dk(true), children: <EmptyState dark={dk(true)} kind="offline" /> })}
+          {Frame({ id: 'empty-net-l', label: 'Bağlantı yok · Light', dark: dk(false), children: <EmptyState dark={dk(false)} kind="offline" /> })}
+          {Frame({ id: 'empty-search-d', label: 'Sonuç yok · Dark', dark: dk(true), children: <EmptyState dark={dk(true)} kind="search" /> })}
+          {Frame({ id: 'empty-search-l', label: 'Sonuç yok · Light', dark: dk(false), children: <EmptyState dark={dk(false)} kind="search" /> })}
+        </DCSection>
+
+        <DCSection id="stats" title="İstatistik / Streak" subtitle="Animasyonlu seri · katkı ızgarası · rozetler">
+          {Frame({ id: 'stats-d', label: 'Dark', dark: dk(true), children: <Stats dark={dk(true)} /> })}
+          {Frame({ id: 'stats-l', label: 'Light', dark: dk(false), children: <Stats dark={dk(false)} /> })}
+        </DCSection>
+
+        <DCSection id="profile" title="Profil" subtitle="Avatar · seviye · haftalık başarı & rozetler · ayarlar">
+          {Frame({ id: 'prof-d', label: 'Dark', dark: dk(true), children: <Profile dark={dk(true)} /> })}
+          {Frame({ id: 'prof-l', label: 'Light', dark: dk(false), children: <Profile dark={dk(false)} /> })}
+        </DCSection>
+
+        <DCSection id="appicon" title="App Icon" subtitle="4 soyut konsept · 1024×1024 · iOS squircle + home-screen mockup">
+          <DCArtboard id="icon-d" label="Konseptler · Dark sunum" width={980} height={560}>
+            <AppIconBoard dark={true} />
+          </DCArtboard>
+          <DCArtboard id="icon-l" label="Konseptler · Light sunum" width={980} height={560}>
+            <AppIconBoard dark={false} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="components" title="Component Library" subtitle="Buttons · inputs · chips · cards · toast · avatar · FAB · bottom sheet — dark + light parite">
+          <DCArtboard id="comp-d" label="Dark" width={920} height={840}>
+            <ComponentLibrary dark={true} />
+          </DCArtboard>
+          <DCArtboard id="comp-l" label="Light" width={920} height={840}>
+            <ComponentLibrary dark={false} />
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection id="motion" title="Animasyon Spec'i" subtitle="Motion system referansı · storyboard + property table + reduced motion (F bölümü)">
+          <DCArtboard id="motion-board" label="Motion system · implementation reference" width={1180} height={1180}>
+            <AnimationSpec />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+
+      <TweaksPanel>
+        <TweakSection label="Tema" />
+        <TweakRadio label="Çerçeve modu" value={t.themeMode}
+          options={['Karşılaştırma', 'Hepsi Dark', 'Hepsi Light']}
+          onChange={(v) => setTweak('themeMode', v)} />
+        <TweakSection label="Aksan (dark)" />
+        <TweakColor label="Renk" value={t.accent}
+          options={Object.values(ACCENTS)}
+          onChange={(v) => setTweak('accent', v)} />
+        <TweakSlider label="Parıltı" value={t.glow} min={4} max={32} unit="%"
+          onChange={(v) => setTweak('glow', v)} />
+        <TweakSection label="Tipografi & Hareket" />
+        <TweakRadio label="Display font" value={t.displayFont}
+          options={['Instrument Serif', 'Space Grotesk']}
+          onChange={(v) => setTweak('displayFont', v)} />
+        <TweakToggle label="Hareketi azalt" value={t.reduceMotion}
+          onChange={(v) => setTweak('reduceMotion', v)} />
+      </TweaksPanel>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

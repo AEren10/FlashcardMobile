@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run lint:fix:*)",
+      "Bash(npx husky init)",
+      "Bash(test:*)",
+      "Bash(npx expo install:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(echo:*)",
+      "Bash(npm start)",
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)"
+    ]
+  }
+}
