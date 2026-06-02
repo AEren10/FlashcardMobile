@@ -14,11 +14,12 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import T from "../themes/tokens";
+import { useTheme } from "./ThemeContext";
 
 const ToastContext = createContext({ show: () => {} });
 
 export const ToastProvider = ({ children }) => {
+  const { c } = useTheme();
   const [toast, setToast] = useState(null);
   const insets = useSafeAreaInsets();
   const translateY = useSharedValue(-120);
@@ -53,7 +54,10 @@ export const ToastProvider = ({ children }) => {
     opacity: opacity.value,
   }));
 
-  const bg = toast?.type === "success" ? "#22C55E" : toast?.type === "error" ? T.coral : T.sky;
+  const bg =
+    toast?.type === "success" ? c.success
+    : toast?.type === "error" ? c.error
+    : c.cobalt;
 
   return (
     <ToastContext.Provider value={{ show }}>

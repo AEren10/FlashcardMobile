@@ -1,15 +1,17 @@
 /**
  * TermsOfServiceScreen — App Store sözleşme zorunluluğu.
  */
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
-import T from "../../themes/tokens";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const LAST_UPDATED = "1 Haziran 2026";
 
 export default function TermsOfServiceScreen({ navigation }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
@@ -18,7 +20,7 @@ export default function TermsOfServiceScreen({ navigation }) {
             <Svg width={10} height={16} viewBox="0 0 8 14">
               <Path
                 d="M7 1L1 7l6 6"
-                stroke={T.text}
+                stroke={c.textPrimary}
                 strokeWidth={2.5}
                 fill="none"
                 strokeLinecap="round"
@@ -109,6 +111,8 @@ export default function TermsOfServiceScreen({ navigation }) {
 }
 
 function Section({ title, children }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
   return (
     <View style={s.section}>
       <Text style={s.sectionTitle}>{title}</Text>
@@ -118,46 +122,50 @@ function Section({ title, children }) {
 }
 
 function P({ children }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
   return <Text style={s.p}>{children}</Text>;
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  back: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: T.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 18,
-    fontFamily: T.fontBodyBold,
-    color: T.text,
-  },
-  body: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
-  muted: { fontSize: 12, fontFamily: T.fontBody, color: T.textMuted, marginBottom: 16 },
-  section: { marginBottom: 24 },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: T.fontBodyBold,
-    color: T.text,
-    marginBottom: 8,
-  },
-  p: {
-    fontSize: 14,
-    fontFamily: T.fontBody,
-    color: T.textSec,
-    lineHeight: 22,
-    marginBottom: 6,
-  },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.bgBase },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    back: {
+      width: 34,
+      height: 34,
+      borderRadius: 17,
+      backgroundColor: c.bgSurface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 18,
+      fontFamily: c.fontBodyBold,
+      color: c.textPrimary,
+    },
+    body: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
+    muted: { fontSize: 12, fontFamily: c.fontBody, color: c.textMuted, marginBottom: 16 },
+    section: { marginBottom: 24 },
+    sectionTitle: {
+      fontSize: 16,
+      fontFamily: c.fontBodyBold,
+      color: c.textPrimary,
+      marginBottom: 8,
+    },
+    p: {
+      fontSize: 14,
+      fontFamily: c.fontBody,
+      color: c.textSec,
+      lineHeight: 22,
+      marginBottom: 6,
+    },
+  });
+}

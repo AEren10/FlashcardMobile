@@ -19,6 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
+import AppleSignInButton from "../../components/auth/AppleSignInButton";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -115,6 +116,13 @@ export default function LoginScreen({ navigation }) {
                 <Text style={s.primaryText}>Giriş Yap</Text>
               )}
             </Pressable>
+
+            {/* Apple Sign In — sadece iOS'ta otomatik render olur */}
+            <View style={{ marginTop: 14 }}>
+              <AppleSignInButton
+                onError={(msg) => Alert.alert("Apple ile Giriş", msg)}
+              />
+            </View>
 
             <Pressable onPress={signInAsGuest} style={s.ghostBtn} accessibilityLabel="Misafir olarak gir">
               <Text style={s.ghostText}>Misafir olarak keşfet</Text>

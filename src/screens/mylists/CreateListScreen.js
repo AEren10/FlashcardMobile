@@ -2,7 +2,7 @@
  * CreateListScreen — Premium Dark redesign.
  * Form state → useListEditor, image → useImageUpload.
  */
-import React, { useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -20,18 +20,43 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import Svg, { Path } from "react-native-svg";
 
-import T from "../../themes/tokens";
+import { useTheme } from "../../contexts/ThemeContext";
 import useImageUpload from "../../hooks/useImageUpload";
 import useListEditor from "../../hooks/useListEditor";
 import { useToast } from "../../contexts/ToastContext";
+import BulkAddModal from "./components/BulkAddModal";
+import { invalidatePublicLists } from "../../hooks/usePublicLists";
 
 export default function CreateListScreen({ route }) {
   const navigation = useNavigation();
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const toast = useToast();
   const listId = route?.params?.listId;
   const editor = useListEditor(listId);
   const img = useImageUpload();
   const [saving, setSaving] = useState(false);
+  const [bulkOpen, setBulkOpen] = useState(false);
+  // Her satırdaki 3 input için ref — onSubmitEditing'de next field'a focus
+  const wordRefs = useRef([]);
+  const meaningRefs = useRef([]);
+  const exampleRefs = useRef([]);
+
+  const focusNext = (index, field) => {
+    if (field === "word") {
+      meaningRefs.current[index]?.focus();
+    } else if (field === "meaning") {
+      exampleRefs.current[index]?.focus();
+    } else if (field === "example") {
+      // Son satırda örnek bitirilince → otomatik yeni satır + word'a focus
+      if (index === editor.words.length - 1) {
+        editor.addWord();
+        setTimeout(() => wordRefs.current[index + 1]?.focus(), 50);
+      } else {
+        wordRefs.current[index + 1]?.focus();
+      }
+    }
+  };
 
   const canSave = editor.title.trim().length > 0;
 
@@ -57,6 +82,8 @@ export default function CreateListScreen({ route }) {
         }
       }
       await editor.save(finalUrl);
+      // Public lists cache'i geçersiz kıl — diğer ekranlar fresh data alsın
+      await invalidatePublicLists();
       toast.show({
         message: editor.isEdit ? "Liste güncellendi ✓" : "Liste oluşturuldu ✓",
         type: "success",
@@ -72,7 +99,7 @@ export default function CreateListScreen({ route }) {
   if (editor.fetching) {
     return (
       <View style={[styles.root, styles.center]}>
-        <ActivityIndicator color={T.lime} size="large" />
+        <ActivityIndicator color={c.accent} size="large" />
       </View>
     );
   }
@@ -95,7 +122,7 @@ export default function CreateListScreen({ route }) {
               <Svg width={10} height={16} viewBox="0 0 8 14">
                 <Path
                   d="M7 1L1 7l6 6"
-                  stroke={T.text}
+                  stroke={c.textPrimary}
                   strokeWidth={2.5}
                   fill="none"
                   strokeLinecap="round"
@@ -110,17 +137,17 @@ export default function CreateListScreen({ route }) {
               disabled={!canSave || saving}
               style={[
                 styles.saveBtn,
-                { backgroundColor: canSave ? T.lime : T.surface },
+                { backgroundColor: canSave ? c.accent : c.bgSurface },
               ]}
               accessibilityLabel="Kaydet"
             >
               {saving ? (
-                <ActivityIndicator color={T.bg} size="small" />
+                <ActivityIndicator color={c.bgBase} size="small" />
               ) : (
                 <Text
                   style={[
                     styles.saveText,
-                    { color: canSave ? T.bg : T.textMuted },
+                    { color: canSave ? c.bgBase : c.textMuted },
                   ]}
                 >
                   Kaydet
@@ -140,12 +167,12 @@ export default function CreateListScreen({ route }) {
                 value={editor.title}
                 onChangeText={editor.setTitle}
                 placeholder="Örn: Seyahat kelimeleri"
-                placeholderTextColor={T.textMuted}
+                placeholderTextColor={c.textMuted}
                 style={[
                   styles.nameInput,
-                  { borderBottomColor: editor.title ? T.lime : T.border },
+                  { borderBottomColor: editor.title ? c.accent : c.border },
                 ]}
-                selectionColor={T.lime}
+                selectionColor={c.accent}
               />
             </View>
 
@@ -164,7 +191,7 @@ export default function CreateListScreen({ route }) {
               )}
               {img.uploading && (
                 <View style={styles.imageOverlay}>
-                  <ActivityIndicator color={T.lime} />
+                  <ActivityIndicator color={c.accent} />
                 </View>
               )}
             </Pressable>
@@ -173,15 +200,24 @@ export default function CreateListScreen({ route }) {
             <View style={styles.tip}>
               <Text style={{ fontSize: 24 }}>💡</Text>
               <Text style={styles.tipText}>
-                <Text style={{ color: T.lime, fontFamily: T.fontBodyBold }}>İpucu:</Text> En az 5
+                <Text style={{ color: c.accent, fontFamily: c.fontBodyBold }}>İpucu:</Text> En az 5
                 kelime ekle, SRS daha verimli çalışsın.
               </Text>
             </View>
 
-            {/* Words */}
-            <Text style={[styles.label, { marginTop: 10, marginBottom: 10 }]}>
-              KELİMELER ({editor.words.length})
-            </Text>
+            {/* Words header — count + bulk button */}
+            <View style={styles.wordsHead}>
+              <Text style={[styles.label, { marginBottom: 0 }]}>
+                KELİMELER ({editor.words.length})
+              </Text>
+              <Pressable
+                onPress={() => setBulkOpen(true)}
+                style={styles.bulkBtn}
+                accessibilityLabel="Toplu kelime ekle"
+              >
+                <Text style={styles.bulkBtnTxt}>📋 Toplu Yapıştır</Text>
+              </Pressable>
+            </View>
 
             {editor.words.map((w, i) => (
               <View key={w.id || i} style={styles.wordRow}>
@@ -190,28 +226,42 @@ export default function CreateListScreen({ route }) {
                 </View>
                 <View style={{ flex: 1, gap: 6 }}>
                   <TextInput
+                    ref={(r) => (wordRefs.current[i] = r)}
                     value={w.word}
                     onChangeText={(v) => editor.updateWord(i, "word", v)}
+                    onSubmitEditing={() => focusNext(i, "word")}
                     placeholder="İngilizce"
-                    placeholderTextColor={T.textMuted}
+                    placeholderTextColor={c.textMuted}
                     style={styles.wordInputEn}
-                    selectionColor={T.lime}
+                    selectionColor={c.accent}
+                    returnKeyType="next"
+                    blurOnSubmit={false}
+                    autoCapitalize="none"
+                    autoCorrect={false}
                   />
                   <TextInput
+                    ref={(r) => (meaningRefs.current[i] = r)}
                     value={w.meaning}
                     onChangeText={(v) => editor.updateWord(i, "meaning", v)}
+                    onSubmitEditing={() => focusNext(i, "meaning")}
                     placeholder="Türkçe"
-                    placeholderTextColor={T.textMuted}
+                    placeholderTextColor={c.textMuted}
                     style={styles.wordInputTr}
-                    selectionColor={T.lime}
+                    selectionColor={c.accent}
+                    returnKeyType="next"
+                    blurOnSubmit={false}
                   />
                   <TextInput
+                    ref={(r) => (exampleRefs.current[i] = r)}
                     value={w.example}
                     onChangeText={(v) => editor.updateWord(i, "example", v)}
+                    onSubmitEditing={() => focusNext(i, "example")}
                     placeholder="Örnek cümle (opsiyonel)"
-                    placeholderTextColor={T.textMuted}
+                    placeholderTextColor={c.textMuted}
                     style={styles.wordInputEx}
-                    selectionColor={T.lime}
+                    selectionColor={c.accent}
+                    returnKeyType="next"
+                    blurOnSubmit={false}
                   />
                 </View>
                 {editor.words.length > 1 && (
@@ -226,7 +276,17 @@ export default function CreateListScreen({ route }) {
               </View>
             ))}
 
-            <Pressable onPress={editor.addWord} style={styles.addWordBtn}>
+            <Pressable
+              onPress={() => {
+                editor.addWord();
+                // Yeni satır eklenince otomatik focus
+                setTimeout(
+                  () => wordRefs.current[editor.words.length]?.focus(),
+                  60
+                );
+              }}
+              style={styles.addWordBtn}
+            >
               <Text style={styles.addWordText}>+ Kelime Ekle</Text>
             </Pressable>
 
@@ -263,7 +323,7 @@ export default function CreateListScreen({ route }) {
                 }}
                 style={[
                   styles.toggle,
-                  { backgroundColor: editor.isPublic ? T.lime : "rgba(255,255,255,0.1)" },
+                  { backgroundColor: editor.isPublic ? c.accent : "rgba(255,255,255,0.1)" },
                 ]}
                 accessibilityRole="switch"
                 accessibilityState={{ checked: editor.isPublic }}
@@ -274,7 +334,7 @@ export default function CreateListScreen({ route }) {
                     styles.toggleKnob,
                     {
                       left: editor.isPublic ? 24 : 2,
-                      backgroundColor: editor.isPublic ? T.bg : T.textMuted,
+                      backgroundColor: editor.isPublic ? c.bgBase : c.textMuted,
                     },
                   ]}
                 />
@@ -282,13 +342,28 @@ export default function CreateListScreen({ route }) {
             </View>
           </ScrollView>
         </SafeAreaView>
+
+        <BulkAddModal
+          visible={bulkOpen}
+          onClose={(added) => {
+            setBulkOpen(false);
+            if (added > 0) {
+              toast.show({
+                message: `${added} kelime eklendi ✓`,
+                type: "success",
+              });
+            }
+          }}
+          onAdd={(text) => editor.bulkAdd(text)}
+        />
       </View>
     </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
+function makeStyles(c) {
+  return StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.bgBase },
   center: { alignItems: "center", justifyContent: "center" },
   header: {
     paddingHorizontal: 22,
@@ -299,30 +374,30 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   backBtn: { flexDirection: "row", alignItems: "center", gap: 6, minWidth: 70 },
-  backText: { fontSize: 15, color: T.text, fontFamily: T.fontBodySemi },
-  title: { fontSize: 18, color: T.text, fontFamily: T.fontBodyBold },
+  backText: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi },
+  title: { fontSize: 18, color: c.textPrimary, fontFamily: c.fontBodyBold },
   saveBtn: { borderRadius: 12, paddingVertical: 8, paddingHorizontal: 18, minWidth: 70, alignItems: "center" },
-  saveText: { fontSize: 14, fontFamily: T.fontBodyBold },
+  saveText: { fontSize: 14, fontFamily: c.fontBodyBold },
 
   card: {
-    backgroundColor: T.bgCard,
-    borderRadius: T.radius,
+    backgroundColor: c.bgElevated,
+    borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: T.border,
+    borderColor: c.border,
     marginBottom: 14,
   },
   label: {
     fontSize: 10,
-    fontFamily: T.fontBodyBold,
-    color: T.textMuted,
+    fontFamily: c.fontBodyBold,
+    color: c.textMuted,
     letterSpacing: 1.5,
   },
   nameInput: {
     marginTop: 10,
     fontSize: 18,
-    color: T.text,
-    fontFamily: T.fontBodySemi,
+    color: c.textPrimary,
+    fontFamily: c.fontBodySemi,
     borderBottomWidth: 2,
     paddingBottom: 8,
     paddingTop: 0,
@@ -330,10 +405,10 @@ const styles = StyleSheet.create({
 
   imagePicker: {
     height: 140,
-    borderRadius: T.radius,
-    backgroundColor: T.bgCard,
+    borderRadius: 16,
+    backgroundColor: c.bgElevated,
     borderWidth: 1,
-    borderColor: T.border,
+    borderColor: c.border,
     marginBottom: 14,
     overflow: "hidden",
     justifyContent: "center",
@@ -342,46 +417,67 @@ const styles = StyleSheet.create({
   imagePreview: { width: "100%", height: "100%" },
   imageEmpty: { alignItems: "center", gap: 8 },
   imageEmojiIcon: { fontSize: 32, opacity: 0.7 },
-  imageEmptyText: { fontSize: 12, color: T.textMuted, fontFamily: T.fontBody },
+  imageEmptyText: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBody },
   imageOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center" },
 
   tip: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: T.limeDim,
+    backgroundColor: c.accentGlow,
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
     borderColor: "rgba(180,255,79,0.08)",
     marginBottom: 4,
   },
-  tipText: { flex: 1, fontSize: 12, color: T.text, fontFamily: T.fontBody, lineHeight: 18 },
+  tipText: { flex: 1, fontSize: 12, color: c.textPrimary, fontFamily: c.fontBody, lineHeight: 18 },
 
+  wordsHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  bulkBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: c.accentGlow,
+    borderWidth: 1,
+    borderColor: "rgba(180,255,79,0.25)",
+  },
+  bulkBtnTxt: {
+    fontSize: 11,
+    color: c.accent,
+    fontFamily: c.fontBodyBold,
+    letterSpacing: 0.3,
+  },
   wordRow: {
-    backgroundColor: T.bgCard,
+    backgroundColor: c.bgElevated,
     borderRadius: 14,
     padding: 12,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     borderWidth: 1,
-    borderColor: T.border,
+    borderColor: c.border,
     marginBottom: 10,
   },
   wordNum: {
     width: 30,
     height: 30,
     borderRadius: 10,
-    backgroundColor: T.limeDim,
+    backgroundColor: c.accentGlow,
     alignItems: "center",
     justifyContent: "center",
   },
-  wordNumText: { fontSize: 13, color: T.lime, fontFamily: T.fontBodyBold },
-  wordInputEn: { fontSize: 15, color: T.text, fontFamily: T.fontBodySemi, padding: 0 },
-  wordInputTr: { fontSize: 13, color: T.textSec, fontFamily: T.fontBody, padding: 0 },
-  wordInputEx: { fontSize: 12, color: T.textMuted, fontFamily: T.fontBody, fontStyle: "italic", padding: 0 },
-  removeIcon: { fontSize: 14, color: T.textMuted, paddingHorizontal: 6 },
+  wordNumText: { fontSize: 13, color: c.accent, fontFamily: c.fontBodyBold },
+  wordInputEn: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi, padding: 0 },
+  wordInputTr: { fontSize: 13, color: c.textSec, fontFamily: c.fontBody, padding: 0 },
+  wordInputEx: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBody, fontStyle: "italic", padding: 0 },
+  removeIcon: { fontSize: 14, color: c.textMuted, paddingHorizontal: 6 },
 
   addWordBtn: {
     marginTop: 2,
@@ -390,23 +486,23 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderStyle: "dashed",
     borderColor: "rgba(180,255,79,0.2)",
-    backgroundColor: T.limeDim,
+    backgroundColor: c.accentGlow,
     alignItems: "center",
   },
-  addWordText: { fontSize: 14, color: T.lime, fontFamily: T.fontBodyBold },
+  addWordText: { fontSize: 14, color: c.accent, fontFamily: c.fontBodyBold },
 
   toggleRow: {
     marginTop: 16,
-    backgroundColor: T.bgCard,
+    backgroundColor: c.bgElevated,
     borderRadius: 14,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: T.border,
+    borderColor: c.border,
   },
-  toggleTitle: { fontSize: 15, color: T.text, fontFamily: T.fontBodySemi },
-  toggleSub: { fontSize: 11, color: T.textMuted, fontFamily: T.fontBody, marginTop: 2 },
+  toggleTitle: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi },
+  toggleSub: { fontSize: 11, color: c.textMuted, fontFamily: c.fontBody, marginTop: 2 },
   toggle: { width: 50, height: 28, borderRadius: 99, position: "relative" },
   toggleKnob: {
     width: 24,
@@ -415,4 +511,5 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 2,
   },
-});
+  });
+}

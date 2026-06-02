@@ -6,14 +6,13 @@
  * Zor:      lapses ≥ 2 olan kelimeler — mini progress
  * Quiz:     2 kolon grid, liste cover'ları
  */
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Pressable,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -21,12 +20,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
-import supabaseApiService from "../../services/supabaseApi";
-import { getDueCount } from "../../supabase/progress";
+import { getDueCount, getCategorizedDueWords } from "../../supabase/progress";
+import { getHardWords } from "../../supabase/views";
+import usePublicLists from "../../hooks/usePublicLists";
 import Segmented from "../../components/design/Segmented";
 import CategoryCover from "../../components/design/CategoryCover";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
+import { Skeleton, SkeletonListItem } from "../../components/design/Skeleton";
 
 const TABS = ["Bugün", "Zor Kelimeler", "Quiz"];
 
@@ -36,24 +37,30 @@ export default function FavoritesScreen() {
   const navigation = useNavigation();
   const [tab, setTab] = useState("Bugün");
   const [dueCount, setDueCount] = useState(0);
-  const [lists, setLists] = useState([]);
+  const { lists, loading: listsLoading } = usePublicLists();
   const [hardWords, setHardWords] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState({
+    newWords: [],
+    reviewWords: [],
+    lapsedWords: [],
+  });
+  const [otherLoading, setOtherLoading] = useState(true);
+  const loading = listsLoading || otherLoading;
 
   const s = useMemo(() => makeStyles(c), [c]);
 
   const load = useCallback(async () => {
     try {
-      const [due, pub, hard] = await Promise.all([
+      const [due, hard, cats] = await Promise.all([
         getDueCount().catch(() => 0),
-        supabaseApiService.getAllPublicLists().catch(() => ({ success: false })),
-        supabaseApiService.getHardWords?.().catch?.(() => ({ success: false })) ?? Promise.resolve({ success: false }),
+        getHardWords().catch(() => []),
+        getCategorizedDueWords().catch(() => ({ newWords: [], reviewWords: [], lapsedWords: [] })),
       ]);
       setDueCount(due || 0);
-      if (pub.success) setLists(pub.data || []);
-      if (hard?.success) setHardWords(hard.data || []);
+      setHardWords(Array.isArray(hard) ? hard : []);
+      setCategories(cats);
     } finally {
-      setLoading(false);
+      setOtherLoading(false);
     }
   }, []);
 
@@ -82,13 +89,34 @@ export default function FavoritesScreen() {
           />
 
           {loading ? (
-            <ActivityIndicator color={c.accent} style={{ marginTop: 60 }} />
+            <View style={{ marginTop: 18, gap: 12 }}>
+              <Skeleton height={130} radius={20} />
+              <Skeleton width="40%" height={14} radius={6} style={{ marginTop: 10 }} />
+              {[0, 1, 2].map((i) => (
+                <SkeletonListItem key={i} />
+              ))}
+            </View>
           ) : (
             <View style={{ marginTop: 18 }}>
               {tab === "Bugün" && (
-                <BugunTab dueCount={dueCount} c={c} s={s} navigation={navigation} lists={lists} />
+                <BugunTab
+                  dueCount={dueCount}
+                  categories={categories}
+                  c={c}
+                  s={s}
+                  navigation={navigation}
+                  lists={lists}
+                />
               )}
-              {tab === "Zor Kelimeler" && <ZorTab hardWords={hardWords} c={c} s={s} />}
+              {tab === "Zor Kelimeler" && (
+                <ZorTab
+                  hardWords={hardWords}
+                  lapsedWords={categories.lapsedWords}
+                  c={c}
+                  s={s}
+                  navigation={navigation}
+                />
+              )}
               {tab === "Quiz" && <QuizTab lists={lists} c={c} s={s} navigation={navigation} />}
             </View>
           )}
@@ -98,19 +126,40 @@ export default function FavoritesScreen() {
   );
 }
 
-function BugunTab({ dueCount, c, s, navigation, lists }) {
-  const startSrs = () => {
-    if (lists.length) {
+function BugunTab({ dueCount, categories, c, s, navigation, lists }) {
+  const { newWords, reviewWords, lapsedWords } = categories;
+  const totalReady =
+    dueCount || newWords.length + reviewWords.length + lapsedWords.length;
+
+  const startWith = (words, title) => {
+    if (!words?.length) {
+      // Fallback: mevcut listelerin ilkinden başla
+      if (lists.length) {
+        const pick = lists[0];
+        navigation.navigate("Study", { listId: pick.id, listTitle: pick.title });
+      }
+      return;
+    }
+    navigation.navigate("Study", {
+      presetWords: words,
+      presetTitle: title,
+      presetMode: "srs",
+    });
+  };
+
+  const startMixed = () => {
+    const all = [...newWords, ...reviewWords, ...lapsedWords];
+    if (all.length) startWith(all, "Bugünün Karması");
+    else if (lists.length) {
       const pick = lists[0];
       navigation.navigate("Study", { listId: pick.id, listTitle: pick.title });
-    } else {
-      navigation.navigate("HardWords");
     }
   };
+
   return (
     <>
       {/* Hero card */}
-      <Pressable onPress={startSrs} style={s.heroCard}>
+      <Pressable onPress={startMixed} style={s.heroCard}>
         <LinearGradient
           colors={[c.bgElevated, c.bgSurface]}
           start={{ x: 0, y: 0 }}
@@ -118,7 +167,6 @@ function BugunTab({ dueCount, c, s, navigation, lists }) {
           style={StyleSheet.absoluteFill}
         />
         <View style={s.heroGlow} />
-        {/* Top edge highlight — premium depth */}
         <LinearGradient
           colors={["rgba(255,255,255,0.08)", "transparent"]}
           start={{ x: 0, y: 0 }}
@@ -126,8 +174,12 @@ function BugunTab({ dueCount, c, s, navigation, lists }) {
           style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
           pointerEvents="none"
         />
-        <Text style={s.heroNum}>{dueCount || 12}</Text>
-        <Text style={s.heroLabel}>kelime bugün hazır</Text>
+        <Text style={s.heroNum}>{totalReady}</Text>
+        <Text style={s.heroLabel}>
+          {totalReady === 0
+            ? "henüz kelime yok — listeden başla"
+            : "kelime bugün hazır"}
+        </Text>
         <View style={s.heroCTA}>
           <Text style={s.heroCTATxt}>Çalışmaya Başla</Text>
           <Icon d={ICONS.arrow} size={18} stroke={c.textOnAccent} sw={2.2} />
@@ -135,28 +187,91 @@ function BugunTab({ dueCount, c, s, navigation, lists }) {
       </Pressable>
 
       <Text style={s.sectionTitle}>Kategoriler</Text>
-      <DueRow label="Yeni" count={5} color={c.cobalt} icon={ICONS.plus} c={c} s={s} />
-      <DueRow label="Tekrar" count={4} color={c.accent} icon={ICONS.bolt} c={c} s={s} />
-      <DueRow label="Unutulmuş" count={3} color={c.error} icon={ICONS.flame} c={c} s={s} />
+      <DueRow
+        label="Yeni"
+        sub="Hiç görmediğin kelimeler"
+        count={newWords.length}
+        color={c.cobalt}
+        icon={ICONS.plus}
+        c={c}
+        s={s}
+        onPress={() => startWith(newWords, "Yeni Kelimeler")}
+      />
+      <DueRow
+        label="Tekrar"
+        sub="SRS aralığı dolan kelimeler"
+        count={reviewWords.length}
+        color={c.accent}
+        icon={ICONS.bolt}
+        c={c}
+        s={s}
+        onPress={() => startWith(reviewWords, "Tekrar")}
+      />
+      <DueRow
+        label="Unutulmuş"
+        sub="Daha önce yanlış cevapladığın"
+        count={lapsedWords.length}
+        color={c.error}
+        icon={ICONS.flame}
+        c={c}
+        s={s}
+        onPress={() => startWith(lapsedWords, "Unutulmuş Kelimeler")}
+      />
     </>
   );
 }
 
-function ZorTab({ hardWords, c, s }) {
-  if (!hardWords.length) {
+function ZorTab({ hardWords, c, s, lapsedWords, navigation }) {
+  // hardWords view: lapses>=2. Client fallback: lapses>=1 olanlar (categorize'dan)
+  const combined = useMemo(() => {
+    const map = new Map();
+    [...(hardWords || []), ...(lapsedWords || [])].forEach((w) => {
+      if (!w?.id) return;
+      const existing = map.get(w.id);
+      // Daha yüksek lapses olanı tut
+      if (!existing || (w.lapses ?? 0) > (existing.lapses ?? 0)) {
+        map.set(w.id, w);
+      }
+    });
+    return Array.from(map.values()).sort(
+      (a, b) => (b.lapses ?? 0) - (a.lapses ?? 0)
+    );
+  }, [hardWords, lapsedWords]);
+
+  if (!combined.length) {
     return (
-      <View style={{ minHeight: 420 }}>
-        <EmptyState
-          kind="search"
-          title="Henüz zor kelime yok"
-          subtitle="Çalışmaya devam et, zorlandığın kelimeler burada listelenecek."
-        />
+      <View style={{ minHeight: 420, paddingTop: 20 }}>
+        <View style={[s.emptyHelper, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
+          <Text style={{ fontSize: 32, textAlign: "center", marginBottom: 10 }}>🎯</Text>
+          <Text style={[s.emptyTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
+            Henüz zor kelimen yok
+          </Text>
+          <Text style={[s.emptyDesc, { color: c.textSec, fontFamily: c.fontBody }]}>
+            Bir kelimeyi quiz veya çalışma sırasında{" "}
+            <Text style={{ color: c.error, fontFamily: c.fontBodyBold }}>yanlış cevapladığında</Text>{" "}
+            burada birikir. SRS, bu kelimeleri sık aralıklarla tekrar gösterir.
+          </Text>
+        </View>
       </View>
     );
   }
+
+  const startStudy = () => {
+    navigation.navigate("Study", {
+      presetWords: combined,
+      presetTitle: "Zor Kelimeler",
+      presetMode: "srs",
+    });
+  };
+
   return (
     <View>
-      {hardWords.slice(0, 20).map((w) => (
+      <Pressable onPress={startStudy} style={[s.zorCta, { backgroundColor: c.accent }]}>
+        <Text style={[s.zorCtaTxt, { color: c.textOnAccent, fontFamily: c.fontBodyBold }]}>
+          🧠 {combined.length} zor kelimeyi şimdi çalış
+        </Text>
+      </Pressable>
+      {combined.slice(0, 30).map((w) => (
         <View key={w.id} style={s.hardCard}>
           <View style={{ flex: 1 }}>
             <Text style={s.hardWord}>{w.word}</Text>
@@ -169,9 +284,7 @@ function ZorTab({ hardWords, c, s }) {
                   key={k}
                   style={[
                     s.hardDot,
-                    {
-                      backgroundColor: k < (w.lapses || 0) ? c.error : c.bgSurface,
-                    },
+                    { backgroundColor: k < (w.lapses || 0) ? c.error : c.bgSurface },
                   ]}
                 />
               ))}
@@ -219,17 +332,35 @@ function QuizTab({ lists, c, s, navigation }) {
   );
 }
 
-function DueRow({ label, count, color, icon, c, s }) {
+function DueRow({ label, sub, count, color, icon, c, s, onPress }) {
+  const disabled = count === 0;
   return (
-    <View style={s.dueRow}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        s.dueRow,
+        {
+          opacity: disabled ? 0.55 : 1,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+          borderColor: pressed ? color + "55" : c.border,
+        },
+      ]}
+    >
       <View style={[s.dueIcon, { backgroundColor: color + "22" }]}>
         <Icon d={icon} size={20} stroke={color} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={s.dueLabel}>{label}</Text>
+        {!!sub && <Text style={[s.dueSub, { color: c.textMuted }]}>{sub}</Text>}
       </View>
-      <Text style={s.dueCount}>{count}</Text>
-    </View>
+      <Text style={[s.dueCount, { color: disabled ? c.textMuted : color }]}>
+        {count}
+      </Text>
+      {!disabled && (
+        <Icon d={ICONS.arrow} size={16} stroke={color} sw={2} />
+      )}
+    </Pressable>
   );
 }
 
@@ -315,7 +446,8 @@ function makeStyles(c) {
       justifyContent: "center",
     },
     dueLabel: { fontFamily: c.fontBodySemi, fontSize: 15, color: c.textPrimary },
-    dueCount: { fontFamily: c.fontNum, fontSize: 20, color: c.textPrimary },
+    dueSub: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted, marginTop: 2 },
+    dueCount: { fontFamily: c.fontNum, fontSize: 20, color: c.textPrimary, marginRight: 4 },
 
     hardCard: {
       flexDirection: "row",
@@ -327,6 +459,36 @@ function makeStyles(c) {
       borderWidth: 1,
       borderColor: c.border,
       marginBottom: 10,
+    },
+    emptyHelper: {
+      borderRadius: 18,
+      borderWidth: 1,
+      padding: 24,
+      margin: 20,
+    },
+    emptyTitle: {
+      fontSize: 18,
+      textAlign: "center",
+      marginBottom: 10,
+    },
+    emptyDesc: {
+      fontSize: 13,
+      lineHeight: 19,
+      textAlign: "center",
+    },
+    zorCta: {
+      paddingVertical: 14,
+      borderRadius: 16,
+      alignItems: "center",
+      marginBottom: 14,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
+      elevation: 4,
+    },
+    zorCtaTxt: {
+      fontSize: 14,
+      letterSpacing: 0.3,
     },
     hardWord: { fontFamily: c.fontBodyBold, fontSize: 16, color: c.textPrimary },
     hardMeaning: { fontFamily: c.fontBody, fontSize: 12, color: c.textSec, marginTop: 2 },

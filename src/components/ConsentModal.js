@@ -2,12 +2,15 @@
  * ConsentModal — Sentry/analytics için GDPR/KVKK consent prompt.
  * İlk açılışta gösterilir, AsyncStorage ile bir kez sorulur.
  */
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Modal, Pressable } from "react-native";
-import T from "../themes/tokens";
+import { useTheme } from "../contexts/ThemeContext";
 import { setConsent } from "../lib/analyticsConsent";
 
 export default function ConsentModal({ visible, onResolved }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
+
   const handle = async (allow) => {
     await setConsent(allow);
     onResolved?.(allow);
@@ -37,46 +40,48 @@ export default function ConsentModal({ visible, onResolved }) {
   );
 }
 
-const s = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "center",
-    paddingHorizontal: 24,
-  },
-  card: {
-    backgroundColor: T.bgCard,
-    borderRadius: T.radius,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: T.border,
-    alignItems: "center",
-  },
-  emoji: { fontSize: 40, marginBottom: 8 },
-  title: {
-    fontSize: 20,
-    fontFamily: T.fontBodyBold,
-    color: T.text,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  body: {
-    fontSize: 14,
-    fontFamily: T.fontBody,
-    color: T.textSec,
-    lineHeight: 20,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  primaryBtn: {
-    backgroundColor: T.lime,
-    borderRadius: 12,
-    paddingVertical: 14,
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  primaryTxt: { color: T.bg, fontFamily: T.fontBodyBold, fontSize: 15 },
-  secondaryBtn: { paddingVertical: 14, width: "100%", alignItems: "center" },
-  secondaryTxt: { color: T.textSec, fontFamily: T.fontBodySemi, fontSize: 14 },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.7)",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    card: {
+      backgroundColor: c.bgElevated,
+      borderRadius: 18,
+      padding: 24,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: "center",
+    },
+    emoji: { fontSize: 40, marginBottom: 8 },
+    title: {
+      fontSize: 20,
+      fontFamily: c.fontBodyBold,
+      color: c.textPrimary,
+      marginBottom: 12,
+      textAlign: "center",
+    },
+    body: {
+      fontSize: 14,
+      fontFamily: c.fontBody,
+      color: c.textSec,
+      lineHeight: 20,
+      textAlign: "center",
+      marginBottom: 24,
+    },
+    primaryBtn: {
+      backgroundColor: c.accent,
+      borderRadius: 12,
+      paddingVertical: 14,
+      width: "100%",
+      alignItems: "center",
+      marginBottom: 8,
+    },
+    primaryTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: 15 },
+    secondaryBtn: { paddingVertical: 14, width: "100%", alignItems: "center" },
+    secondaryTxt: { color: c.textSec, fontFamily: c.fontBodySemi, fontSize: 14 },
+  });
+}

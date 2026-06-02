@@ -1,82 +1,171 @@
-# FlashcardMobile — Roadmap & Notlar
+# FlashcardMobile — Roadmap & İlerleme
 
-## 🔴 Yapılacaklar (Manuel)
+> Türkçe→İngilizce kelime öğrenme app'i. React Native (Expo SDK 54) + Supabase + SRS.
 
-- [ ] `EXPO_PUBLIC_SENTRY_DSN` env değişkenini tanımla (yoksa Sentry zaten init olmaz)
-- [ ] `app.json` → `extra.eas.projectId` boş, EAS build öncesi doldur
-- [ ] App icon yeniden tasarım (1024×1024)
-- [ ] App Store screenshot'ları (iPhone 6.7" ve 6.5", 6 adet)
-- [ ] TestFlight upload + internal testing
-- [ ] App Store Connect → Privacy details formu
-- [ ] Privacy Policy + ToS için public URL (in-app var ama metadata için web URL şart)
-- [ ] Hazır public listelerin sayısını artır (YDS, TOEFL, IELTS, KPDS, business, travel, food, tech — toplam 20+)
+---
 
-## 🎨 Tasarım (Claude Design ile yenilenecek)
+## ✅ YAPILANLAR
 
-- [ ] Tüm tasarım sistemi (renk, font, spacing, component'ler)
-- [ ] Maskot yeniden değerlendirme (kal ya da çıkar)
-- [ ] App icon
-- [ ] Onboarding görselleri
-- [ ] Empty state'ler
-- [ ] Splash screen
+### 🏗️ Altyapı & Backend
+- [x] Supabase schema (6 tablo + RLS politikaları)
+- [x] Auth (email/password + guest + Apple Sign In hazır)
+- [x] **Hesap silme** RPC (Apple 5.1.1(v) — `delete_user_account`)
+- [x] **Storage buckets** (`avatars` + `images` + RLS)
+- [x] SRS algoritması (SM-2 lite, `src/lib/srs.js`)
+- [x] Offline queue (mutex'li, app kill'e dayanıklı)
+- [x] **Cache layer** (SWR, AsyncStorage TTL) + invalidation
+- [x] `favorite_words` tablo + RPC
+- [x] `lists.kind` (mistakes/auto) + `word_progress.mistakes_streak`
+- [x] `add_to_mistakes_list` + `remove_from_mistakes_list` RPC'leri
+- [x] Push notification reminder (daily local)
+- [x] GDPR/KVKK consent (Sentry opt-in)
 
-## ✨ Yeni Özellikler (Öncelik Sırası)
+### 🎨 UI / Design System
+- [x] Claude Design v2 tokens (lime + cobalt + light mode)
+- [x] Dark palette rafine (sofistike, az neon)
+- [x] Light/dark/system theme switching + AsyncStorage persist
+- [x] Tüm ekranlar `useTheme()` migrate (statik T → dynamic)
+- [x] Inter (body) + Space Grotesk (num) + Instrument Serif (display)
+- [x] Difficulty color system (5 seviye: mint/indigo/amber/coral/violet)
+- [x] Skeleton primitives (8 farklı) — tüm loading state'lerinde
+- [x] Empty states kişiselleştirilmiş + action butonlar
+- [x] Offline banner (NetInfo)
+
+### 📱 Ekranlar (Tamam)
+- [x] Onboarding (3 slide, parallax + atla butonu)
+- [x] Login / Register / ForgotPassword (Apple Sign In dahil)
+- [x] Home — Hero (animated alev + radial daily) + LevelMiniCard + 7 discovery slider
+- [x] Library / Kütüphane — segmented + sort + smart pins
+- [x] Çalış / Favorites — Bugün kategoriler + Zor Kelimeler + Quiz
+- [x] FlashcardDetail — 3D flip card + chevron nav
+- [x] Study — SRS swipe, mistakes flow, sub-hook'lara split
+- [x] Quiz — 2×2 grid + mode modal (Normal/Hızlı 10sn) + result
+- [x] StudyResultScreen + QuizResultScreen — donut + favorile + retry mistakes
+- [x] MistakesListModal — "Sana özel liste hazırladık"
+- [x] Streak / İstatistikler — flame hero + Last30BarChart + rozetler
+- [x] **Roadmap** — Duolingo path tarzı, 10 milestone, level sistem
+- [x] FavoriteWords — kelime kartları + liste badge
+- [x] ListExplorer — generic listing (popular/newest/category/search)
+- [x] Profile — avatar + level chip + minimal entry
+- [x] **EditProfile** — avatar pick + display_name
+- [x] **Settings** — konsolide (Tema, Dil, Hatırlatıcı, Gizlilik, Hesap)
+- [x] Language — TR/EN placeholder
+- [x] Appearance — light/dark/system
+- [x] Privacy Policy + Terms of Service + Privacy Settings
+- [x] HardWordsScreen
+
+### ⚙️ Modüler Mimari (Hook'lar & Helpers)
+- [x] `useTheme`, `useAuth`, `useToast`, `useStudyEngine`, `useStudySwipe`
+- [x] `usePublicLists` (cache-backed SWR)
+- [x] `useUserLevel` (XP → seviye + ünvan)
+- [x] `useCountUp`, `useDifficultyTint`, `useBadgeWatcher`
+- [x] `useImageUpload`, `useListEditor` (bulk paste destekli)
+- [x] Service layer: `wordFavorites.js`, `mistakesList.js`
+- [x] Redux: `favoritesSlice`, `favoriteWordsSlice`
+
+### 🎬 Animasyonlar (60fps native driver)
+- [x] HeroDashboard: floating particles + radial donut + flame breathing
+- [x] StreakChip / DailyGoalCard: pulse + shimmer + counter
+- [x] SmartListCard: shimmer + press scale
+- [x] BookmarkButton: ghost uçar
+- [x] Quiz: spring pop / shake / dim fade
+- [x] Study: swipe rotate + verdict badges + center pop + confetti
+- [x] Roadmap: stagger entry + current node pulse
+- [x] AnimatedFlame: 3-katmanlı ring pulse
+- [x] AchievementModal: confetti + spring + waves
+- [x] Last30BarChart: animated bars + today pulse
+- [x] DonutChart: animated stroke
+- [x] StaggerEnter, FlameRefreshControl
+
+### 🚀 Modüler Kod Yapısı
+- [x] StudyScreen 700→399 satır (sub-hook split)
+- [x] HomeScreen modüler (HeroDashboard, LevelMiniCard, DiscoveryRow, HomeSearchBar)
+- [x] FlashcardDetail modüler (Header, CardArea, CTAs, WordChipList)
+- [x] Roadmap modüler (Header, Node)
+- [x] CLAUDE.md kuralı: bileşen başına ~150 satır
+
+### 📦 Hazır İçerik
+- [x] 12+ seed public liste (YDS, TOEFL, IELTS, business, travel, tech, academic, food, health, phrasal verbs)
+- [x] Toplu yapıştır (bulk paste) liste oluşturma
+
+### 🔒 Compliance & Privacy
+- [x] In-app account deletion (Apple 5.1.1(v))
+- [x] Privacy Policy + ToS in-app ekranlar
+- [x] KVKK/GDPR consent modal
+- [x] Privacy manifest (iOS 17+)
+- [x] RLS tüm tablolarda
+- [x] `SECURITY DEFINER` view'lar `security_invoker=true`
+
+---
+
+## 🟡 YAPILACAKLAR (App Store öncesi BLOCKER)
+
+### 🚨 Senin yapman (CLI / Dashboard)
+- [ ] **EAS projectId** — `eas project:init` çalıştır, `app.json → extra.eas.projectId` doldur
+- [ ] **Apple Developer Console** — bundle ID için "Sign In with Apple" capability aç, Service ID oluştur
+- [ ] **Supabase Auth → Providers → Apple** — Service ID + Team ID + Key ID + .p8 key gir
+- [ ] **App icon** — 1024×1024 PNG (şu an default olabilir)
+- [ ] **Splash screen** — özelleştir
+- [ ] **App Store screenshots** — iPhone 6.7" ve 6.5", 6+ adet
+- [ ] **App Store Connect**:
+  - Privacy details form
+  - TR + EN açıklama
+  - Keywords + Subtitle
+- [ ] **TestFlight** internal beta
+- [ ] Privacy Policy + ToS **public web URL** (in-app var ama metadata için web şart)
+
+### 🛠️ Kod (opsiyonel cleanup)
+- [ ] QuizScreen 583 satır → sub-hook'lara böl (StudyScreen pattern'ı)
+- [ ] `console.log` cleanup (production'da spam yok ama best-practice)
+- [ ] Magic numbers (paddingBottom:160 vs.) → token
+
+---
+
+## 💡 SONRAKİ FEATURE'LAR (önceliği sen seç)
 
 ### Tier 1 — Düşük maliyet, yüksek değer
+- [ ] **Storyboard mode** — kullanıcı liste kelimelerini kullanarak kısa hikaye yazsın
+- [ ] **Reverse learning toggle** — EN↔TR yön değiştir
+- [ ] **Sentence builder mini-game**
+- [ ] **Match mini-game** (Quizlet tarzı kelime-anlam sürükle)
+- [ ] **Personal photo notes** — kelimeye telefon galerisinden fotoğraf
+- [ ] **Mood-based lists** — küratörlü temalı
 
-- [ ] **Storyboard mode** — kullanıcı liste kelimelerini kullanarak kısa hikaye yazsın, gamification puanı kazansın (AI gerek yok, sadece kelime sayım + paylaşılabilir output)
-- [ ] **Reverse learning toggle** — EN→TR ve TR→EN'i tek butonla değiş, aynı kart farklı yön
-- [ ] **Personal photo notes** — kullanıcı kelimeye telefon galerisinden kendi fotoğrafını ekleyebilsin (kişisel bağlam = güçlü hafıza, görsel kart sorununa çözüm)
-- [ ] **Mood-based lists** — "bugün motiveysem", "üzgünsem", "yorgunsam" temalı küratörlü listeler
-- [ ] **Crowdsourced emoji per word** — public listelerde her kelimeye topluluk emoji seçsin (oy çoğunluğu), free
-- [ ] **Daily global challenge** — herkes aynı 10 kelimeyle yarışsın, günlük leaderboard
-- [ ] **Sentence builder mini-game** — kelimeleri sürükle-bırak ile cümle kur (quiz alternatifi)
-- [ ] **Liste paylaşımı deep link** — `flashcardmobile://list/{id}` zaten var, paylaş butonu UX'ini güçlendir
+### Tier 2 — Orta efor
+- [ ] **Apple Health 3-ring hero** — günlük 3 farklı hedef ring
+- [ ] **Spotify Wrapped tarzı haftalık özet ekranı**
+- [ ] iOS widget
+- [ ] **Pronunciation practice** — STT scoring
+- [ ] **Daily global challenge + leaderboard**
+- [ ] Visual word cards (görsel ipucu — Memrise tarzı)
+- [ ] Crowdsourced emoji per word
 
-### Tier 2 — Orta maliyet, orta-yüksek değer
+### Tier 3 — Uzun vadeli
+- [ ] AI quiz generation (OpenAI/Claude)
+- [ ] **Premium subscription** (StoreKit)
+- [ ] Community marketplace (kullanıcı listesi paylaşımı)
+- [ ] Friend system + social leaderboard
+- [ ] Pull notification "X kelime hazır" (akıllı tetikleme)
+- [ ] Memrise video clip (native speaker)
 
-- [ ] **Görsel kelime kartları** (üç yöntem birleştir):
-  - User upload (private listeler için, Supabase Storage 1GB free)
-  - Crowdsourced emoji (public listeler için)
-  - Openclipart.org / Wiktionary commons fetch (otomatik suggest)
-- [ ] **Pronunciation practice** — `expo-speech` zaten yüklü, ters yönü ekle: STT ile kullanıcı söylesin, skor
-- [ ] **iOS widget** — "Günün kelimesi" widget, retention için kritik
-- [ ] **Apple Sign In** — iOS'ta zorunlu (mevcut email + Google auth varsa)
-- [ ] **Friend system** — arkadaş ekleme, beraber çalışma, leaderboard
+---
 
-### Tier 3 — Yüksek maliyet, ileride
+## 🧪 TEST HESABI
 
-- [ ] **AI quiz generation** — kelimeye otomatik örnek cümle (OpenAI/Anthropic API)
-- [ ] **Premium subscription** — sınırsız liste, AI quiz, gelişmiş istatistik
-- [ ] **Topluluk listeleri** — onaylı moderasyonla public liste mağazası
+```
+Email:    admin@gmail.com
+Password: admin123
+```
 
-## 🛡️ App Store Submission Checklist (kalan)
+---
 
-- [x] Trigger fix + view security_invoker
-- [x] Test kullanıcısı oluştur
-- [x] Auth password policy + rate limit
-- [x] Privacy/ToS in-app
-- [x] Hesap silme akışı (Apple 5.1.1(v))
-- [x] GDPR consent modal (Sentry)
-- [x] Refactor: HomeScreen + FlashcardDetailScreen
-- [x] Theme consolidation
-- [ ] Apple Sign In
-- [ ] App icon final
-- [ ] Screenshots (6 adet)
-- [ ] EAS Build → TestFlight
-- [ ] Privacy details (App Store Connect)
-- [ ] Public Privacy Policy + ToS URL
+## 📐 Mimari Notlar
 
-## 📊 Bilinen Metrikler
-
-- 6 tablo + 3 view (RLS aktif, 11 policy)
-- Free tier (Nano compute, EU Frankfurt)
-- Realtime disabled (sorun değil, app gerek duymuyor)
-- 0 production user (henüz launch öncesi)
-
-## 🧪 Test Kullanıcısı
-
-- Email: `admin@gmail.com`
-- Şifre: `admin123`
-- UUID: `f32a440c-2d86-4783-9b66-a0a18c440df5`
-- App Store review için bu hesap verilecek
+- **State:** Redux (favorites + favoriteWords) + Context (auth/theme/toast) + local
+- **Data:** Supabase + cache layer (SWR pattern, AsyncStorage TTL 10dk)
+- **Auth tokens:** SecureStore
+- **Tercihler:** AsyncStorage
+- **Push:** expo-notifications, daily 20:00 reminder
+- **i18n:** Şimdilik TR-only, dil seçimi UI placeholder
+- **Min iOS:** 15.1 (Expo 54 default)
+- **Bundle:** Hermes + New Architecture (`newArchEnabled: true`)

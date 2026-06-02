@@ -6,8 +6,36 @@
 
 import React, { useEffect, useState } from "react";
 import { Text, View, ActivityIndicator } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, getFocusedRouteNameFromRoute } from "@react-navigation/native";
 import * as Linking from "expo-linking";
+
+// İçerik ekranlarında tab bar'ı gizle — alttaki içerik kesilmesin.
+const HIDE_TAB_BAR_ON = new Set([
+  "Study",
+  "Quiz",
+  "Streak",
+  "Roadmap",
+  "FlashcardDetail",
+  "HardWords",
+  "CreateList",
+  "FavoriteWords",
+  "ListExplorer",
+  "EditProfile",
+  "Language",
+  "Settings",
+  "Appearance",
+  "PrivacySettings",
+  "PrivacyPolicy",
+  "TermsOfService",
+]);
+
+function getTabBarStyle(route) {
+  const routeName = getFocusedRouteNameFromRoute(route);
+  if (routeName && HIDE_TAB_BAR_ON.has(routeName)) {
+    return { display: "none" };
+  }
+  return undefined;
+}
 
 const linking = {
   prefixes: [Linking.createURL("/"), "flashcardmobile://", "https://flashcardmobile.app"],
@@ -56,12 +84,15 @@ import HomeScreen from "../screens/home/HomeScreen";
 import MyListsScreen from "../screens/mylists/MyListsScreen";
 import CreateListScreen from "../screens/mylists/CreateListScreen";
 import FavoritesScreen from "../screens/favorites/FavoritesScreen";
+import FavoriteWordsScreen from "../screens/favorites/FavoriteWordsScreen";
+import ListExplorerScreen from "../screens/explore/ListExplorerScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import FlashcardDetailScreen from "../screens/flashcard/FlashcardDetailScreen";
 import StudyScreen from "../screens/study/StudyScreen";
 import QuizScreen from "../screens/study/QuizScreen";
 import StreakScreen from "../screens/streak/StreakScreen";
 import HardWordsScreen from "../screens/hard/HardWordsScreen";
+import RoadmapScreen from "../screens/roadmap/RoadmapScreen";
 
 // Auth Screens
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -75,6 +106,9 @@ import PrivacySettingsScreen from "../screens/legal/PrivacySettingsScreen";
 
 // Settings
 import AppearanceScreen from "../screens/settings/AppearanceScreen";
+import LanguageScreen from "../screens/settings/LanguageScreen";
+import SettingsScreen from "../screens/settings/SettingsScreen";
+import EditProfileScreen from "../screens/profile/EditProfileScreen";
 
 // Onboarding
 import OnboardingScreen, { hasSeenOnboarding } from "../screens/onboarding/OnboardingScreen";
@@ -153,8 +187,18 @@ function HomeStackNavigator() {
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <HomeStack.Screen
+        name="Roadmap"
+        component={RoadmapScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
         name="HardWords"
         component={HardWordsScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
+        name="ListExplorer"
+        component={ListExplorerScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
     </HomeStack.Navigator>
@@ -187,6 +231,11 @@ function MyListsStackNavigator() {
       <MyListsStack.Screen
         name="Quiz"
         component={QuizScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <MyListsStack.Screen
+        name="FavoriteWords"
+        component={FavoriteWordsScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
     </MyListsStack.Navigator>
@@ -223,6 +272,26 @@ function ProfileStackNavigator() {
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
       <ProfileStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Roadmap"
+        component={RoadmapScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Language"
+        component={LanguageScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
         name="Appearance"
         component={AppearanceScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
@@ -254,34 +323,38 @@ function BottomTabNavigator() {
       <Tab.Screen
         name="Home"
         component={HomeStackNavigator}
-        options={{
+        options={({ route }) => ({
           tabBarLabel: "Ana Sayfa",
           tabBarAccessibilityLabel: "Ana Sayfa sekmesi",
-        }}
+          tabBarStyle: getTabBarStyle(route),
+        })}
       />
       <Tab.Screen
         name="Favorites"
         component={FavoritesStackNavigator}
-        options={{
+        options={({ route }) => ({
           tabBarLabel: "Çalış",
           tabBarAccessibilityLabel: "Çalış sekmesi",
-        }}
+          tabBarStyle: getTabBarStyle(route),
+        })}
       />
       <Tab.Screen
         name="MyLists"
         component={MyListsStackNavigator}
-        options={{
+        options={({ route }) => ({
           tabBarLabel: "Kütüphane",
           tabBarAccessibilityLabel: "Kütüphane sekmesi",
-        }}
+          tabBarStyle: getTabBarStyle(route),
+        })}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileStackNavigator}
-        options={{
+        options={({ route }) => ({
           tabBarLabel: "Profil",
           tabBarAccessibilityLabel: "Profil sekmesi",
-        }}
+          tabBarStyle: getTabBarStyle(route),
+        })}
       />
     </Tab.Navigator>
   );

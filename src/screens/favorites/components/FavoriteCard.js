@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import T from "../../../themes/tokens";
+import { useTheme } from "../../../contexts/ThemeContext";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { toggleFavorite, selectIsFavorite } from "../../../store/favoritesSlice";
 import { useAuth } from "../../../contexts/AuthContext";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 const CATEGORY_EMOJI = {
   daily: "☀️",
@@ -20,6 +21,8 @@ function getEmoji(cat) {
 }
 
 const FavoriteCard = ({ item, onPress }) => {
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const dispatch = useAppDispatch();
   const isFavorite = useAppSelector((s) => selectIsFavorite(s, item.id));
   const { isAuthenticated, isGuestUser } = useAuth();
@@ -31,7 +34,13 @@ const FavoriteCard = ({ item, onPress }) => {
   };
 
   return (
-    <Pressable style={styles.listItem} onPress={() => onPress(item)}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.listItem,
+        { transform: [{ scale: pressed ? 0.98 : 1 }] },
+      ]}
+      onPress={() => onPress(item)}
+    >
       <View style={styles.emojiBox}>
         <Text style={styles.emojiTxt}>{getEmoji(item.category)}</Text>
       </View>
@@ -45,47 +54,55 @@ const FavoriteCard = ({ item, onPress }) => {
         </Text>
       </View>
       {isAuthenticated() && !isGuestUser() && (
-        <Pressable onPress={handleFav} hitSlop={8}>
-          <Text style={styles.heart}>{isFavorite ? "❤️" : "🤍"}</Text>
+        <Pressable onPress={handleFav} hitSlop={8} style={styles.starBtn}>
+          <Icon
+            d={ICONS.star}
+            size={20}
+            stroke={isFavorite ? c.warning : c.textMuted}
+            fill={isFavorite ? c.warning : "none"}
+            sw={1.8}
+          />
         </Pressable>
       )}
     </Pressable>
   );
 };
 
-const styles = StyleSheet.create({
-  listItem: {
-    backgroundColor: T.bgCard,
-    borderRadius: 16,
-    padding: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-    borderWidth: 1,
-    borderColor: T.border,
-    marginBottom: 10,
-  },
-  emojiBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: T.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emojiTxt: { fontSize: 22 },
-  title: {
-    fontSize: 15,
-    color: T.text,
-    fontFamily: T.fontBodySemi,
-    marginBottom: 3,
-  },
-  meta: {
-    fontSize: 11,
-    color: T.textMuted,
-    fontFamily: T.fontBody,
-  },
-  heart: { fontSize: 22 },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    listItem: {
+      backgroundColor: c.bgElevated,
+      borderRadius: 16,
+      padding: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      marginBottom: 10,
+    },
+    emojiBox: {
+      width: 46,
+      height: 46,
+      borderRadius: 14,
+      backgroundColor: c.bgSurface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emojiTxt: { fontSize: 22 },
+    title: {
+      fontSize: 15,
+      color: c.textPrimary,
+      fontFamily: c.fontBodySemi,
+      marginBottom: 3,
+    },
+    meta: {
+      fontSize: 11,
+      color: c.textMuted,
+      fontFamily: c.fontBody,
+    },
+    starBtn: { padding: 4 },
+  });
+}
 
 export default React.memo(FavoriteCard);

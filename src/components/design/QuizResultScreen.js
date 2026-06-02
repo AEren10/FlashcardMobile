@@ -19,6 +19,7 @@ import {
   Animated,
   Easing,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -27,6 +28,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "./Icon";
 import PremiumButton from "./PremiumButton";
 import StaggerEnter from "./StaggerEnter";
+import { addFavoriteWord } from "../../supabase/wordFavorites";
 
 const { width: W } = Dimensions.get("window");
 
@@ -36,13 +38,25 @@ export default function QuizResultScreen({
   durationSec = 0,
   correctWords = [],
   wrongWords = [],
+  mistakesAdded = 0,
+  listId,
   onRetry,
   onFinish,
 }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const [displayScore, setDisplayScore] = useState(0);
+  const [favorited, setFavorited] = useState(false);
   const scoreScale = useRef(new Animated.Value(0)).current;
+
+  const handleSaveWrongs = async () => {
+    if (favorited || !wrongWords.length) return;
+    setFavorited(true);
+    await Promise.all(
+      wrongWords.map((w) => addFavoriteWord(w.id, listId || w.list_id))
+    );
+    Alert.alert("Eklendi", `${wrongWords.length} kelime favorilerine eklendi.`);
+  };
   const ratio = total ? correct / total : 0;
   const accuracyPct = Math.round(ratio * 100);
   const isExcellent = ratio >= 0.8;
@@ -124,6 +138,22 @@ export default function QuizResultScreen({
             <Text style={s.title}>{title}</Text>
             <Text style={s.subtitle}>{subtitle}</Text>
           </View>
+
+          {/* Mistakes saved info */}
+          {mistakesAdded > 0 && (
+            <View style={s.infoCard}>
+              <View style={s.infoIcon}>
+                <Text style={{ fontSize: 18 }}>🎯</Text>
+              </View>
+              <Text style={s.infoTxt}>
+                <Text style={{ fontFamily: c.fontBodyBold, color: c.textPrimary }}>
+                  {mistakesAdded} kelime
+                </Text>{" "}
+                "Bilemediğin Kelimeler" listene eklendi. 3 kez doğru bilince
+                otomatik çıkar.
+              </Text>
+            </View>
+          )}
 
           {/* Stats row */}
           <View style={s.statsRow}>
@@ -235,6 +265,21 @@ export default function QuizResultScreen({
             </StaggerEnter>
           )}
 
+          {/* Save wrongs CTA */}
+          {wrongWords.length > 0 && (
+            <View style={{ marginTop: 16 }}>
+              <PremiumButton
+                label={favorited ? "✓ Favorilere Eklendi" : "Bilemediklerimi Favorile"}
+                variant={favorited ? "secondary" : "primary"}
+                onPress={handleSaveWrongs}
+                hapticStyle="medium"
+                block
+                size="lg"
+                disabled={favorited}
+              />
+            </View>
+          )}
+
           {/* CTAs */}
           <View style={s.ctaRow}>
             <PremiumButton
@@ -247,7 +292,7 @@ export default function QuizResultScreen({
             />
             <PremiumButton
               label="Bitir"
-              variant="primary"
+              variant="ghost"
               onPress={onFinish}
               hapticStyle="success"
               block
@@ -399,6 +444,33 @@ function makeStyles(c) {
     },
     moreTxt: { fontFamily: c.fontBody, fontSize: 12, marginTop: 4 },
 
-    ctaRow: { flexDirection: "row", gap: 12, marginTop: 24 },
+    ctaRow: { flexDirection: "row", gap: 12, marginTop: 16 },
+
+    infoCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      backgroundColor: c.accentGlow,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.borderAccent,
+      padding: 14,
+      marginTop: 16,
+    },
+    infoIcon: {
+      width: 36,
+      height: 36,
+      borderRadius: 10,
+      backgroundColor: c.bgBase,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    infoTxt: {
+      flex: 1,
+      fontFamily: c.fontBody,
+      fontSize: 13,
+      color: c.textSec,
+      lineHeight: 18,
+    },
   });
 }

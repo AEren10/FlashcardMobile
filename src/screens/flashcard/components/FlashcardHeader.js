@@ -1,10 +1,11 @@
 /**
  * FlashcardHeader — başlık + sahip/ziyaretçi action butonları (paylaş, düzenle, sil, favori).
+ * Tema-aware (useTheme).
  */
-import React from "react";
+import React, { useMemo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import Svg, { Path } from "react-native-svg";
-import T from "../../../themes/tokens";
+import { useTheme } from "../../../contexts/ThemeContext";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 export default function FlashcardHeader({
   title,
@@ -18,19 +19,13 @@ export default function FlashcardHeader({
   isFavorite,
   onToggleFavorite,
 }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
+
   return (
     <View style={s.header}>
       <Pressable onPress={onBack} style={s.iconBtn} hitSlop={12} accessibilityLabel="Geri dön">
-        <Svg width={10} height={16} viewBox="0 0 8 14">
-          <Path
-            d="M7 1L1 7l6 6"
-            stroke={T.text}
-            strokeWidth={2.5}
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </Svg>
+        <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.textPrimary} sw={2.2} />
       </Pressable>
 
       <View style={{ flex: 1, alignItems: "center" }}>
@@ -39,24 +34,16 @@ export default function FlashcardHeader({
         </Text>
         {tint && (
           <View
-            style={{
-              marginTop: 2,
-              paddingHorizontal: 8,
-              paddingVertical: 2,
-              borderRadius: 999,
-              backgroundColor: tint.glow,
-              borderWidth: 1,
-              borderColor: tint.border,
-            }}
+            style={[
+              s.tintChip,
+              { backgroundColor: tint.glow, borderColor: tint.border },
+            ]}
           >
             <Text
-              style={{
-                fontFamily: T.fontBodySemi,
-                fontSize: 10,
-                color: tint.color,
-                letterSpacing: 0.4,
-                textTransform: "uppercase",
-              }}
+              style={[
+                s.tintTxt,
+                { color: tint.color, fontFamily: c.fontBodySemi },
+              ]}
             >
               {tint.label}
             </Text>
@@ -74,7 +61,12 @@ export default function FlashcardHeader({
             <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Listeyi düzenle" style={s.iconBtn}>
               <Text style={s.icon}>✏️</Text>
             </Pressable>
-            <Pressable onPress={onDelete} hitSlop={8} accessibilityLabel="Listeyi sil" style={s.deleteBtn}>
+            <Pressable
+              onPress={onDelete}
+              hitSlop={8}
+              accessibilityLabel="Listeyi sil"
+              style={[s.iconBtn, { borderColor: c.error + "33" }]}
+            >
               <Text style={s.icon}>🗑️</Text>
             </Pressable>
           </>
@@ -84,9 +76,21 @@ export default function FlashcardHeader({
               onPress={onToggleFavorite}
               hitSlop={8}
               accessibilityLabel={isFavorite ? "Favorilerden çıkar" : "Favorilere ekle"}
-              style={s.iconBtn}
+              style={[
+                s.iconBtn,
+                isFavorite && {
+                  backgroundColor: c.warningDim,
+                  borderColor: c.warning + "55",
+                },
+              ]}
             >
-              <Text style={s.icon}>{isFavorite ? "❤️" : "🤍"}</Text>
+              <Icon
+                d={ICONS.star}
+                size={18}
+                stroke={isFavorite ? c.warning : c.textMuted}
+                fill={isFavorite ? c.warning : "none"}
+                sw={1.8}
+              />
             </Pressable>
           )
         )}
@@ -95,40 +99,44 @@ export default function FlashcardHeader({
   );
 }
 
-const s = StyleSheet.create({
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 22,
-    paddingTop: 14,
-    gap: 12,
-  },
-  title: {
-    fontSize: 18,
-    color: T.text,
-    fontFamily: T.fontBodyBold,
-    textAlign: "center",
-  },
-  actions: { flexDirection: "row", gap: 8 },
-  iconBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: T.bgCard,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: T.border,
-  },
-  deleteBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: T.bgCard,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,99,99,0.2)",
-  },
-  icon: { fontSize: 16 },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 22,
+      paddingTop: 14,
+      gap: 12,
+    },
+    title: {
+      fontSize: 18,
+      color: c.textPrimary,
+      fontFamily: c.fontBodyBold,
+      textAlign: "center",
+    },
+    tintChip: {
+      marginTop: 4,
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    tintTxt: {
+      fontSize: 10,
+      letterSpacing: 0.4,
+      textTransform: "uppercase",
+    },
+    actions: { flexDirection: "row", gap: 8 },
+    iconBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: c.bgSurface,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    icon: { fontSize: 16 },
+  });
+}

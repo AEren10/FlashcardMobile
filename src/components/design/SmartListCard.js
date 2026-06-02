@@ -1,0 +1,179 @@
+/**
+ * SmartListCard — "Senin İçin" pinli özel listeler için kart.
+ * Shimmer + sparkle vurgusu, normal liste kartlarından ayrılır.
+ */
+import React, { useEffect, useRef } from "react";
+import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useTheme } from "../../contexts/ThemeContext";
+import Icon, { ICONS } from "./Icon";
+
+export default function SmartListCard({
+  emoji = "🎯",
+  title,
+  subtitle,
+  count = 0,
+  accent,
+  pulse = false,
+  onPress,
+}) {
+  const { c } = useTheme();
+  const shimmer = useRef(new Animated.Value(0)).current;
+  const pulseScale = useRef(new Animated.Value(1)).current;
+  const pressScale = useRef(new Animated.Value(1)).current;
+  const fillColor = accent || c.accent;
+
+  useEffect(() => {
+    const shimmerLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmer, {
+          toValue: 1,
+          duration: 2200,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmer, { toValue: 0, duration: 0, useNativeDriver: true }),
+      ])
+    );
+    shimmerLoop.start();
+
+    let pulseLoop;
+    if (pulse) {
+      pulseLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseScale, {
+            toValue: 1.015,
+            duration: 1600,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseScale, {
+            toValue: 1,
+            duration: 1600,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      pulseLoop.start();
+    }
+
+    return () => {
+      shimmerLoop.stop();
+      pulseLoop?.stop();
+    };
+  }, [shimmer, pulseScale, pulse]);
+
+  const translateX = shimmer.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-200, 320],
+  });
+
+  const onPressIn = () => {
+    Animated.spring(pressScale, {
+      toValue: 0.97,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 8,
+    }).start();
+  };
+  const onPressOut = () => {
+    Animated.spring(pressScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 30,
+      bounciness: 10,
+    }).start();
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale: pulseScale }, { scale: pressScale }] }}>
+    <Pressable
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
+      style={[s.wrap, { borderColor: fillColor + "55" }]}
+    >
+      <LinearGradient
+        colors={[fillColor + "1A", "transparent"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      {/* Shimmer band */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          s.shimmer,
+          { backgroundColor: fillColor + "22", transform: [{ translateX }, { rotate: "20deg" }] },
+        ]}
+      />
+
+      <View style={[s.iconBox, { backgroundColor: fillColor + "22", borderColor: fillColor + "44" }]}>
+        <Text style={{ fontSize: 22 }}>{emoji}</Text>
+      </View>
+
+      <View style={{ flex: 1 }}>
+        <View style={s.titleRow}>
+          <Text style={[s.title, { color: c.textPrimary, fontFamily: c.fontBodyBold }]} numberOfLines={1}>
+            {title}
+          </Text>
+          <View style={[s.aiBadge, { backgroundColor: fillColor + "22", borderColor: fillColor + "55" }]}>
+            <Text style={{ fontSize: 9, color: fillColor, fontFamily: c.fontBodyBold, letterSpacing: 0.5 }}>
+              ✨ AKILLI
+            </Text>
+          </View>
+        </View>
+        <Text style={[s.sub, { color: c.textSec, fontFamily: c.fontBody }]} numberOfLines={2}>
+          {subtitle}
+        </Text>
+        <View style={s.footer}>
+          <Text style={[s.count, { color: fillColor, fontFamily: c.fontNum }]}>{count}</Text>
+          <Text style={[s.countLbl, { color: c.textMuted, fontFamily: c.fontBody }]}>kelime</Text>
+          <View style={{ flex: 1 }} />
+          <Icon d={ICONS.arrow} size={16} stroke={fillColor} sw={2} />
+        </View>
+      </View>
+    </Pressable>
+    </Animated.View>
+  );
+}
+
+const s = StyleSheet.create({
+  wrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 12,
+  },
+  shimmer: {
+    position: "absolute",
+    top: -40,
+    bottom: -40,
+    width: 80,
+  },
+  iconBox: {
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  title: { fontSize: 15, flex: 1 },
+  aiBadge: {
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 999,
+    borderWidth: 1,
+  },
+  sub: { fontSize: 12, marginTop: 3, lineHeight: 16 },
+  footer: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8 },
+  count: { fontSize: 18 },
+  countLbl: { fontSize: 11 },
+});

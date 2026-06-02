@@ -11,6 +11,7 @@ import { getStudyStats, getDailyActivity } from "../../supabase/progress";
 import { STREAK_BADGES, WORDS_BADGES, getStreakBadge } from "../../lib/badges";
 import AnimatedFlame from "../../components/design/AnimatedFlame";
 import AchievementModal from "../../components/design/AchievementModal";
+import Last30BarChart from "../../components/design/Last30BarChart";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
 
 export default function StreakScreen({ navigation }) {
@@ -26,7 +27,7 @@ export default function StreakScreen({ navigation }) {
 
   useEffect(() => {
     getStudyStats().then(setStats).catch(() => {});
-    getDailyActivity(35).then(setDays).catch(() => {});
+    getDailyActivity(30).then(setDays).catch(() => {});
   }, []);
 
   const accuracy = stats.totalSessions
@@ -38,7 +39,10 @@ export default function StreakScreen({ navigation }) {
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 20, paddingBottom: 180 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Header */}
           <View style={s.header}>
             <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={s.back}>
@@ -98,26 +102,9 @@ export default function StreakScreen({ navigation }) {
             />
           </View>
 
-          {/* Contribution grid */}
-          <View style={s.gridCard}>
-            <View style={s.gridHead}>
-              <Text style={s.gridTitle}>Son 35 Gün</Text>
-              <Text style={s.gridDays}>Pzt – Paz</Text>
-            </View>
-            <ContributionGrid days={days} c={c} />
-            <View style={s.legend}>
-              <Text style={s.legendCap}>Az</Text>
-              {[0, 1, 2, 3, 4].map((lvl) => (
-                <View
-                  key={lvl}
-                  style={[
-                    s.legendCell,
-                    { backgroundColor: intensity(lvl, c), borderColor: c.border },
-                  ]}
-                />
-              ))}
-              <Text style={s.legendCap}>Çok</Text>
-            </View>
+          {/* Last 30 days canlı bar chart */}
+          <View style={{ marginTop: 18 }}>
+            <Last30BarChart days={days} />
           </View>
 
           {/* Badges */}

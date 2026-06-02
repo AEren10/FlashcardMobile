@@ -18,6 +18,7 @@ import {
   getReminderPref,
 } from "../../lib/notifications";
 import Icon, { ICONS } from "../../components/design/Icon";
+import useUserLevel from "../../hooks/useUserLevel";
 
 function inferLevel(words) {
   if (words < 100) return "A1 BEGINNER";
@@ -114,7 +115,8 @@ export default function ProfileScreen() {
     );
   }
 
-  const level = inferLevel(stats.totalWords);
+  const _legacyLevel = inferLevel(stats.totalWords);
+  const userLevel = useUserLevel(stats.totalWords);
 
   return (
     <View style={s.root}>
@@ -133,9 +135,26 @@ export default function ProfileScreen() {
               </LinearGradient>
             </View>
             <Text style={s.name}>{displayName()}</Text>
-            <View style={s.levelChip}>
-              <Text style={s.levelTxt}>SEVİYE · {level}</Text>
-            </View>
+            <Pressable
+              onPress={() => navigation.navigate("Roadmap")}
+              style={({ pressed }) => [
+                s.levelChip,
+                {
+                  backgroundColor: userLevel.color + "1F",
+                  borderColor: userLevel.color + "55",
+                  transform: [{ scale: pressed ? 0.97 : 1 }],
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                },
+              ]}
+              accessibilityLabel="Yol haritam"
+            >
+              <Text style={{ fontSize: 14 }}>{userLevel.emoji}</Text>
+              <Text style={[s.levelTxt, { color: userLevel.color }]}>
+                LV {userLevel.lv} · {userLevel.title.toUpperCase()}
+              </Text>
+            </Pressable>
           </View>
 
           {/* Motivation card */}
@@ -186,43 +205,28 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          {/* Settings */}
-          <Text style={s.sectionLabel}>AYARLAR</Text>
+          {/* Quick actions — sade */}
           <View style={s.list}>
             <Row
-              icon="🔔"
-              label="Günlük Hatırlatma"
-              detail={reminder.enabled ? "20:00 ✓" : "Kapalı"}
-              onPress={toggleReminder}
+              icon="🗺️"
+              label="Yol Haritam"
+              detail="Seviye + İlerleme"
+              onPress={() => navigation.navigate("Roadmap")}
               c={c}
               s={s}
             />
             <Row
-              icon="🌓"
-              label="Görünüm"
-              detail={appearanceLabel()}
-              onPress={() => navigation.navigate("Appearance")}
+              icon="👤"
+              label="Profili Düzenle"
+              onPress={() => navigation.navigate("EditProfile")}
               c={c}
               s={s}
             />
             <Row
-              icon="🔒"
-              label="Gizlilik Ayarları"
-              onPress={() => navigation.navigate("PrivacySettings")}
-              c={c}
-              s={s}
-            />
-            <Row
-              icon="📄"
-              label="Gizlilik Politikası"
-              onPress={() => navigation.navigate("PrivacyPolicy")}
-              c={c}
-              s={s}
-            />
-            <Row
-              icon="📋"
-              label="Kullanım Koşulları"
-              onPress={() => navigation.navigate("TermsOfService")}
+              icon="⚙️"
+              label="Ayarlar"
+              detail="Tema, Dil, Bildirim…"
+              onPress={() => navigation.navigate("Settings")}
               c={c}
               s={s}
             />

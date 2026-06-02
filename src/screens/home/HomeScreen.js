@@ -9,22 +9,29 @@ import {
   ScrollView,
   Pressable,
   StyleSheet,
-  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { useSelector } from "react-redux";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import supabaseApiService from "../../services/supabaseApi";
 import { getStudyStats } from "../../supabase/progress";
+import { getMistakesList } from "../../supabase/mistakesList";
+import { selectFavoriteWordIds } from "../../store/favoriteWordsSlice";
 import Icon, { ICONS } from "../../components/design/Icon";
 import CategoryCover from "../../components/design/CategoryCover";
-import ProgressBar from "../../components/design/ProgressBar";
 import StaggerEnter from "../../components/design/StaggerEnter";
-import { SkeletonContinueCard } from "../../components/design/Skeleton";
+import SmartListCard from "../../components/design/SmartListCard";
+import DiscoveryRow from "./components/DiscoveryRow";
+import HeroDashboard from "./components/HeroDashboard";
+import HomeSearchBar from "./components/HomeSearchBar";
+import LevelMiniCard from "./components/LevelMiniCard";
+import { SkeletonContinueCard, SkeletonStatRow } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
+import usePublicLists from "../../hooks/usePublicLists";
 
 const DAILY_TOTAL = 10;
 
@@ -40,38 +47,41 @@ function greeting() {
 export default function HomeScreen({ navigation }) {
   const { c } = useTheme();
   const { isAuthenticated, getUserEmail } = useAuth();
-  const [lists, setLists] = useState([]);
+  const { lists, loading: listsLoading, refreshing, refresh } = usePublicLists();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [mistakesList, setMistakesList] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const favoriteWordIds = useSelector(selectFavoriteWordIds);
+  const loading = listsLoading || authLoading;
 
   const s = useMemo(() => makeStyles(c), [c]);
 
-  const load = useCallback(async () => {
+  const loadUserData = useCallback(async () => {
+    if (!isAuthenticated()) {
+      setAuthLoading(false);
+      return;
+    }
     try {
-      const [listRes, statsRes] = await Promise.all([
-        supabaseApiService.getAllPublicLists(),
-        isAuthenticated() ? getStudyStats().catch(() => null) : Promise.resolve(null),
+      const [statsRes, mistakesRes] = await Promise.all([
+        getStudyStats().catch(() => null),
+        getMistakesList().catch(() => null),
       ]);
-      if (listRes.success) setLists(listRes.data || []);
       if (statsRes) setStats(statsRes);
+      if (mistakesRes?.success) setMistakesList(mistakesRes.data);
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setAuthLoading(false);
     }
   }, [isAuthenticated]);
 
   useFocusEffect(
     useCallback(() => {
-      load();
-    }, [load])
+      loadUserData();
+    }, [loadUserData])
   );
 
   const userName = (getUserEmail() || "").split("@")[0] || "Hoşgeldin";
   const streak = stats.streakDays || 0;
   const dailyDone = Math.min(stats.totalWords || 0, DAILY_TOTAL);
-  const remaining = Math.max(0, DAILY_TOTAL - dailyDone);
-  const progress = DAILY_TOTAL ? dailyDone / DAILY_TOTAL : 0;
 
   const startChallenge = () => {
     if (lists.length) {
@@ -81,6 +91,49 @@ export default function HomeScreen({ navigation }) {
   };
 
   const recentLists = lists.slice(0, 5);
+  const popularLists = useMemo(
+    () => [...lists].sort((a, b) => (b.study_count ?? 0) - (a.study_count ?? 0)).slice(0, 8),
+    [lists]
+  );
+  const newestLists = useMemo(
+    () =>
+      [...lists]
+        .sort((a, b) => (b.inserted_at || "").localeCompare(a.inserted_at || ""))
+        .slice(0, 8),
+    [lists]
+  );
+
+  // Kategorileri bir kez grupla — her DiscoveryRow için filter() çalıştırma maliyetini sıfırla
+  const categoryMap = useMemo(() => {
+    const map = {};
+    for (const l of lists) {
+      const k = (l.category || "").toLowerCase();
+      if (!k) continue;
+      (map[k] = map[k] || []).push(l);
+    }
+    return map;
+  }, [lists]);
+
+  const byCategory = useCallback(
+    (cat) => (categoryMap[cat.toLowerCase()] || []).slice(0, 8),
+    [categoryMap]
+  );
+
+  const openList = useCallback(
+    (item) =>
+      navigation.navigate("FlashcardDetail", {
+        listId: item.id,
+        listTitle: item.title,
+        listLevel: item.level,
+      }),
+    [navigation]
+  );
+
+  const openExplorer = useCallback(
+    (filter, options = {}) =>
+      navigation.navigate("ListExplorer", { filter, ...options }),
+    [navigation]
+  );
 
   return (
     <View style={s.root}>
@@ -92,52 +145,29 @@ export default function HomeScreen({ navigation }) {
             <FlameRefreshControl
               refreshing={refreshing}
               onRefresh={() => {
-                setRefreshing(true);
-                load();
+                refresh();
+                loadUserData();
               }}
               title="🔥 Çekip yenile..."
             />
           }
         >
-          {/* Greeting */}
-          <Text style={s.greet}>{greeting()} 👋</Text>
-          <Text style={s.name}>{userName}</Text>
-
-          {/* Stats row */}
-          <View style={s.statsRow}>
-            <Pressable
-              onPress={() => navigation.navigate("Streak")}
-              style={[s.statBox, { width: 104 }]}
-            >
-              <View style={s.streakTop}>
-                <Icon
-                  d={ICONS.flame}
-                  size={18}
-                  fill={c.warning}
-                  stroke={c.warning}
-                  sw={1.6}
-                />
-                <Text style={s.streakNum}>{streak}</Text>
-              </View>
-              <Text style={s.statCap}>günlük seri</Text>
-            </Pressable>
-
-            <View style={[s.statBox, { flex: 1 }]}>
-              <View style={s.goalHeader}>
-                <Text style={s.goalLabel}>Günlük hedef</Text>
-                <Text style={s.goalNum}>
-                  {dailyDone}
-                  <Text style={[s.goalNum, { color: c.textMuted }]}>/{DAILY_TOTAL}</Text>
-                </Text>
-              </View>
-              <View style={{ marginTop: 14 }}>
-                <ProgressBar progress={progress} />
-              </View>
-              <Text style={s.statCap}>
-                {remaining === 0 ? "Hedef tamamlandı 🎉" : `${remaining} kelime kaldı`}
-              </Text>
+          {/* Hero Dashboard — animasyonlu canlı üst alan */}
+          {loading ? (
+            <View style={{ marginBottom: 4 }}>
+              <SkeletonStatRow />
             </View>
-          </View>
+          ) : (
+            <HeroDashboard
+              greeting={greeting()}
+              userName={userName}
+              streak={streak}
+              dailyDone={dailyDone}
+              dailyTotal={DAILY_TOTAL}
+              onStreakPress={() => navigation.navigate("Streak")}
+              onGoalPress={startChallenge}
+            />
+          )}
 
           {/* Challenge hero card */}
           <Pressable onPress={startChallenge} style={s.challengeCard}>
@@ -169,10 +199,36 @@ export default function HomeScreen({ navigation }) {
             </View>
           </Pressable>
 
+          {/* Level mini card — challenge'tan sonra "ilerleme" sekansı */}
+          {!loading && isAuthenticated() && (
+            <LevelMiniCard
+              totalWords={stats.totalWords || 0}
+              onPress={() => navigation.navigate("Roadmap")}
+            />
+          )}
+
+          {/* Search bar */}
+          {!loading && (
+            <HomeSearchBar
+              onPress={() =>
+                navigation.navigate("ListExplorer", {
+                  title: "Liste Ara",
+                  filter: "popular",
+                  searchMode: true,
+                })
+              }
+            />
+          )}
+
           {/* Continue Et */}
           <View style={s.sectionHead}>
             <Text style={s.sectionTitle}>Devam Et</Text>
-            <Pressable onPress={() => navigation.navigate("Library")}>
+            <Pressable
+              onPress={() =>
+                navigation.getParent()?.navigate("MyLists") ??
+                navigation.navigate("MyLists")
+              }
+            >
               <Text style={s.sectionLink}>Tümü</Text>
             </Pressable>
           </View>
@@ -203,29 +259,165 @@ export default function HomeScreen({ navigation }) {
                     pct={Math.min(100, (item.study_count ?? 0) * 5)}
                     level={item.level}
                     c={c}
-                    onPress={() =>
-                      navigation.navigate("FlashcardDetail", {
-                        listId: item.id,
-                        listTitle: item.title,
-                        listLevel: item.level,
-                      })
-                    }
+                    onPress={() => openList(item)}
                   />
                 </StaggerEnter>
               ))}
             </ScrollView>
           )}
+
+          {/* Senin İçin — kişisel akıllı kartlar */}
+          {isAuthenticated() && (favoriteWordIds.length > 0 || mistakesList) && (
+            <View style={{ marginTop: 26 }}>
+              <Text style={s.discoveryHeader}>✨ Senin İçin</Text>
+              {favoriteWordIds.length > 0 && (
+                <SmartListCard
+                  emoji="🔖"
+                  title="Favori Kelimelerim"
+                  subtitle="Kart üstündeki yer iminden eklediklerin."
+                  count={favoriteWordIds.length}
+                  accent={c.accent}
+                  onPress={() =>
+                    navigation.getParent()?.navigate("MyLists", {
+                      screen: "FavoriteWords",
+                    })
+                  }
+                />
+              )}
+              {mistakesList && (
+                <SmartListCard
+                  emoji="🎯"
+                  title={mistakesList.title}
+                  subtitle="Takıldığın kelimeler. 3 kez doğru bilince çıkar."
+                  count={mistakesList.word_count ?? 0}
+                  accent={c.error}
+                  pulse
+                  onPress={() => openList(mistakesList)}
+                />
+              )}
+            </View>
+          )}
+
+          {/* Popüler listeler */}
+          <DiscoveryRow
+            title="🌟 Popüler"
+            subtitle="En çok çalışılan listeler"
+            items={popularLists}
+            accent={c.warning}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("popular", { title: "🌟 Popüler", accent: c.warning })
+            }
+          />
+
+          {/* Kategorik slider'lar — Spotify/App Store tarzı */}
+          <DiscoveryRow
+            title="💼 İş & Kariyer"
+            subtitle="Profesyonel İngilizce"
+            items={byCategory("business")}
+            accent={c.cobalt}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("category", {
+                title: "💼 İş & Kariyer",
+                category: "business",
+                accent: c.cobalt,
+              })
+            }
+          />
+
+          <DiscoveryRow
+            title="✈️ Seyahat"
+            subtitle="Yolda işine yarayacak"
+            items={byCategory("travel")}
+            accent={c.info}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("category", {
+                title: "✈️ Seyahat",
+                category: "travel",
+                accent: c.info,
+              })
+            }
+          />
+
+          <DiscoveryRow
+            title="🎓 Akademik"
+            subtitle="Sınav ve akademi"
+            items={byCategory("academic")}
+            accent={c.accent}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("category", {
+                title: "🎓 Akademik",
+                category: "academic",
+                accent: c.accent,
+              })
+            }
+          />
+
+          <DiscoveryRow
+            title="💻 Teknoloji"
+            subtitle="Modern yazılım & AI"
+            items={byCategory("tech")}
+            accent={c.success}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("category", {
+                title: "💻 Teknoloji",
+                category: "tech",
+                accent: c.success,
+              })
+            }
+          />
+
+          <DiscoveryRow
+            title="🍔 Yemek & Mutfak"
+            subtitle="Restoran ve günlük yemek"
+            items={byCategory("food")}
+            accent={c.warning}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("category", {
+                title: "🍔 Yemek & Mutfak",
+                category: "food",
+                accent: c.warning,
+              })
+            }
+          />
+
+          {/* Yeni eklendi */}
+          <DiscoveryRow
+            title="🆕 Yeni Eklendi"
+            subtitle="Son hazır liste paketleri"
+            items={newestLists}
+            accent={c.cobalt}
+            loading={loading}
+            onItemPress={openList}
+            onSeeAll={() =>
+              openExplorer("newest", { title: "🆕 Yeni Eklendi", accent: c.cobalt })
+            }
+          />
         </ScrollView>
       </SafeAreaView>
     </View>
   );
 }
 
-function ContinueCard({ title, count, pct, level, c, onPress }) {
+const ContinueCard = React.memo(function ContinueCard({ title, count, pct, level, c, onPress }) {
   return (
-    <Pressable onPress={onPress} style={{ width: 150 }}>
-      <View style={{ borderRadius: 14, overflow: "hidden", marginBottom: 10 }}>
-        <CategoryCover difficulty={level} height={86} />
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [{ width: 165, transform: [{ scale: pressed ? 0.96 : 1 }] }]}
+    >
+      <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 10 }}>
+        <CategoryCover difficulty={level} height={100} />
       </View>
       <Text
         numberOfLines={1}
@@ -256,7 +448,7 @@ function ContinueCard({ title, count, pct, level, c, onPress }) {
       </View>
     </Pressable>
   );
-}
+});
 
 function makeStyles(c) {
   return StyleSheet.create({
@@ -275,54 +467,6 @@ function makeStyles(c) {
       marginTop: 2,
     },
     statsRow: { flexDirection: "row", gap: 12, marginTop: 20 },
-    statBox: {
-      borderRadius: 16,
-      backgroundColor: c.bgElevated,
-      borderWidth: 1,
-      borderColor: c.border,
-      padding: 16,
-      justifyContent: "space-between",
-    },
-    streakTop: { flexDirection: "row", alignItems: "center", gap: 6 },
-    flame: { fontSize: 18 },
-    streakNum: {
-      fontFamily: c.fontNum,
-      fontSize: 26,
-      color: c.textPrimary,
-    },
-    statCap: {
-      fontFamily: c.fontBody,
-      fontSize: 12,
-      color: c.textSec,
-      marginTop: 6,
-    },
-    goalHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "baseline",
-    },
-    goalLabel: {
-      fontFamily: c.fontBodySemi,
-      fontSize: 14,
-      color: c.textSec,
-    },
-    goalNum: {
-      fontFamily: c.fontNum,
-      fontSize: 15,
-      color: c.textPrimary,
-    },
-    track: {
-      height: 8,
-      borderRadius: 999,
-      backgroundColor: c.bgSurface,
-      overflow: "hidden",
-      marginTop: 14,
-    },
-    fill: {
-      height: "100%",
-      borderRadius: 999,
-      backgroundColor: c.accent,
-    },
     challengeCard: {
       marginTop: 16,
       borderRadius: 20,
@@ -415,6 +559,14 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       marginTop: 16,
       fontSize: 13,
+    },
+    discoveryHeader: {
+      fontFamily: c.fontBodyBold,
+      fontSize: 13,
+      color: c.textSec,
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      marginBottom: 12,
     },
   });
 }

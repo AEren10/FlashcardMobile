@@ -158,7 +158,7 @@ function EmptyIllu({ kind }) {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32 },
+  wrap: { alignItems: "center", justifyContent: "center", padding: 32, paddingVertical: 40 },
   emoji: { fontSize: 56, marginBottom: 12 },
   illuWrap: {
     width: 188,

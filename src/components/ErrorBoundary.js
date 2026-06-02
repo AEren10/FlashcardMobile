@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { T } from "../themes/tokens";
+import T from "../themes/tokens";
 
 export default class ErrorBoundary extends React.Component {
   state = { error: null };

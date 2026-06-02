@@ -49,6 +49,63 @@ export async function recordReview(wordId, grade) {
   return { success: true, progress: next };
 }
 
+/**
+ * Bugün çalışılacak kelimeleri kategorize getirir:
+ *  - newWords: kullanıcının hiç görmediği (word_progress kaydı yok)
+ *  - reviewWords: gördüğü, due_at <= now, lapses = 0
+ *  - lapsedWords: bir veya daha fazla yanlış cevap (lapses > 0)
+ */
+export async function getCategorizedDueWords() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { newWords: [], reviewWords: [], lapsedWords: [] };
+
+  const nowIso = new Date().toISOString();
+
+  // 1) Due (gördüğü, vakti gelmiş) kelimeler — word_progress join words
+  const { data: dueRows, error: dueErr } = await supabase
+    .from(TABLES.WORD_PROGRESS)
+    .select("lapses, repetitions, due_at, words(*)")
+    .eq("user_id", user.id)
+    .lte("due_at", nowIso);
+  if (dueErr) console.warn("categorized.due", dueErr.message);
+
+  const dueAll = (dueRows || [])
+    .filter((r) => r.words)
+    .map((r) => ({ ...r.words, lapses: r.lapses, repetitions: r.repetitions }));
+
+  const reviewWords = dueAll.filter((w) => (w.lapses ?? 0) === 0);
+  const lapsedWords = dueAll.filter((w) => (w.lapses ?? 0) > 0);
+
+  // 2) Hiç görmediği (yeni) kelimeler — public listelerden, progress yok
+  // Önce kullanıcının erişebildiği tüm word_id'leri al, sonra progress kaydı olmayanları filtrele
+  const { data: allWords } = await supabase
+    .from("words")
+    .select("id, word, meaning, example, list_id, lists!inner(is_public, user_id)")
+    .limit(500);
+
+  const visibleWords = (allWords || []).filter(
+    (w) => w.lists?.is_public === true || w.lists?.user_id === user.id
+  );
+
+  const seenIds = new Set(
+    (dueRows || []).map((r) => r.words?.id).filter(Boolean)
+  );
+  // Ayrıca tüm progress kayıtlarını da al (due olmayan da dahil)
+  const { data: allProgress } = await supabase
+    .from(TABLES.WORD_PROGRESS)
+    .select("word_id")
+    .eq("user_id", user.id);
+  (allProgress || []).forEach((p) => seenIds.add(p.word_id));
+
+  const newWords = visibleWords
+    .filter((w) => !seenIds.has(w.id))
+    .slice(0, 30);
+
+  return { newWords, reviewWords, lapsedWords };
+}
+
 export async function getDueCount() {
   const {
     data: { user },

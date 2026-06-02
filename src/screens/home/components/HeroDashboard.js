@@ -1,0 +1,473 @@
+/**
+ * HeroDashboard — HomeScreen üstü animasyonlu, canlı dashboard.
+ * Card değil, full-bleed alan. Floating particles + radial daily goal + streak orbit.
+ * Tap → ilgili sayfa.
+ */
+import React, { useEffect, useMemo, useRef } from "react";
+import { View, Text, Pressable, Animated, Easing, StyleSheet, Dimensions } from "react-native";
+import Svg, { Circle, G } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
+import * as Haptics from "expo-haptics";
+import { useTheme } from "../../../contexts/ThemeContext";
+import useCountUp from "../../../hooks/useCountUp";
+
+const { width: W } = Dimensions.get("window");
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
+export default function HeroDashboard({
+  greeting,
+  userName,
+  streak = 0,
+  dailyDone = 0,
+  dailyTotal = 10,
+  onStreakPress,
+  onGoalPress,
+}) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
+  const ratio = Math.min(1, dailyDone / Math.max(1, dailyTotal));
+  const pct = Math.round(ratio * 100);
+  const animStreak = useCountUp(streak, 1000);
+  const animPct = useCountUp(pct, 1400);
+
+  return (
+    <View style={s.wrap}>
+      {/* Sade soft gradient — kare blob YOK */}
+      <LinearGradient
+        colors={[c.accent + "10", "transparent"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+
+      {/* Floating particles */}
+      <Particles c={c} />
+
+      {/* Greeting */}
+      <Text style={[s.greet, { color: c.textSec, fontFamily: c.fontBody }]}>
+        {greeting} 👋
+      </Text>
+      <Text style={[s.name, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>
+        {userName}
+      </Text>
+
+      {/* Dashboard row: streak (sol) + daily radial (sağ-ortada) */}
+      <View style={s.row}>
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            onStreakPress?.();
+          }}
+          style={({ pressed }) => [
+            s.streakBox,
+            { opacity: pressed ? 0.7 : 1 },
+          ]}
+          accessibilityLabel="Streak"
+        >
+          <StreakOrbit streak={streak} c={c} />
+          <View style={s.streakInfo}>
+            <View style={s.streakNumRow}>
+              <Text style={[s.streakNum, { color: c.textPrimary, fontFamily: c.fontNum }]}>
+                {animStreak}
+              </Text>
+              <Text style={[s.streakUnit, { color: c.textSec, fontFamily: c.fontBodyMed }]}>
+                gün
+              </Text>
+            </View>
+            <Text style={[s.streakLbl, { color: streak > 0 ? c.warning : c.textMuted, fontFamily: c.fontBodySemi }]}>
+              {streak === 0 ? "henüz seri yok" : streak === 1 ? "ilk gün" : "ateşin tütüyor 🔥"}
+            </Text>
+          </View>
+        </Pressable>
+
+        <Pressable
+          onPress={() => {
+            Haptics.selectionAsync();
+            onGoalPress?.();
+          }}
+          style={({ pressed }) => [
+            s.goalBox,
+            { opacity: pressed ? 0.8 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
+          ]}
+          accessibilityLabel="Günlük hedef"
+        >
+          <RadialGoal ratio={ratio} c={c} />
+          <View style={s.goalCenter} pointerEvents="none">
+            <Text style={[s.goalPct, { color: c.textPrimary, fontFamily: c.fontNum }]}>
+              %{animPct}
+            </Text>
+            <Text style={[s.goalLbl, { color: c.textMuted, fontFamily: c.fontBody }]}>
+              {dailyDone}/{dailyTotal}
+            </Text>
+          </View>
+        </Pressable>
+      </View>
+
+      <Text style={[s.hint, { color: c.textMuted, fontFamily: c.fontBody }]}>
+        {pct >= 100
+          ? "🎉 Bugünkü hedefini tamamladın!"
+          : `${dailyTotal - dailyDone} kelime kaldı`}
+      </Text>
+    </View>
+  );
+}
+
+/** Doğal alev — yükselip küçülen, etrafında daire YOK, sadece soft text-shadow halo */
+function StreakOrbit({ streak, c }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const lift = useRef(new Animated.Value(0)).current;
+  const shadowGlow = useRef(new Animated.Value(0.6)).current;
+  const active = streak > 0;
+  const intensity = Math.min(1, streak / 30);
+
+  useEffect(() => {
+    if (!active) {
+      scale.setValue(1);
+      lift.setValue(0);
+      shadowGlow.setValue(0.3);
+      return;
+    }
+    // Alev "nefes alır": büyür-küçülür (700ms — gerçek alev gibi hızlı)
+    const scaleLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(scale, {
+          toValue: 1.2,
+          duration: 650,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 0.92,
+          duration: 550,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    // Yukarı doğru hafif çekilme (alev yükseliyor)
+    const liftLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(lift, {
+          toValue: -5,
+          duration: 800,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(lift, {
+          toValue: 0,
+          duration: 800,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    // Glow flicker (alev parlaklığı titriyor)
+    const glowLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shadowGlow, {
+          toValue: 1,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shadowGlow, {
+          toValue: 0.55,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shadowGlow, {
+          toValue: 0.85,
+          duration: 380,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    scaleLoop.start();
+    liftLoop.start();
+    glowLoop.start();
+    return () => {
+      scaleLoop.stop();
+      liftLoop.stop();
+      glowLoop.stop();
+    };
+  }, [scale, lift, shadowGlow, active]);
+
+  const flameColor = streak >= 30 ? c.error : c.warning;
+  const emojiSize = 38 + intensity * 18; // 38 → 56 px
+
+  return (
+    <View style={s.flameWrap}>
+      <Animated.Text
+        style={[
+          s.flameEmoji,
+          {
+            fontSize: emojiSize,
+            textShadowColor: flameColor,
+            textShadowRadius: 14 + intensity * 12,
+            textShadowOffset: { width: 0, height: 0 },
+            opacity: shadowGlow,
+            transform: [{ scale }, { translateY: lift }],
+          },
+        ]}
+      >
+        🔥
+      </Animated.Text>
+    </View>
+  );
+}
+
+/** RadialGoal — büyük donut, animated stroke + entry scale + glow pulse (tamamlanınca) */
+function RadialGoal({ ratio, c }) {
+  const progress = useRef(new Animated.Value(0)).current;
+  const entryScale = useRef(new Animated.Value(0.6)).current;
+  const pulse = useRef(new Animated.Value(1)).current;
+  const completed = ratio >= 1;
+  const size = 92;
+  const stroke = 10;
+  const r = (size - stroke) / 2;
+  const circ = 2 * Math.PI * r;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(entryScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        stiffness: 180,
+        damping: 14,
+      }),
+      Animated.timing(progress, {
+        toValue: ratio,
+        duration: 1600,
+        delay: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: false,
+      }),
+    ]).start();
+  }, [ratio, progress, entryScale]);
+
+  useEffect(() => {
+    if (!completed) {
+      pulse.setValue(1);
+      return;
+    }
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, {
+          toValue: 1.06,
+          duration: 900,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulse, {
+          toValue: 1,
+          duration: 900,
+          easing: Easing.inOut(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [completed, pulse]);
+
+  const offset = progress.interpolate({
+    inputRange: [0, 1],
+    outputRange: [circ, 0],
+  });
+
+  const fillColor = completed ? c.success : c.accent;
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{ scale: entryScale }, { scale: pulse }],
+        shadowColor: fillColor,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: completed ? 0.5 : 0.3,
+        shadowRadius: 16,
+      }}
+    >
+      <Svg width={size} height={size}>
+        <G rotation="-90" origin={`${size / 2}, ${size / 2}`}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={c.bgSurface}
+            strokeWidth={stroke}
+            fill="none"
+          />
+          <AnimatedCircle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={fillColor}
+            strokeWidth={stroke}
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+          />
+        </G>
+      </Svg>
+    </Animated.View>
+  );
+}
+
+/** Particles — 5 ufak nokta, scale+opacity loop, farklı period */
+function Particles({ c }) {
+  const dots = useRef(
+    Array.from({ length: 6 }).map((_, i) => ({
+      anim: new Animated.Value(0),
+      x: (i * (W - 100)) / 5 + 30 + (i % 2 === 0 ? 20 : -10),
+      y: 30 + (i % 3) * 28 + (i * 7) % 18,
+      delay: i * 500,
+      size: 3 + (i % 3),
+    }))
+  ).current;
+
+  useEffect(() => {
+    const loops = dots.map((d) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(d.delay),
+          Animated.timing(d.anim, {
+            toValue: 1,
+            duration: 2400,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(d.anim, {
+            toValue: 0,
+            duration: 2400,
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ])
+      )
+    );
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [dots]);
+
+  return (
+    <>
+      {dots.map((d, i) => (
+        <Animated.View
+          key={i}
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            left: d.x,
+            top: d.y,
+            width: d.size * 2,
+            height: d.size * 2,
+            borderRadius: d.size,
+            backgroundColor: i % 2 === 0 ? c.accent : c.cobalt,
+            opacity: d.anim.interpolate({ inputRange: [0, 1], outputRange: [0.1, 0.7] }),
+            transform: [
+              {
+                translateY: d.anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, -14],
+                }),
+              },
+              {
+                scale: d.anim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.6, 1.2],
+                }),
+              },
+            ],
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
+const FLAME_BOX = 58;
+
+function makeStyles(c) {
+  return StyleSheet.create({
+    wrap: {
+      paddingTop: 4,
+      paddingBottom: 10,
+      marginBottom: 6,
+      overflow: "hidden",
+    },
+    greet: {
+      fontSize: 13,
+      letterSpacing: 0.3,
+    },
+    name: {
+      fontSize: 38,
+      lineHeight: 42,
+      marginTop: 2,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      marginTop: 20,
+      paddingRight: 4,
+    },
+    streakBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      flex: 1,
+      paddingVertical: 6,
+    },
+    flameWrap: {
+      width: FLAME_BOX,
+      height: FLAME_BOX,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    flameEmoji: {
+      textAlign: "center",
+    },
+    streakInfo: { flex: 1 },
+    streakNumRow: { flexDirection: "row", alignItems: "baseline", gap: 6 },
+    streakNum: { fontSize: 34, lineHeight: 36 },
+    streakUnit: { fontSize: 14, letterSpacing: 0.3 },
+    streakLbl: { fontSize: 11, marginTop: 3, letterSpacing: 0.3 },
+
+    goalBox: {
+      width: 92,
+      height: 92,
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: 46,
+    },
+    goalCenter: {
+      position: "absolute",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    goalPct: { fontSize: 18, lineHeight: 20 },
+    goalLbl: { fontSize: 10, marginTop: 1 },
+
+    hint: {
+      marginTop: 14,
+      fontSize: 12,
+      letterSpacing: 0.3,
+    },
+  });
+}
+
+const s = StyleSheet.create({
+  flameWrap: {
+    width: FLAME_BOX,
+    height: FLAME_BOX,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  flameEmoji: { textAlign: "center" },
+});

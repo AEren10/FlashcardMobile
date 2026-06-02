@@ -1,12 +1,15 @@
-import React, { useState, useCallback } from "react";
-import { View, Text, StyleSheet, FlatList, Pressable, ActivityIndicator } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import Svg, { Path } from "react-native-svg";
-import T from "../../themes/tokens";
+import { useTheme } from "../../contexts/ThemeContext";
 import { getHardWords } from "../../supabase/views";
+import { SkeletonWordCard } from "../../components/design/Skeleton";
+import Icon, { ICONS } from "../../components/design/Icon";
 
 export default function HardWordsScreen({ navigation }) {
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
   const goBack = () => navigation.goBack();
@@ -18,17 +21,20 @@ export default function HardWordsScreen({ navigation }) {
     setLoading(false);
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      load();
-    }, [load])
-  );
+  useFocusEffect(useCallback(() => { load(); }, [load]));
 
   if (loading) {
     return (
       <View style={s.root}>
-        <SafeAreaView edges={["top"]} style={s.center}>
-          <ActivityIndicator color={T.lime} />
+        <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {[0, 1, 2, 3, 4].map((i) => (
+              <SkeletonWordCard key={i} />
+            ))}
+          </ScrollView>
         </SafeAreaView>
       </View>
     );
@@ -41,7 +47,8 @@ export default function HardWordsScreen({ navigation }) {
           <Text style={s.emptyEmoji}>🎯</Text>
           <Text style={s.emptyTitle}>Zor kelimen yok</Text>
           <Text style={s.emptySub}>
-            Çalışmaya devam et; sık yanlış yaptığın kelimeler burada toplanacak.
+            Çalışmaya başlayınca yanlış cevapladığın kelimeler burada birikir.
+            SRS algoritması bu kelimeleri daha sık tekrar ettirir.
           </Text>
           <Pressable style={s.cta} onPress={goBack}>
             <Text style={s.ctaText}>Geri Dön</Text>
@@ -55,20 +62,11 @@ export default function HardWordsScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
         <View style={s.header}>
-          <Pressable onPress={goBack} hitSlop={12}>
-            <Svg width={10} height={16} viewBox="0 0 8 14">
-              <Path
-                d="M7 1L1 7l6 6"
-                stroke={T.text}
-                strokeWidth={2.5}
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </Svg>
+          <Pressable onPress={goBack} hitSlop={12} style={s.back}>
+            <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.textPrimary} sw={2.2} />
           </Pressable>
           <Text style={s.title}>Zor Kelimeler</Text>
-          <View style={{ width: 10 }} />
+          <View style={{ width: 38 }} />
         </View>
 
         <Pressable
@@ -86,7 +84,7 @@ export default function HardWordsScreen({ navigation }) {
 
         <FlatList
           data={words}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 16, gap: 8 }}
           renderItem={({ item }) => (
             <View style={s.row}>
@@ -95,60 +93,92 @@ export default function HardWordsScreen({ navigation }) {
                 <Text style={s.meaning}>{item.meaning}</Text>
               </View>
               <View style={s.badge}>
-                <Text style={s.badgeText}>{item.lapses}× yanlış</Text>
+                <Icon d={ICONS.flame} size={11} stroke={c.error} fill={c.error} sw={1.5} />
+                <Text style={s.badgeText}>{item.lapses}×</Text>
               </View>
             </View>
           )}
+          removeClippedSubviews
+          maxToRenderPerBatch={10}
+          windowSize={5}
         />
       </SafeAreaView>
     </View>
   );
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  title: { flex: 1, textAlign: "center", fontSize: 18, fontFamily: T.fontBodyBold, color: T.text },
-  cta: {
-    marginHorizontal: 16,
-    marginTop: 4,
-    paddingVertical: 14,
-    borderRadius: T.radius,
-    alignItems: "center",
-    backgroundColor: T.lime,
-  },
-  ctaText: { color: T.bg, fontFamily: T.fontBodyBold, fontSize: 15 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    borderRadius: T.radius,
-    borderWidth: 1,
-    backgroundColor: T.bgCard,
-    borderColor: T.border,
-  },
-  word: { fontSize: 16, fontFamily: T.fontBodyBold, color: T.text },
-  meaning: { fontSize: 13, marginTop: 2, fontFamily: T.fontBody, color: T.textSec },
-  badge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    backgroundColor: T.coralDim,
-  },
-  badgeText: { color: T.coral, fontSize: 11, fontFamily: T.fontBodyBold },
-  emptyEmoji: { fontSize: 48, marginBottom: 12 },
-  emptyTitle: { fontSize: 20, fontFamily: T.fontBodyBold, color: T.text, marginBottom: 6 },
-  emptySub: {
-    fontSize: 14,
-    fontFamily: T.fontBody,
-    color: T.textSec,
-    textAlign: "center",
-    marginBottom: 20,
-  },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.bgBase },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      gap: 12,
+    },
+    back: {
+      width: 38,
+      height: 38,
+      borderRadius: 12,
+      backgroundColor: c.bgSurface,
+      borderWidth: 1,
+      borderColor: c.border,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    title: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 17,
+      fontFamily: c.fontBodyBold,
+      color: c.textPrimary,
+    },
+    cta: {
+      marginHorizontal: 16,
+      marginTop: 4,
+      paddingVertical: 14,
+      borderRadius: 16,
+      alignItems: "center",
+      backgroundColor: c.accent,
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.4,
+      shadowRadius: 18,
+      elevation: 4,
+    },
+    ctaText: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: 14 },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      padding: 14,
+      borderRadius: 14,
+      borderWidth: 1,
+      backgroundColor: c.bgElevated,
+      borderColor: c.border,
+    },
+    word: { fontSize: 16, fontFamily: c.fontBodyBold, color: c.textPrimary },
+    meaning: { fontSize: 13, marginTop: 2, fontFamily: c.fontBody, color: c.textSec },
+    badge: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 999,
+      backgroundColor: c.errorDim,
+    },
+    badgeText: { color: c.error, fontSize: 11, fontFamily: c.fontBodyBold },
+    emptyEmoji: { fontSize: 48, marginBottom: 12 },
+    emptyTitle: { fontSize: 20, fontFamily: c.fontBodyBold, color: c.textPrimary, marginBottom: 6 },
+    emptySub: {
+      fontSize: 14,
+      fontFamily: c.fontBody,
+      color: c.textSec,
+      textAlign: "center",
+      marginBottom: 20,
+    },
+  });
+}

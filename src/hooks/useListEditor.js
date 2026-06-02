@@ -49,6 +49,34 @@ export default function useListEditor(listId) {
   const removeWord = (index) =>
     setWords((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== index) : prev));
 
+  /**
+   * Toplu yapıştır: her satır "word - meaning" veya "word, meaning" veya
+   * "word: meaning" veya tab-ayrılmış "word\tmeaning". Boş satırlar atlanır.
+   * Mevcut boş satırların yerine yazılır, dolular eklenir.
+   */
+  const bulkAdd = useCallback((text) => {
+    const lines = (text || "").split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    if (!lines.length) return 0;
+    const parsed = lines
+      .map((line) => {
+        const m = line.match(/^(.+?)\s*(?:[-,:|\t]|\s—\s)\s*(.+)$/);
+        if (m) {
+          return { word: m[1].trim(), meaning: m[2].trim(), example: "" };
+        }
+        // Ayraç yoksa sadece word, meaning boş kalır
+        return { word: line, meaning: "", example: "" };
+      })
+      .filter((w) => w.word);
+    if (!parsed.length) return 0;
+    setWords((prev) => {
+      const emptyTail = prev.every((w) => !w.word.trim() && !w.meaning.trim())
+        ? []
+        : prev.filter((w) => w.word.trim() || w.meaning.trim());
+      return [...emptyTail, ...parsed];
+    });
+    return parsed.length;
+  }, []);
+
   const validate = () => {
     if (!title.trim()) return "Liste adı gerekli.";
     const valid = words.filter((w) => w.word.trim() && w.meaning.trim());
@@ -116,6 +144,7 @@ export default function useListEditor(listId) {
     updateWord,
     addWord,
     removeWord,
+    bulkAdd,
     fetching,
     validate,
     save,

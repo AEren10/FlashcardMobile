@@ -28,6 +28,7 @@ import { startAutoFlush } from "./src/lib/offlineQueue";
 import { getConsent, hasResolvedConsent } from "./src/lib/analyticsConsent";
 import ConsentModal from "./src/components/ConsentModal";
 import DynamicStatusBar from "./src/components/design/DynamicStatusBar";
+import OfflineBanner from "./src/components/design/OfflineBanner";
 import {
   useFonts as useSpaceGrotesk,
   SpaceGrotesk_400Regular,
@@ -96,6 +97,7 @@ function App() {
               <DynamicStatusBar />
               <ToastProvider>
                 <AppNavigator />
+                <OfflineBanner />
                 <ConsentModal visible={consentVisible} onResolved={handleConsentResolved} />
               </ToastProvider>
             </ThemeProvider>

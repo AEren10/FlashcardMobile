@@ -11,26 +11,43 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  ActivityIndicator,
+  Alert,
+  Share,
 } from "react-native";
+import * as Linking from "expo-linking";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import supabaseApiService from "../../services/supabaseApi";
+import {
+  selectFavoriteListIds,
+  fetchFavorites,
+} from "../../store/favoritesSlice";
+import {
+  selectFavoriteWordIds,
+  fetchFavoriteWordIds,
+} from "../../store/favoriteWordsSlice";
 import Segmented from "../../components/design/Segmented";
 import CategoryCover from "../../components/design/CategoryCover";
 import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import AnimatedFAB from "../../components/design/AnimatedFAB";
+import SmartListCard from "../../components/design/SmartListCard";
 import EmptyState from "../../components/EmptyState";
 import { SkeletonListCard } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
+import usePublicLists, { invalidatePublicLists } from "../../hooks/usePublicLists";
 
 const TABS = ["Listelerim", "Favoriler", "Keşfet"];
+const SORTS = [
+  { key: "newest", label: "Yeni" },
+  { key: "popular", label: "Popüler" },
+  { key: "az", label: "A-Z" },
+];
 
 const trLevel = (lvl) => {
   const m = { Beginner: "Başlangıç", Intermediate: "Orta", Advanced: "İleri" };
@@ -40,30 +57,39 @@ const trLevel = (lvl) => {
 export default function MyListsScreen() {
   const { c } = useTheme();
   const navigation = useNavigation();
-  const { isAuthenticated, isGuestUser } = useAuth();
+  const { isAuthenticated, isGuestUser, getUserId } = useAuth();
+  const userId = getUserId();
   const [tab, setTab] = useState("Listelerim");
   const [myLists, setMyLists] = useState([]);
-  const [publicLists, setPublicLists] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const favIds = useSelector((st) => st.favorites?.ids ?? []);
+  const [myListsLoading, setMyListsLoading] = useState(true);
+  const [sortKey, setSortKey] = useState("newest");
+  const {
+    lists: publicLists,
+    loading: publicLoading,
+    refreshing,
+    refresh: refreshPublic,
+  } = usePublicLists();
+  const favIds = useSelector(selectFavoriteListIds);
+  const favoriteWordIds = useSelector(selectFavoriteWordIds);
+  const dispatch = useDispatch();
+  const loading = publicLoading || myListsLoading;
 
   const s = useMemo(() => makeStyles(c), [c]);
 
   const load = useCallback(async () => {
-    try {
-      const promises = [supabaseApiService.getAllPublicLists()];
-      if (isAuthenticated() && !isGuestUser()) {
-        promises.push(supabaseApiService.getLists());
-      }
-      const [pub, mine] = await Promise.all(promises);
-      if (pub.success) setPublicLists(pub.data || []);
+    if (isAuthenticated() && !isGuestUser()) {
+      dispatch(fetchFavorites());
+      dispatch(fetchFavoriteWordIds());
+      const mine = await supabaseApiService.getLists();
       if (mine?.success) setMyLists(mine.data || []);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
     }
-  }, [isAuthenticated, isGuestUser]);
+    setMyListsLoading(false);
+  }, [isAuthenticated, isGuestUser, dispatch]);
+
+  const refresh = useCallback(() => {
+    refreshPublic();
+    load();
+  }, [refreshPublic, load]);
 
   useFocusEffect(
     useCallback(() => {
@@ -71,15 +97,98 @@ export default function MyListsScreen() {
     }, [load])
   );
 
+  const handleLongPress = useCallback(
+    (item) => {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const isOwner = userId && item.user_id === userId;
+      const shareLink = Linking.createURL(`/list/${item.id}`);
+      const buttons = [];
+
+      buttons.push({
+        text: "📤 Paylaş",
+        onPress: async () => {
+          try {
+            await Share.share({
+              message: `"${item.title}" listesini incele: ${shareLink}`,
+              url: shareLink,
+              title: item.title,
+            });
+          } catch {}
+        },
+      });
+
+      if (isOwner) {
+        buttons.push({
+          text: "✏️ Düzenle",
+          onPress: () => navigation.navigate("CreateList", { listId: item.id }),
+        });
+        buttons.push({
+          text: "🗑️ Sil",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              "Listeyi sil?",
+              `"${item.title}" ve içindeki kelimeler kalıcı silinecek.`,
+              [
+                { text: "Vazgeç", style: "cancel" },
+                {
+                  text: "Sil",
+                  style: "destructive",
+                  onPress: async () => {
+                    await supabaseApiService.deleteList(item.id);
+                    await invalidatePublicLists();
+                    refresh();
+                  },
+                },
+              ]
+            );
+          },
+        });
+      } else {
+        buttons.push({
+          text: "🧠 Çalışmaya Başla",
+          onPress: () =>
+            navigation.navigate("Study", { listId: item.id, listTitle: item.title }),
+        });
+      }
+      buttons.push({ text: "İptal", style: "cancel" });
+      Alert.alert(item.title, "İşlem seç", buttons);
+    },
+    [userId, navigation, load]
+  );
+
   const favoriteSet = new Set(favIds.map(String));
   const favoritesList = publicLists.filter((l) => favoriteSet.has(String(l.id)));
 
+  // Listelerim: mistakes listesini ayır (özel pin alanında gösterilecek)
+  const mistakesList = myLists.find((l) => l.kind === "mistakes");
+  const regularMyLists = myLists.filter((l) => l.kind !== "mistakes");
+
   const dataByTab = {
-    Listelerim: myLists,
+    Listelerim: regularMyLists,
     Favoriler: favoritesList,
-    Keşfet: publicLists,
+    Keşfet: publicLists.filter((l) => l.kind !== "mistakes"),
   };
-  const items = dataByTab[tab] || [];
+  const rawItems = dataByTab[tab] || [];
+
+  // Sort
+  const items = useMemo(() => {
+    const sorted = [...rawItems];
+    if (sortKey === "popular") {
+      sorted.sort((a, b) => (b.study_count ?? 0) - (a.study_count ?? 0));
+    } else if (sortKey === "az") {
+      sorted.sort((a, b) => (a.title || "").localeCompare(b.title || "", "tr"));
+    } else {
+      sorted.sort((a, b) => (b.inserted_at || "").localeCompare(a.inserted_at || ""));
+    }
+    return sorted;
+  }, [rawItems, sortKey]);
+
+  const showSmartPins = tab === "Listelerim" && !loading;
+  // Sort + smart pins boş listede gözükmesin — empty CTA üstte kalsın
+  const isEmpty = !loading && items.length === 0;
+  const showFilters = !isEmpty;
+  const showPinsActual = showSmartPins && !isEmpty;
 
   return (
     <View style={s.root}>
@@ -90,10 +199,7 @@ export default function MyListsScreen() {
           refreshControl={
             <FlameRefreshControl
               refreshing={refreshing}
-              onRefresh={() => {
-                setRefreshing(true);
-                load();
-              }}
+              onRefresh={refresh}
               title="🔥 Çekip yenile..."
             />
           }
@@ -109,7 +215,75 @@ export default function MyListsScreen() {
             }}
           />
 
+          {showFilters && <View style={s.sortRow}>
+            {SORTS.map((sort) => {
+              const active = sortKey === sort.key;
+              return (
+                <Pressable
+                  key={sort.key}
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setSortKey(sort.key);
+                  }}
+                  style={[
+                    s.sortChip,
+                    {
+                      backgroundColor: active ? c.accentGlow : c.bgElevated,
+                      borderColor: active ? c.borderAccent : c.border,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      s.sortChipTxt,
+                      {
+                        color: active ? c.accent : c.textSec,
+                        fontFamily: c.fontBodySemi,
+                      },
+                    ]}
+                  >
+                    {sort.label}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>}
+
           <View style={{ marginTop: 18 }}>
+            {/* Smart pins (sadece Listelerim sekmesinde + dolu) */}
+            {showPinsActual && (
+              <View style={{ marginBottom: 6 }}>
+                <Text style={s.smartHeader}>✨ Senin İçin</Text>
+                <SmartListCard
+                  emoji="🔖"
+                  title="Favori Kelimelerim"
+                  subtitle="Kart sağ üstündeki yer iminden eklediklerin."
+                  count={favoriteWordIds.length}
+                  accent={c.accent}
+                  onPress={() => navigation.navigate("FavoriteWords")}
+                />
+                {mistakesList && (
+                  <SmartListCard
+                    emoji="🎯"
+                    title={mistakesList.title}
+                    subtitle="Çalışırken takıldığın kelimeler. 3 kez doğru bilince çıkar."
+                    count={mistakesList.word_count ?? 0}
+                    accent={c.error}
+                    onPress={() =>
+                      navigation.navigate("FlashcardDetail", {
+                        listId: mistakesList.id,
+                        listTitle: mistakesList.title,
+                        listLevel: mistakesList.level,
+                        listIsPublic: mistakesList.is_public,
+                      })
+                    }
+                  />
+                )}
+                <View style={s.divider} />
+                <Text style={s.smartHeader}>Listelerim</Text>
+              </View>
+            )}
+
             {loading ? (
               <View>
                 {[0, 1, 2].map((i) => (
@@ -137,12 +311,7 @@ export default function MyListsScreen() {
                         listIsPublic: item.is_public,
                       })
                     }
-                    onLongPress={() =>
-                      navigation.navigate("Study", {
-                        listId: item.id,
-                        listTitle: item.title,
-                      })
-                    }
+                    onLongPress={() => handleLongPress(item)}
                   />
                 </StaggerEnter>
               ))
@@ -195,11 +364,11 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
 function Empty({ tab, onCreate }) {
   if (tab === "Listelerim") {
     return (
-      <View style={{ minHeight: 420 }}>
+      <View style={{ paddingVertical: 30 }}>
         <EmptyState
           kind="list"
-          title="Henüz liste yok"
-          subtitle="Kendi kelime listeni oluştur, çalışmaya hemen başla."
+          title="Kendine ait listen yok 📚"
+          subtitle="İlk listeni oluştur — toplu yapıştır ile saniyeler içinde 50 kelime ekleyebilirsin."
           actionLabel="İlk Listeni Oluştur"
           onAction={onCreate}
         />
@@ -208,11 +377,11 @@ function Empty({ tab, onCreate }) {
   }
   if (tab === "Favoriler") {
     return (
-      <View style={{ minHeight: 420 }}>
+      <View style={{ paddingVertical: 30 }}>
         <EmptyState
           kind="search"
-          title="Henüz favorin yok"
-          subtitle="Keşfet sekmesinden beğendiğin listeleri ⭐ ile favorilere ekle."
+          title="Favori listen yok ⭐"
+          subtitle="Keşfet sekmesinde bir liste aç → sağ üst yıldıza bas. Burada hızlı erişim için birikecek."
         />
       </View>
     );
@@ -221,8 +390,8 @@ function Empty({ tab, onCreate }) {
     <View style={{ minHeight: 420 }}>
       <EmptyState
         kind="search"
-        title="Henüz public liste yok"
-        subtitle="Topluluk listeleri yakında burada olacak."
+        title="Public liste bekleniyor 🌍"
+        subtitle="Topluluk listeleri çok yakında. Şimdilik kendi listelerinden başlayabilirsin."
       />
     </View>
   );
@@ -236,6 +405,32 @@ function makeStyles(c) {
       fontSize: 34,
       color: c.textPrimary,
       marginBottom: 18,
+    },
+    smartHeader: {
+      fontFamily: c.fontBodyBold,
+      fontSize: 13,
+      color: c.textSec,
+      letterSpacing: 0.5,
+      textTransform: "uppercase",
+      marginBottom: 10,
+      marginTop: 6,
+    },
+    sortRow: { flexDirection: "row", gap: 8, marginTop: 14 },
+    sortChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    sortChipTxt: {
+      fontSize: 12,
+      letterSpacing: 0.3,
+    },
+    divider: {
+      height: 1,
+      backgroundColor: c.border,
+      marginVertical: 16,
+      opacity: 0.5,
     },
     card: {
       backgroundColor: c.bgElevated,

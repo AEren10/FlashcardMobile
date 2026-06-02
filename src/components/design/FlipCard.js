@@ -18,6 +18,7 @@ import Animated, {
 import { LinearGradient } from "expo-linear-gradient";
 import * as Speech from "expo-speech";
 import { useTheme } from "../../contexts/ThemeContext";
+import BookmarkButton from "./BookmarkButton";
 
 const FLIP_DURATION = 600;
 const GLINT_DURATION = 600;
@@ -28,6 +29,8 @@ export default function FlipCard({
   example,
   pron,
   tag = "sıfat",
+  wordId,
+  listId,
   onFlip: onFlipCb,
   flipped: flippedProp,
   onPress,
@@ -160,9 +163,12 @@ export default function FlipCard({
           <View style={[s.chip, s.chipAccent, { borderColor: c.borderAccent, backgroundColor: c.accentGlow }]}>
             <Text style={[s.chipTxt, { color: c.accent }]}>İngilizce</Text>
           </View>
-          <Pressable onPress={speak} hitSlop={10} style={[s.soundBtn, { borderColor: c.border, backgroundColor: c.bgSurface }]} accessibilityLabel="Telaffuzu dinle">
-            <Text style={[s.soundIcon, { color: c.accent }]}>🔊</Text>
-          </Pressable>
+          <View style={s.topActions}>
+            <BookmarkButton wordId={wordId} listId={listId} size={38} />
+            <Pressable onPress={speak} hitSlop={10} style={[s.soundBtn, { borderColor: c.border, backgroundColor: c.bgSurface }]} accessibilityLabel="Telaffuzu dinle">
+              <Text style={[s.soundIcon, { color: c.accent }]}>🔊</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={s.center}>
@@ -251,6 +257,11 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
+    },
+    topActions: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
     },
     chip: {
       paddingHorizontal: 12,

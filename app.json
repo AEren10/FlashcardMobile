@@ -17,6 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.aeren.flashcardmobile",
       "buildNumber": "1",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSPhotoLibraryUsageDescription": "Liste kapak görseli seçebilmek için fotoğraflarınıza erişim gerekiyor.",
@@ -53,6 +54,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-apple-authentication",
       [
         "expo-image-picker",
         {

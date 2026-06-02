@@ -2,13 +2,13 @@
  * FlashcardDetailScreen — orchestrator.
  * Alt parçalar `./components/` altında.
  */
-import React, { useState, useEffect, useCallback } from "react";
-import { View, StyleSheet, ActivityIndicator, Alert, Share } from "react-native";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { View, StyleSheet, Alert, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 
-import T from "../../themes/tokens";
+import { useTheme } from "../../contexts/ThemeContext";
 import { useToast } from "../../contexts/ToastContext";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../contexts/AuthContext";
@@ -22,9 +22,12 @@ import FlashcardHeader from "./components/FlashcardHeader";
 import FlashcardCardArea from "./components/FlashcardCardArea";
 import FlashcardCTAs from "./components/FlashcardCTAs";
 import WordChipList from "./components/WordChipList";
+import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
 
 export default function FlashcardDetailScreen({ route, navigation }) {
   const { listId, listTitle, listLevel, listIsPublic, isOwner: paramIsOwner } = route.params ?? {};
+  const { c } = useTheme();
+  const s = useMemo(() => makeStyles(c), [c]);
   const { isAuthenticated, isGuestUser } = useAuth();
   const dispatch = useAppDispatch();
   const isFavorite = useAppSelector((s) => selectIsFavorite(s, listId));
@@ -110,16 +113,34 @@ export default function FlashcardDetailScreen({ route, navigation }) {
     } catch {}
   }, [title, words, listId]);
 
-  const handleComplete = () =>
-    toast.show({
-      message: "Tüm kelimeleri gördün! 🎉 Şimdi çalış veya quiz dene.",
-      type: "success",
+  const handleComplete = () => {
+    // Kart önizlemesi bitti → direkt Study (SRS) sayfasına yönlendir
+    navigation.navigate("Study", {
+      listId,
+      listTitle: title,
+      listLevel,
     });
+  };
 
   if (loading) {
     return (
-      <View style={[s.root, s.center]}>
-        <ActivityIndicator color={T.lime} size="large" />
+      <View style={s.root}>
+        <SafeAreaView style={{ flex: 1, padding: 22, gap: 16 }} edges={["top"]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <Skeleton width={36} height={36} radius={12} />
+            <Skeleton width={140} height={20} radius={6} />
+            <View style={{ flex: 1 }} />
+            <Skeleton width={36} height={36} radius={12} />
+          </View>
+          <Skeleton width="40%" height={14} radius={6} style={{ alignSelf: "center" }} />
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <SkeletonFlipCard />
+          </View>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <Skeleton width="48%" height={50} radius={14} />
+            <Skeleton width="48%" height={50} radius={14} />
+          </View>
+        </SafeAreaView>
       </View>
     );
   }
@@ -168,6 +189,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           currentIndex={currentIndex}
           setCurrentIndex={setCurrentIndex}
           onComplete={handleComplete}
+          listId={listId}
         />
 
         <FlashcardCTAs
@@ -191,7 +213,9 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   );
 }
 
-const s = StyleSheet.create({
-  root: { flex: 1, backgroundColor: T.bg },
-  center: { alignItems: "center", justifyContent: "center" },
-});
+function makeStyles(c) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.bgBase },
+    center: { alignItems: "center", justifyContent: "center" },
+  });
+}

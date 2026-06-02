@@ -7,6 +7,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import supabase from "../supabase/client";
 import { store } from "../store/store";
 import { fetchFavorites, clearFavorites } from "../store/favoritesSlice";
+import {
+  fetchFavoriteWordIds,
+  clearFavoriteWords,
+} from "../store/favoriteWordsSlice";
 
 // Create the context
 const AuthContext = createContext({});
@@ -52,11 +56,13 @@ export const AuthProvider = ({ children }) => {
       // default liste üretmiyoruz. Kullanıcı istediğinde kendi listesini oluşturur.
       if (event === "SIGNED_IN" && session?.user) {
         store.dispatch(fetchFavorites());
+        store.dispatch(fetchFavoriteWordIds());
       }
 
       // Clear favorites when user signs out
       if (event === "SIGNED_OUT") {
         store.dispatch(clearFavorites());
+        store.dispatch(clearFavoriteWords());
       }
     });
 
@@ -164,8 +170,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setSession(null);
         setLoading(false);
-        // Clear favorites when guest signs out
         store.dispatch(clearFavorites());
+        store.dispatch(clearFavoriteWords());
         return { success: true };
       }
 
@@ -174,8 +180,8 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
 
       setIsGuest(false);
-      // Clear favorites when user signs out
       store.dispatch(clearFavorites());
+      store.dispatch(clearFavoriteWords());
       return { success: true };
     } catch (error) {
       console.error("Sign out error:", error.message);

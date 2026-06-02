@@ -9,59 +9,59 @@
  */
 
 const dark = {
-  // Surfaces
-  bg: "#0A1019",
-  bgBase: "#0A1019",
-  bgElevated: "#0E1726",
-  bgCard: "#0E1726",
-  bgCardHover: "#14202E",
-  bgSurface: "#14202E",
-  surface: "rgba(255,255,255,0.04)",
-  surfaceHover: "rgba(255,255,255,0.07)",
+  // Surfaces — daha derin & mat (Linear/Notion/Headway etkisi)
+  bg: "#0B0D14",
+  bgBase: "#0B0D14",
+  bgElevated: "#151921",
+  bgCard: "#151921",
+  bgCardHover: "#1C2030",
+  bgSurface: "#1C2030",
+  surface: "rgba(255,255,255,0.03)",
+  surfaceHover: "rgba(255,255,255,0.06)",
 
-  // Accents
+  // Accents — lime brand korundu, glow'lar yumuşatıldı (daha az neon)
   accent: "#B4FF4F",
   lime: "#B4FF4F",
   limeDark: "#7EE840",
-  limeDim: "rgba(180,255,79,0.18)",
-  limeGlow: "rgba(180,255,79,0.25)",
-  accentGlow: "rgba(180,255,79,0.18)",
+  limeDim: "rgba(180,255,79,0.12)",
+  limeGlow: "rgba(180,255,79,0.18)",
+  accentGlow: "rgba(180,255,79,0.12)",
 
-  // Secondary (cobalt)
-  cobalt: "#5B7FFF",
-  cobaltDim: "rgba(91,127,255,0.16)",
-  cobaltGlow: "rgba(91,127,255,0.22)",
+  // Secondary (cobalt) — daha sofistike mavi
+  cobalt: "#6B8FFF",
+  cobaltDim: "rgba(107,143,255,0.12)",
+  cobaltGlow: "rgba(107,143,255,0.18)",
 
-  // Semantic
-  success: "#4ADE80",
-  successDim: "rgba(74,222,128,0.18)",
-  warning: "#FFB84D",
-  warningDim: "rgba(255,184,77,0.18)",
-  error: "#FF6B6B",
-  errorDim: "rgba(255,107,107,0.18)",
-  info: "#4DC9FF",
-  infoDim: "rgba(77,201,255,0.18)",
+  // Semantic — emerald/warm-amber/soft-coral (neon değil)
+  success: "#5DD8A0",
+  successDim: "rgba(93,216,160,0.14)",
+  warning: "#FFC36B",
+  warningDim: "rgba(255,195,107,0.14)",
+  error: "#FF7C7C",
+  errorDim: "rgba(255,124,124,0.14)",
+  info: "#5EC4FF",
+  infoDim: "rgba(94,196,255,0.14)",
 
   // Legacy aliases (geri uyum için)
-  coral: "#FF6B6B",
-  coralDim: "rgba(255,107,107,0.18)",
-  amber: "#FFB84D",
-  amberDim: "rgba(255,184,77,0.18)",
-  sky: "#4DC9FF",
-  skyDim: "rgba(77,201,255,0.18)",
+  coral: "#FF7C7C",
+  coralDim: "rgba(255,124,124,0.14)",
+  amber: "#FFC36B",
+  amberDim: "rgba(255,195,107,0.14)",
+  sky: "#5EC4FF",
+  skyDim: "rgba(94,196,255,0.14)",
 
-  // Text
-  text: "#F1F5F9",
-  textPrimary: "#F1F5F9",
-  textSec: "#8899AB",
-  textSecondary: "#8899AB",
-  textMuted: "#4A5C6E",
-  textOnAccent: "#0A1019",
+  // Text — true white yerine soft, daha az göz yoran
+  text: "#ECEFF5",
+  textPrimary: "#ECEFF5",
+  textSec: "#8B96AD",
+  textSecondary: "#8B96AD",
+  textMuted: "#525E73",
+  textOnAccent: "#0B0D14",
 
-  // Borders
-  border: "rgba(255,255,255,0.06)",
-  borderAccent: "rgba(180,255,79,0.20)",
-  divider: "rgba(255,255,255,0.05)",
+  // Borders daha subtle
+  border: "rgba(255,255,255,0.05)",
+  borderAccent: "rgba(180,255,79,0.18)",
+  divider: "rgba(255,255,255,0.04)",
 
   // Radius
   radius: 16,
