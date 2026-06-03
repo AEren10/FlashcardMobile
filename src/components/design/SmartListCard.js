@@ -6,10 +6,11 @@ import React, { useEffect, useRef } from "react";
 import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
-import Icon, { ICONS } from "./Icon";
+import Icon from "./Icon";
 
 export default function SmartListCard({
-  emoji = "🎯",
+  emoji,
+  iconPath,
   title,
   subtitle,
   count = 0,
@@ -110,7 +111,11 @@ export default function SmartListCard({
       />
 
       <View style={[s.iconBox, { backgroundColor: fillColor + "22", borderColor: fillColor + "44" }]}>
-        <Text style={{ fontSize: 22 }}>{emoji}</Text>
+        {iconPath ? (
+          <Icon d={iconPath} size={20} stroke={fillColor} sw={1.8} />
+        ) : (
+          <Text style={{ fontSize: 22 }}>{emoji || "📖"}</Text>
+        )}
       </View>
 
       <View style={{ flex: 1 }}>
@@ -120,7 +125,7 @@ export default function SmartListCard({
           </Text>
           <View style={[s.aiBadge, { backgroundColor: fillColor + "22", borderColor: fillColor + "55" }]}>
             <Text style={{ fontSize: 9, color: fillColor, fontFamily: c.fontBodyBold, letterSpacing: 0.5 }}>
-              ✨ AKILLI
+              AKILLI
             </Text>
           </View>
         </View>

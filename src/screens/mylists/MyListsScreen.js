@@ -105,7 +105,7 @@ export default function MyListsScreen() {
       const buttons = [];
 
       buttons.push({
-        text: "📤 Paylaş",
+        text: "Paylaş",
         onPress: async () => {
           try {
             await Share.share({
@@ -119,11 +119,11 @@ export default function MyListsScreen() {
 
       if (isOwner) {
         buttons.push({
-          text: "✏️ Düzenle",
+          text: "Düzenle",
           onPress: () => navigation.navigate("CreateList", { listId: item.id }),
         });
         buttons.push({
-          text: "🗑️ Sil",
+          text: "Sil",
           style: "destructive",
           onPress: () => {
             Alert.alert(
@@ -146,7 +146,7 @@ export default function MyListsScreen() {
         });
       } else {
         buttons.push({
-          text: "🧠 Çalışmaya Başla",
+          text: "Çalışmaya Başla",
           onPress: () =>
             navigation.navigate("Study", { listId: item.id, listTitle: item.title }),
         });
@@ -200,7 +200,7 @@ export default function MyListsScreen() {
             <FlameRefreshControl
               refreshing={refreshing}
               onRefresh={refresh}
-              title="🔥 Çekip yenile..."
+              title="Yenile"
             />
           }
         >
@@ -253,9 +253,9 @@ export default function MyListsScreen() {
             {/* Smart pins (sadece Listelerim sekmesinde + dolu) */}
             {showPinsActual && (
               <View style={{ marginBottom: 6 }}>
-                <Text style={s.smartHeader}>✨ Senin İçin</Text>
+                <Text style={s.smartHeader}>Senin İçin</Text>
                 <SmartListCard
-                  emoji="🔖"
+                  iconPath={ICONS.bookmark}
                   title="Favori Kelimelerim"
                   subtitle="Kart sağ üstündeki yer iminden eklediklerin."
                   count={favoriteWordIds.length}
@@ -264,7 +264,7 @@ export default function MyListsScreen() {
                 />
                 {mistakesList && (
                   <SmartListCard
-                    emoji="🎯"
+                    iconPath={ICONS.target}
                     title={mistakesList.title}
                     subtitle="Çalışırken takıldığın kelimeler. 3 kez doğru bilince çıkar."
                     count={mistakesList.word_count ?? 0}
@@ -336,7 +336,7 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
       <CategoryCover difficulty={item.level} height={72}>
         {item.is_public && (
           <View style={s.publicBadge}>
-            <Text style={s.publicBadgeTxt}>🌍 Public</Text>
+            <Text style={s.publicBadgeTxt}>Public</Text>
           </View>
         )}
         {fav && (
@@ -367,7 +367,7 @@ function Empty({ tab, onCreate }) {
       <View style={{ paddingVertical: 30 }}>
         <EmptyState
           kind="list"
-          title="Kendine ait listen yok 📚"
+          title="Kendine ait listen yok"
           subtitle="İlk listeni oluştur — toplu yapıştır ile saniyeler içinde 50 kelime ekleyebilirsin."
           actionLabel="İlk Listeni Oluştur"
           onAction={onCreate}
@@ -380,7 +380,7 @@ function Empty({ tab, onCreate }) {
       <View style={{ paddingVertical: 30 }}>
         <EmptyState
           kind="search"
-          title="Favori listen yok ⭐"
+          title="Favori listen yok"
           subtitle="Keşfet sekmesinde bir liste aç → sağ üst yıldıza bas. Burada hızlı erişim için birikecek."
         />
       </View>
@@ -390,7 +390,7 @@ function Empty({ tab, onCreate }) {
     <View style={{ minHeight: 420 }}>
       <EmptyState
         kind="search"
-        title="Public liste bekleniyor 🌍"
+        title="Public liste bekleniyor"
         subtitle="Topluluk listeleri çok yakında. Şimdilik kendi listelerinden başlayabilirsin."
       />
     </View>

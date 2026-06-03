@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
+import Icon, { ICONS } from "./Icon";
 
 const PULL_THRESHOLD = 80;
 
@@ -81,11 +82,9 @@ export function FlameOverlayBanner({ visible }) {
           { backgroundColor: c.warning, opacity: glow },
         ]}
       />
-      <Animated.Text
-        style={[s.emoji, { transform: [{ scale }] }]}
-      >
-        🔥
-      </Animated.Text>
+      <Animated.View style={{ transform: [{ scale }] }}>
+        <Icon d={ICONS.flame} size={22} stroke={c.warning} fill={c.warning} sw={1.5} />
+      </Animated.View>
       <Text style={[s.txt, { color: c.textSec, fontFamily: c.fontBody }]}>
         Yenileniyor...
       </Text>

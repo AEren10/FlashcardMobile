@@ -242,7 +242,7 @@ function ZorTab({ hardWords, c, s, lapsedWords, navigation }) {
     return (
       <View style={{ minHeight: 420, paddingTop: 20 }}>
         <View style={[s.emptyHelper, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
-          <Text style={{ fontSize: 32, textAlign: "center", marginBottom: 10 }}>🎯</Text>
+          <View style={{ alignItems: "center", marginBottom: 10 }}><Icon d={ICONS.target} size={32} stroke={c.accent} sw={1.5} /></View>
           <Text style={[s.emptyTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
             Henüz zor kelimen yok
           </Text>
@@ -268,7 +268,7 @@ function ZorTab({ hardWords, c, s, lapsedWords, navigation }) {
     <View>
       <Pressable onPress={startStudy} style={[s.zorCta, { backgroundColor: c.accent }]}>
         <Text style={[s.zorCtaTxt, { color: c.textOnAccent, fontFamily: c.fontBodyBold }]}>
-          🧠 {combined.length} zor kelimeyi şimdi çalış
+          {combined.length} zor kelimeyi şimdi çalış
         </Text>
       </Pressable>
       {combined.slice(0, 30).map((w) => (

@@ -9,9 +9,11 @@ import Svg, { Path } from "react-native-svg";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getStudyStats, getDailyActivity } from "../../supabase/progress";
 import { STREAK_BADGES, WORDS_BADGES, getStreakBadge } from "../../lib/badges";
+import Icon from "../../components/design/Icon";
 import AnimatedFlame from "../../components/design/AnimatedFlame";
 import AchievementModal from "../../components/design/AchievementModal";
 import Last30BarChart from "../../components/design/Last30BarChart";
+import Last7DaysDots from "../../components/design/Last7DaysDots";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
 
 export default function StreakScreen({ navigation }) {
@@ -27,7 +29,7 @@ export default function StreakScreen({ navigation }) {
 
   useEffect(() => {
     getStudyStats().then(setStats).catch(() => {});
-    getDailyActivity(30).then(setDays).catch(() => {});
+    getDailyActivity(35).then(setDays).catch(() => {});
   }, []);
 
   const accuracy = stats.totalSessions
@@ -68,10 +70,21 @@ export default function StreakScreen({ navigation }) {
             <Text style={s.heroCap}>gün üst üste</Text>
             {streak.next && (
               <Text style={s.heroNext}>
-                Sonraki: {streak.next.emoji} {streak.next.label} —{" "}
+                Sonraki:{" "}
+                {streak.next.icon ? (
+                  <Icon d={streak.next.icon} size={14} stroke={c.textMuted} sw={1.5} />
+                ) : (
+                  streak.next.emoji
+                )}{" "}
+                {streak.next.label} —{" "}
                 {streak.next.threshold - stats.streakDays} gün
               </Text>
             )}
+          </View>
+
+          {/* Bu hafta — 7 gün yuvarlaklar */}
+          <View style={{ marginTop: 8 }}>
+            <Last7DaysDots days={days} />
           </View>
 
           {/* Stat tiles */}
@@ -172,7 +185,11 @@ function BadgeCell({ badge, unlocked, c, s }) {
             : { backgroundColor: c.bgSurface, borderColor: c.border, opacity: 0.45 },
         ]}
       >
-        <Text style={{ fontSize: 26 }}>{badge.emoji}</Text>
+        {badge.icon ? (
+          <Icon d={badge.icon} size={26} stroke={unlocked ? c.accent : c.textMuted} fill={unlocked ? c.accentGlow : "none"} sw={1.5} />
+        ) : (
+          <Text style={{ fontSize: 26 }}>{badge.emoji}</Text>
+        )}
       </View>
       <Text style={s.badgeLbl}>{badge.label}</Text>
     </View>

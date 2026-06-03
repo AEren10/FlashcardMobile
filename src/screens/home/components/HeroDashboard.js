@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useCountUp from "../../../hooks/useCountUp";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 const { width: W } = Dimensions.get("window");
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -45,7 +46,7 @@ export default function HeroDashboard({
 
       {/* Greeting */}
       <Text style={[s.greet, { color: c.textSec, fontFamily: c.fontBody }]}>
-        {greeting} 👋
+        {greeting}
       </Text>
       <Text style={[s.name, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>
         {userName}
@@ -75,7 +76,7 @@ export default function HeroDashboard({
               </Text>
             </View>
             <Text style={[s.streakLbl, { color: streak > 0 ? c.warning : c.textMuted, fontFamily: c.fontBodySemi }]}>
-              {streak === 0 ? "henüz seri yok" : streak === 1 ? "ilk gün" : "ateşin tütüyor 🔥"}
+              {streak === 0 ? "henüz seri yok" : streak === 1 ? "ilk gün" : "ateşin tütüyor"}
             </Text>
           </View>
         </Pressable>
@@ -105,7 +106,7 @@ export default function HeroDashboard({
 
       <Text style={[s.hint, { color: c.textMuted, fontFamily: c.fontBody }]}>
         {pct >= 100
-          ? "🎉 Bugünkü hedefini tamamladın!"
+          ? "Bugünkü hedefini tamamladın!"
           : `${dailyTotal - dailyDone} kelime kaldı`}
       </Text>
     </View>
@@ -198,25 +199,18 @@ function StreakOrbit({ streak, c }) {
   }, [scale, lift, shadowGlow, active]);
 
   const flameColor = streak >= 30 ? c.error : c.warning;
-  const emojiSize = 38 + intensity * 18; // 38 → 56 px
+  const iconSize = 34 + intensity * 14;
 
   return (
     <View style={s.flameWrap}>
-      <Animated.Text
-        style={[
-          s.flameEmoji,
-          {
-            fontSize: emojiSize,
-            textShadowColor: flameColor,
-            textShadowRadius: 14 + intensity * 12,
-            textShadowOffset: { width: 0, height: 0 },
-            opacity: shadowGlow,
-            transform: [{ scale }, { translateY: lift }],
-          },
-        ]}
+      <Animated.View
+        style={{
+          opacity: shadowGlow,
+          transform: [{ scale }, { translateY: lift }],
+        }}
       >
-        🔥
-      </Animated.Text>
+        <Icon d={ICONS.flame} size={iconSize} stroke={flameColor} fill={flameColor} sw={1.2} />
+      </Animated.View>
     </View>
   );
 }

@@ -6,6 +6,7 @@ import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useCountUp from "../../../hooks/useCountUp";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 export default function RoadmapHeader({ level }) {
   const { c } = useTheme();
@@ -37,7 +38,7 @@ export default function RoadmapHeader({ level }) {
 
       <View style={s.row}>
         <View style={[s.badge, { backgroundColor: level.color + "22", borderColor: level.color + "55" }]}>
-          <Text style={s.emoji}>{level.emoji}</Text>
+          <Icon d={level.icon || ICONS.star} size={28} stroke={level.color} fill={level.color + "33"} sw={1.5} />
         </View>
         <View style={{ flex: 1 }}>
           <Text style={[s.titleTxt, { color: level.color, fontFamily: c.fontBodyBold }]}>
@@ -61,20 +62,24 @@ export default function RoadmapHeader({ level }) {
         />
       </View>
 
-      <Text style={[s.next, { color: c.textSec, fontFamily: c.fontBody }]}>
-        {level.lv >= level.nextMilestone.lv ? (
-          "👑 Tüm seviyeleri tamamladın!"
-        ) : (
-          <>
+      {level.lv >= level.nextMilestone.lv ? (
+        <Text style={[s.next, { color: c.textSec, fontFamily: c.fontBody }]}>
+          Tüm seviyeleri tamamladın!
+        </Text>
+      ) : (
+        <View style={s.nextRow}>
+          <Text style={[s.next, { color: c.textSec, fontFamily: c.fontBody }]}>
             <Text style={{ fontFamily: c.fontBodyBold, color: c.textPrimary }}>
               {level.xpToNext} XP
             </Text>{" "}
-            sonra: <Text style={{ color: level.nextMilestone.color }}>
-              {level.nextMilestone.emoji} {level.nextMilestone.title}
-            </Text>
-          </>
-        )}
-      </Text>
+            sonra:{" "}
+          </Text>
+          <Icon d={level.nextMilestone.icon || ICONS.star} size={13} stroke={level.nextMilestone.color} sw={1.6} />
+          <Text style={[s.next, { color: level.nextMilestone.color, fontFamily: c.fontBody, marginLeft: 4 }]}>
+            {level.nextMilestone.title}
+          </Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -96,8 +101,8 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  emoji: { fontSize: 26 },
   titleTxt: { fontSize: 14, letterSpacing: 0.3, marginBottom: 2 },
+  nextRow: { flexDirection: "row", alignItems: "center", marginTop: 10, flexWrap: "wrap" },
   lvTxt: { fontSize: 22 },
   xpBox: { alignItems: "flex-end" },
   xpNum: { fontSize: 24, lineHeight: 26 },

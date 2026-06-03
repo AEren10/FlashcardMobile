@@ -140,6 +140,25 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     setIndex((i) => i + 1);
   }, []);
 
+  // "Bu kelimeyi biliyorum" — SRS graduate, 21 gün sonra döner
+  const graduateCurrent = useCallback(() => {
+    if (!current) return;
+    safeRecordReview(current.id, GRADE.GRADUATE).catch(() => {});
+    bumpMistakesStreak(current.id, current.word, current.meaning).catch(() => {});
+    setCorrect((c) => c + 1);
+    setCorrectIds((arr) => [...arr, current.id]);
+    // Sonraki karta geç
+    setIndex((i) => i + 1);
+  }, [current]);
+
+  // "Yanlış çeviri bildir" — TODO: Supabase report tablosuna yaz
+  // Şimdilik just console log + local marker
+  const reportCurrent = useCallback(() => {
+    if (!current) return;
+    // TODO: supabase reportWordTranslation(current.id, reason)
+    console.log("[Report]", { wordId: current.id, word: current.word });
+  }, [current]);
+
   const restart = useCallback(() => {
     setIndex(0);
     setCorrect(0);
@@ -178,5 +197,7 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     advance,
     finishSeason,
     restart,
+    graduateCurrent,
+    reportCurrent,
   };
 }

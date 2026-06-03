@@ -7,18 +7,18 @@ import { useAuth } from "../../../contexts/AuthContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
 import PressableScale from "../../../components/design/PressableScale";
 
-const CATEGORY_EMOJI = {
-  daily: "☀️",
-  travel: "✈️",
-  business: "💼",
-  learning: "📚",
-  popular: "🔥",
-  colors: "🎨",
+const CATEGORY_ICON = {
+  daily: ICONS.sun,
+  travel: ICONS.plane,
+  business: ICONS.briefcase,
+  learning: ICONS.books,
+  popular: ICONS.flame,
+  colors: ICONS.palette,
 };
 
-function getEmoji(cat) {
-  if (!cat) return "📖";
-  return CATEGORY_EMOJI[cat.toLowerCase()] || "📖";
+function getCategoryIcon(cat) {
+  if (!cat) return ICONS.books;
+  return CATEGORY_ICON[cat.toLowerCase()] || ICONS.books;
 }
 
 const FavoriteCard = ({ item, onPress }) => {
@@ -41,7 +41,7 @@ const FavoriteCard = ({ item, onPress }) => {
       onPress={() => onPress(item)}
     >
       <View style={styles.emojiBox}>
-        <Text style={styles.emojiTxt}>{getEmoji(item.category)}</Text>
+        <Icon d={getCategoryIcon(item.category)} size={20} stroke={c.textSec} sw={1.5} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={styles.title} numberOfLines={1}>

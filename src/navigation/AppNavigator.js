@@ -114,7 +114,7 @@ import EditProfileScreen from "../screens/profile/EditProfileScreen";
 import OnboardingScreen, { hasSeenOnboarding } from "../screens/onboarding/OnboardingScreen";
 
 // Theme
-import T from "../themes/tokens";
+import { T } from "../themes/tokens";
 import TabBar from "../components/design/TabBar";
 
 // Navigation Stacks

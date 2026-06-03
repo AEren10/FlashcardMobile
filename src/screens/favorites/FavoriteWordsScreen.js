@@ -63,7 +63,7 @@ export default function FavoriteWordsScreen({ navigation }) {
         ) : items.length === 0 ? (
           <EmptyState
             kind="search"
-            title="Favori kelimen yok 🔖"
+            title="Favori kelimen yok"
             subtitle="Çalışırken kartın sağ üstündeki yer imine (bookmark) bas — gözden kaçırmak istemediklerin buraya gelir."
           />
         ) : (

@@ -20,6 +20,7 @@ import Svg, { Path } from "react-native-svg";
 import ConfettiCannon from "react-native-confetti-cannon";
 
 import FlipCard from "../../components/design/FlipCard";
+import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
 import ProgressBar from "../../components/design/ProgressBar";
 import StudyResultScreen from "../../components/design/StudyResultScreen";
@@ -96,7 +97,7 @@ export default function StudyScreen({ route, navigation }) {
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }}>
           <EmptyState
-            emoji="📭"
+            kind="search"
             title="Bu listede kelime yok"
             subtitle="Önce listeye kelime ekle."
             actionLabel="Geri dön"
@@ -151,10 +152,13 @@ export default function StudyScreen({ route, navigation }) {
                 word={engine.current.word}
                 meaning={engine.current.meaning}
                 example={engine.current.example}
+                exampleTr={engine.current.example_tr || engine.current.exampleTr}
                 pron={engine.current.pron}
                 flipped={flipped}
                 onPress={() => {}}
                 disabled={!!feedback}
+                onGraduate={() => engine.graduateCurrent?.()}
+                onReport={() => engine.reportCurrent?.()}
               />
               <VerdictBadges s={s} c={c} know={knowAmt} dont={dontAmt} />
               {feedback && <CenterPop s={s} c={c} type={feedback} scale={swipe.popScale} />}
@@ -199,7 +203,7 @@ function Header({ c, s, title, streak, onBack }) {
         <Text style={s.deckTitle} numberOfLines={1}>{title}</Text>
       </Pressable>
       <View style={s.streakBox}>
-        <Text style={s.flame}>🔥</Text>
+        <Icon d={ICONS.flame} size={16} stroke={c.warning} fill={c.warning} sw={1.2} />
         <Text style={s.streakNum}>{streak}</Text>
       </View>
     </View>

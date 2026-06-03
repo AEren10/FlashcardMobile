@@ -18,7 +18,7 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
   return (
     <View style={s.row}>
       <CtaButton
-        emoji="🧠"
+        iconPath={ICONS.lightbulb}
         title="Çalış"
         subtitle="SRS · 5 sn"
         accent={tint?.color || c.accent}
@@ -28,7 +28,7 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
         bold
       />
       <CtaButton
-        emoji="🧩"
+        iconPath={ICONS.grid}
         title="Quiz"
         subtitle={quizDisabled ? `${MIN_QUIZ_WORDS}+ kelime` : "Çoktan seçmeli"}
         accent={c.cobalt}
@@ -49,7 +49,7 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
 }
 
 function CtaButton({
-  emoji,
+  iconPath,
   title,
   subtitle,
   accent,
@@ -108,7 +108,9 @@ function CtaButton({
           />
         )}
 
-        <Text style={s.emoji}>{emoji}</Text>
+        <View style={s.iconBox}>
+          <Icon d={iconPath} size={20} stroke={bold ? onAccent : accent} sw={1.8} />
+        </View>
         <View style={{ flex: 1 }}>
           <Text
             style={[
@@ -184,7 +186,7 @@ const s = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
   },
-  emoji: { fontSize: 22 },
+  iconBox: { width: 28, height: 28, alignItems: "center", justifyContent: "center" },
   title: { fontSize: 15, letterSpacing: 0.2 },
   sub: { fontSize: 11, marginTop: 2 },
 });

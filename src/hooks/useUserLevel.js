@@ -13,18 +13,19 @@
  * Her seviyenin bir unvanı + emoji + accent rengi var.
  */
 import { useMemo } from "react";
+import { ICONS } from "../components/design/Icon";
 
 export const LEVELS = [
-  { lv: 0,  threshold: 0,    title: "Çaylak",        emoji: "🌱", color: "#6EE7B7" }, // mint
-  { lv: 1,  threshold: 10,   title: "Öğrenci",        emoji: "📚", color: "#6EE7B7" },
-  { lv: 2,  threshold: 40,   title: "Hevesli",        emoji: "✨", color: "#818CF8" }, // indigo
-  { lv: 3,  threshold: 90,   title: "Meraklı",        emoji: "🔍", color: "#818CF8" },
-  { lv: 5,  threshold: 250,  title: "Bilen",          emoji: "💡", color: "#FBBF24" }, // amber
-  { lv: 7,  threshold: 490,  title: "Sözlük Avcısı",  emoji: "📖", color: "#FBBF24" },
-  { lv: 10, threshold: 1000, title: "Polyglot",       emoji: "🌍", color: "#FF8B73" }, // coral
-  { lv: 15, threshold: 2250, title: "Usta",           emoji: "🏆", color: "#FF8B73" },
-  { lv: 20, threshold: 4000, title: "Bilge",          emoji: "🧙", color: "#A78BFA" }, // violet
-  { lv: 30, threshold: 9000, title: "Efsane",         emoji: "👑", color: "#A78BFA" },
+  { lv: 0,  threshold: 0,    title: "Çaylak",        icon: ICONS.leaf,      color: "#6EE7B7" },
+  { lv: 1,  threshold: 10,   title: "Öğrenci",        icon: ICONS.books,     color: "#6EE7B7" },
+  { lv: 2,  threshold: 40,   title: "Hevesli",        icon: ICONS.sparkle,   color: "#818CF8" },
+  { lv: 3,  threshold: 90,   title: "Meraklı",        icon: ICONS.search,    color: "#818CF8" },
+  { lv: 5,  threshold: 250,  title: "Bilen",          icon: ICONS.lightbulb, color: "#FBBF24" },
+  { lv: 7,  threshold: 490,  title: "Sözlük Avcısı",  icon: ICONS.bookmark,  color: "#FBBF24" },
+  { lv: 10, threshold: 1000, title: "Polyglot",       icon: ICONS.globe,     color: "#FF8B73" },
+  { lv: 15, threshold: 2250, title: "Usta",           icon: ICONS.trophy,    color: "#FF8B73" },
+  { lv: 20, threshold: 4000, title: "Bilge",          icon: ICONS.brain,     color: "#A78BFA" },
+  { lv: 30, threshold: 9000, title: "Efsane",         icon: ICONS.crown,     color: "#A78BFA" },
 ];
 
 function levelFromXP(xp) {
@@ -63,7 +64,7 @@ export default function useUserLevel(totalWords = 0) {
       xp,
       lv,
       title: milestone.title,
-      emoji: milestone.emoji,
+      icon: milestone.icon,
       color: milestone.color,
       nextMilestone: next,
       progress: Math.max(0, Math.min(1, progress)),

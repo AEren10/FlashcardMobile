@@ -63,7 +63,7 @@ export default function QuizResultScreen({
   const isExcellent = ratio >= 0.8;
   const isGood = ratio >= 0.5;
 
-  const emoji = isExcellent ? "🏆" : isGood ? "👏" : "💪";
+  const medalIcon = isExcellent ? ICONS.trophy : isGood ? ICONS.star : ICONS.flame;
   const title = isExcellent
     ? "Harika!"
     : isGood
@@ -127,7 +127,7 @@ export default function QuizResultScreen({
                 style={[StyleSheet.absoluteFill, { borderRadius: 32 }]}
                 pointerEvents="none"
               />
-              <Text style={s.medalEmoji}>{emoji}</Text>
+              <Icon d={medalIcon} size={40} stroke={c.accent} fill={isExcellent ? c.accent : "none"} sw={1.8} />
             </Animated.View>
             {isExcellent && (
               <View style={{ position: "absolute", top: -6, right: -6 }}>
@@ -149,7 +149,7 @@ export default function QuizResultScreen({
           {mistakesAdded > 0 && (
             <View style={s.infoCard}>
               <View style={s.infoIcon}>
-                <Text style={{ fontSize: 18 }}>🎯</Text>
+                <Icon d={ICONS.target} size={18} stroke={c.accent} sw={1.5} />
               </View>
               <Text style={s.infoTxt}>
                 <Text style={{ fontFamily: c.fontBodyBold, color: c.textPrimary }}>

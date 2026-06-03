@@ -1,15 +1,11 @@
-/**
- * LevelMiniCard — width: aynı (challenge card ile aynı), height: düşük.
- * Lv X · Ünvan + XP progress bar + sonraki ünvana kalan.
- * Tap → Roadmap.
- */
 import React, { useEffect, useRef } from "react";
-import { View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
+import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useUserLevel from "../../../hooks/useUserLevel";
 import Icon, { ICONS } from "../../../components/design/Icon";
+import PressableScale from "../../../components/design/PressableScale";
 
 export default function LevelMiniCard({ totalWords = 0, onPress }) {
   const { c } = useTheme();
@@ -31,59 +27,59 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
   });
 
   return (
-    <Pressable
+    <PressableScale
       onPress={() => {
         Haptics.selectionAsync();
         onPress?.();
       }}
-      style={({ pressed }) => [
-        s.wrap,
-        {
-          backgroundColor: c.bgElevated,
-          borderColor: level.color + "44",
-          transform: [{ scale: pressed ? 0.99 : 1 }],
-        },
-      ]}
+      style={[s.wrap, { borderColor: c.borderAccent }]}
+      scaleDown={0.985}
       accessibilityLabel="Yol haritam"
     >
       <LinearGradient
-        colors={[level.color + "14", "transparent"]}
+        colors={[c.bgElevated, c.bgSurface]}
         start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
+      />
+      {/* Glow blob — challenge card'ın aynısı ama farklı pozisyon/renk */}
+      <View style={[s.glow, { backgroundColor: c.cobaltGlow }]} />
+      <LinearGradient
+        colors={["rgba(255,255,255,0.06)", "transparent"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 0.4 }}
+        style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
+        pointerEvents="none"
       />
 
       <View style={s.row}>
-        <View style={[s.badge, { backgroundColor: level.color + "22", borderColor: level.color + "55" }]}>
-          <Text style={{ fontSize: 20 }}>{level.emoji}</Text>
+        <View style={[s.badge, { backgroundColor: c.accentGlow, borderColor: c.borderAccent }]}>
+          <Icon d={ICONS.star} size={18} stroke={c.accent} fill={c.accentGlow} sw={1.6} />
         </View>
         <View style={{ flex: 1 }}>
           <View style={s.titleRow}>
-            <Text style={[s.lvNum, { color: level.color, fontFamily: c.fontBodyBold }]}>
+            <Text style={[s.lvChip, { color: c.accent, backgroundColor: c.accentGlow, fontFamily: c.fontBodyBold }]}>
               LV {level.lv}
             </Text>
             <Text style={[s.titleTxt, { color: c.textPrimary, fontFamily: c.fontBodySemi }]}>
-              · {level.title}
+              {level.title}
             </Text>
           </View>
-          <View style={[s.track, { backgroundColor: c.bgSurface }]}>
+          <View style={[s.track, { backgroundColor: c.bgBase }]}>
             <Animated.View
-              style={[
-                s.fill,
-                { width: fillWidth, backgroundColor: level.color },
-              ]}
+              style={[s.fill, { width: fillWidth, backgroundColor: c.accent }]}
             />
           </View>
         </View>
         <Icon d={ICONS.arrow} size={14} stroke={c.textMuted} sw={2} />
       </View>
 
-      <Text style={[s.next, { color: c.textMuted, fontFamily: c.fontBody }]}>
-        {level.lv >= level.nextMilestone.lv
-          ? "👑 Tüm seviyeler tamamlandı"
-          : `${level.xpToNext} XP sonra: ${level.nextMilestone.emoji} ${level.nextMilestone.title}`}
-      </Text>
-    </Pressable>
+      {level.lv < level.nextMilestone.lv && (
+        <Text style={[s.next, { color: c.textSec, fontFamily: c.fontBody }]}>
+          {level.xpToNext} XP → {level.nextMilestone.title}
+        </Text>
+      )}
+    </PressableScale>
   );
 }
 
@@ -92,31 +88,47 @@ const s = StyleSheet.create({
     marginTop: 16,
     borderRadius: 18,
     borderWidth: 1,
-    padding: 14,
+    padding: 16,
     overflow: "hidden",
+  },
+  glow: {
+    position: "absolute",
+    bottom: -30,
+    left: -20,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    opacity: 0.7,
   },
   row: { flexDirection: "row", alignItems: "center", gap: 12 },
   badge: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: 13,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
-  titleRow: { flexDirection: "row", alignItems: "baseline", gap: 4, marginBottom: 6 },
-  lvNum: { fontSize: 13, letterSpacing: 0.5 },
-  titleTxt: { fontSize: 13 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  lvChip: {
+    fontSize: 11,
+    letterSpacing: 0.5,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    overflow: "hidden",
+  },
+  titleTxt: { fontSize: 14 },
   track: {
-    height: 6,
+    height: 5,
     borderRadius: 999,
     overflow: "hidden",
   },
   fill: { height: "100%", borderRadius: 999 },
   next: {
     fontSize: 11,
-    marginTop: 8,
-    marginLeft: 52,
+    marginTop: 10,
+    marginLeft: 54,
     letterSpacing: 0.2,
   },
 });

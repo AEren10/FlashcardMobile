@@ -19,10 +19,10 @@ export default function Last30BarChart({ days = [] }) {
   const [selected, setSelected] = useState(null);
 
   const padded = useMemo(() => {
-    // 30 gün — eksikse 0 ile doldur
+    // 35 gün — eksikse 0 ile doldur
     const arr = [...(days || [])];
-    while (arr.length < 30) arr.unshift({ sessions: 0 });
-    return arr.slice(-30);
+    while (arr.length < 35) arr.unshift({ sessions: 0 });
+    return arr.slice(-35);
   }, [days]);
 
   const maxSessions = Math.max(1, ...padded.map((d) => d?.sessions || 0));
@@ -31,7 +31,7 @@ export default function Last30BarChart({ days = [] }) {
   return (
     <View style={s.wrap}>
       <View style={s.headRow}>
-        <Text style={s.title}>Son 30 Gün</Text>
+        <Text style={s.title}>Son 35 Gün</Text>
         {selected != null && (
           <Text style={s.selectedTxt}>
             {selected === todayIdx
@@ -70,7 +70,7 @@ export default function Last30BarChart({ days = [] }) {
       </ScrollView>
 
       <View style={s.axisRow}>
-        <Text style={s.axisTxt}>30 gün önce</Text>
+        <Text style={s.axisTxt}>35 gün önce</Text>
         <Text style={s.axisTxt}>Bugün</Text>
       </View>
     </View>

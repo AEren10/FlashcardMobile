@@ -6,6 +6,7 @@ import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Modal, Pressable } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
 import { setConsent } from "../lib/analyticsConsent";
+import Icon, { ICONS } from "./design/Icon";
 
 export default function ConsentModal({ visible, onResolved }) {
   const { c } = useTheme();
@@ -20,7 +21,7 @@ export default function ConsentModal({ visible, onResolved }) {
     <Modal visible={visible} transparent animationType="fade" onRequestClose={() => handle(false)}>
       <View style={s.overlay}>
         <View style={s.card}>
-          <Text style={s.emoji}>🔒</Text>
+          <View style={s.emoji}><Icon d={ICONS.lock} size={40} stroke={c.accent} sw={1.5} /></View>
           <Text style={s.title}>Gizlilik Tercihin</Text>
           <Text style={s.body}>
             Uygulamayı geliştirmemize yardımcı olmak için anonim çökme raporları toplayabiliriz.
@@ -56,7 +57,7 @@ function makeStyles(c) {
       borderColor: c.border,
       alignItems: "center",
     },
-    emoji: { fontSize: 40, marginBottom: 8 },
+    emoji: { marginBottom: 8, alignItems: "center" },
     title: {
       fontSize: 20,
       fontFamily: c.fontBodyBold,

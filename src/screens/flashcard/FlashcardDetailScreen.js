@@ -105,7 +105,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
       .map((w) => `• ${w.word} — ${w.meaning}`)
       .join("\n");
     const deepLink = `https://flashcardmobile.app/list/${listId}`;
-    const msg = `📚 "${title}" kelime listesi (${words.length} kelime)\n\n${sample}${
+    const msg = `"${title}" kelime listesi (${words.length} kelime)\n\n${sample}${
       words.length > 3 ? "\n..." : ""
     }\n\nListeyi aç: ${deepLink}\n\nFlashcardMobile ile öğren!`;
     try {
@@ -150,7 +150,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }}>
           <EmptyState
-            emoji={error ? "⚠️" : "📭"}
+            kind={error ? "offline" : "search"}
             title={error ?? "Bu listede kelime yok"}
             subtitle={
               error

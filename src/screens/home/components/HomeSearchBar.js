@@ -3,9 +3,10 @@
  * Tap → ListExplorer'a search modunda gider.
  */
 import React from "react";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { Text, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 export default function HomeSearchBar({ onPress }) {
   const { c } = useTheme();
@@ -25,15 +26,10 @@ export default function HomeSearchBar({ onPress }) {
       ]}
       accessibilityLabel="Listelerde ara"
     >
-      <Text style={s.icon}>🔍</Text>
+      <Icon d={ICONS.search} size={16} stroke={c.textMuted} sw={1.8} />
       <Text style={[s.txt, { color: c.textMuted, fontFamily: c.fontBody }]}>
         Liste veya kelime ara…
       </Text>
-      <View style={[s.kbHint, { backgroundColor: c.bgSurface }]}>
-        <Text style={[s.kbTxt, { color: c.textMuted, fontFamily: c.fontBodyBold }]}>
-          ⌘ K
-        </Text>
-      </View>
     </Pressable>
   );
 }
@@ -49,12 +45,5 @@ const s = StyleSheet.create({
     borderWidth: 1,
     marginTop: 18,
   },
-  icon: { fontSize: 14, opacity: 0.7 },
   txt: { flex: 1, fontSize: 14 },
-  kbHint: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  kbTxt: { fontSize: 10, letterSpacing: 0.3 },
 });

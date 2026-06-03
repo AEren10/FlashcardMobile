@@ -82,8 +82,8 @@ function App() {
 
   if (!fontsLoaded) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0B1520", justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator color="#B4FF4F" />
+      <View style={{ flex: 1, backgroundColor: "#1A1814", justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator color="#C8A96E" />
       </View>
     );
   }

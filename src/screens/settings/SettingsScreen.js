@@ -9,7 +9,7 @@ import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
-import Icon from "../../components/design/Icon";
+import Icon, { ICONS } from "../../components/design/Icon";
 import {
   getReminderPref,
   scheduleDailyReminder,
@@ -88,7 +88,7 @@ export default function SettingsScreen({ navigation }) {
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
           <Section title="Görünüm" c={c} s={s}>
             <Row
-              icon="🌓"
+              iconPath={ICONS.sun}
               label="Tema"
               detail={appearanceLabel()}
               onPress={() => navigation.navigate("Appearance")}
@@ -96,7 +96,7 @@ export default function SettingsScreen({ navigation }) {
               s={s}
             />
             <Row
-              icon="🌐"
+              iconPath={ICONS.globe}
               label="Dil"
               detail="Türkçe"
               onPress={() => navigation.navigate("Language")}
@@ -107,7 +107,7 @@ export default function SettingsScreen({ navigation }) {
 
           <Section title="Bildirimler" c={c} s={s}>
             <Row
-              icon="🔔"
+              iconPath={ICONS.sound}
               label="Günlük Hatırlatıcı"
               detail={reminder.enabled ? "20:00 ✓" : "Kapalı"}
               onPress={toggleReminder}
@@ -118,21 +118,21 @@ export default function SettingsScreen({ navigation }) {
 
           <Section title="Gizlilik" c={c} s={s}>
             <Row
-              icon="🔒"
+              iconPath={ICONS.lock}
               label="Gizlilik Ayarları"
               onPress={() => navigation.navigate("PrivacySettings")}
               c={c}
               s={s}
             />
             <Row
-              icon="📄"
+              iconPath={ICONS.shield}
               label="Gizlilik Politikası"
               onPress={() => navigation.navigate("PrivacyPolicy")}
               c={c}
               s={s}
             />
             <Row
-              icon="📋"
+              iconPath={ICONS.books}
               label="Kullanım Koşulları"
               onPress={() => navigation.navigate("TermsOfService")}
               c={c}
@@ -143,14 +143,14 @@ export default function SettingsScreen({ navigation }) {
           {!isGuestUser() && (
             <Section title="Hesap" c={c} s={s}>
               <Row
-                icon="🚪"
+                iconPath={ICONS.arrow}
                 label="Çıkış Yap"
                 onPress={confirmLogout}
                 c={c}
                 s={s}
               />
               <Row
-                icon="🗑️"
+                iconPath={ICONS.x}
                 label="Hesabımı Sil"
                 detail="Kalıcı"
                 danger
@@ -177,7 +177,7 @@ function Section({ title, children, c, s }) {
   );
 }
 
-function Row({ icon, label, detail, danger, onPress, c, s }) {
+function Row({ icon, iconPath, label, detail, danger, onPress, c, s }) {
   return (
     <Pressable
       onPress={onPress}
@@ -186,7 +186,11 @@ function Row({ icon, label, detail, danger, onPress, c, s }) {
         { backgroundColor: pressed ? c.bgSurface : "transparent" },
       ]}
     >
-      <Text style={s.rowIcon}>{icon}</Text>
+      {iconPath ? (
+        <View style={s.rowIcon}><Icon d={iconPath} size={18} stroke={danger ? c.error : c.textSec} sw={1.6} /></View>
+      ) : (
+        <Text style={s.rowIcon}>{icon}</Text>
+      )}
       <Text
         style={[
           s.rowLabel,

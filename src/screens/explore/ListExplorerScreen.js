@@ -120,7 +120,7 @@ export default function ListExplorerScreen({ route, navigation }) {
         {searchMode && (
           <View style={s.searchWrap}>
             <View style={[s.searchBox, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
-              <Text style={s.searchIcon}>🔍</Text>
+              <Icon d={ICONS.search} size={16} stroke={c.textMuted} sw={1.8} />
               <TextInput
                 value={query}
                 onChangeText={setQuery}
@@ -135,7 +135,7 @@ export default function ListExplorerScreen({ route, navigation }) {
               />
               {!!query && (
                 <Pressable onPress={() => setQuery("")} hitSlop={8}>
-                  <Text style={{ color: c.textMuted, fontSize: 16 }}>✕</Text>
+                  <Icon d={ICONS.x} size={14} stroke={c.textMuted} sw={2} />
                 </Pressable>
               )}
             </View>
@@ -272,7 +272,6 @@ function makeStyles(c) {
       borderRadius: 14,
       borderWidth: 1,
     },
-    searchIcon: { fontSize: 14, opacity: 0.7 },
     searchInput: { flex: 1, fontSize: 14, padding: 0 },
 
     card: {

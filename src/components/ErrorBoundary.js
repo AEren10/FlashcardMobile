@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import T from "../themes/tokens";
+import Icon, { ICONS } from "./design/Icon";
 
 export default class ErrorBoundary extends React.Component {
   state = { error: null };
@@ -19,7 +20,7 @@ export default class ErrorBoundary extends React.Component {
     if (!this.state.error) return this.props.children;
     return (
       <View style={s.wrap}>
-        <Text style={s.emoji}>😵‍💫</Text>
+        <View style={s.emoji}><Icon d={ICONS.shield} size={56} stroke="#CF7B68" sw={1.5} /></View>
         <Text style={s.title}>Bir şeyler ters gitti</Text>
         <Text style={s.msg} numberOfLines={4}>
           {String(this.state.error?.message ?? this.state.error)}
@@ -35,7 +36,7 @@ export default class ErrorBoundary extends React.Component {
 // ErrorBoundary class component, useTheme kullanamaz — dark token'ları statik kullan.
 const s = StyleSheet.create({
   wrap: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, backgroundColor: T.bgBase },
-  emoji: { fontSize: 56, marginBottom: 12 },
+  emoji: { marginBottom: 12, alignItems: "center" },
   title: { fontSize: 20, fontFamily: T.fontBodyBold, marginBottom: 8, color: T.textPrimary },
   msg: { fontSize: 14, fontFamily: T.fontBody, color: T.textSec, textAlign: "center", marginBottom: 20 },
   btn: {

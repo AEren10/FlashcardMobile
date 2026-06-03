@@ -9,6 +9,7 @@ import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useCountUp from "../../../hooks/useCountUp";
+import Icon, { ICONS } from "../../../components/design/Icon";
 
 export default function StreakChip({ streak = 0, onPress }) {
   const { c } = useTheme();
@@ -113,9 +114,9 @@ export default function StreakChip({ streak = 0, onPress }) {
         />
 
         <View style={s.row}>
-          <Animated.Text style={[s.flame, { transform: [{ rotate: rotation }] }]}>
-            🔥
-          </Animated.Text>
+          <Animated.View style={{ transform: [{ rotate: rotation }] }}>
+            <Icon d={ICONS.flame} size={20} stroke={c.warning} fill={c.warning} sw={1.2} />
+          </Animated.View>
           <Text
             style={[
               s.num,
@@ -157,7 +158,6 @@ const s = StyleSheet.create({
     borderRadius: 50,
   },
   row: { flexDirection: "row", alignItems: "center", gap: 4 },
-  flame: { fontSize: 22 },
   num: { fontSize: 28, lineHeight: 30 },
   cap: { fontSize: 11, marginTop: 8, letterSpacing: 0.2 },
 });

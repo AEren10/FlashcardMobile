@@ -148,7 +148,7 @@ export default function DailyGoalCard({ done = 0, total = 10, onPress }) {
           ]}
         >
           {completed
-            ? "✓ Hedef tamamlandı 🎉"
+            ? "✓ Hedef tamamlandı"
             : `${total - done} kelime kaldı`}
         </Text>
       </Pressable>

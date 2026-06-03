@@ -104,7 +104,7 @@ export default function ProfileScreen() {
     return (
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
-          <Text style={{ fontSize: 64 }}>👤</Text>
+          <Icon d={ICONS.user} size={64} stroke="#A69E90" sw={1.5} />
           <Text style={s.guestTitle}>Profil</Text>
           <Text style={s.guestSub}>Bu özelliği kullanmak için kayıt ol</Text>
           <Pressable style={s.primaryBtn} onPress={() => signOut()}>
@@ -150,7 +150,7 @@ export default function ProfileScreen() {
               ]}
               accessibilityLabel="Yol haritam"
             >
-              <Text style={{ fontSize: 14 }}>{userLevel.emoji}</Text>
+              <Icon d={userLevel.icon} size={14} stroke={userLevel.color} sw={1.8} />
               <Text style={[s.levelTxt, { color: userLevel.color }]}>
                 LV {userLevel.lv} · {userLevel.title.toUpperCase()}
               </Text>
@@ -182,9 +182,9 @@ export default function ProfileScreen() {
             </Text>
             <View style={s.miniBadges}>
               {[
-                { e: "🌱", l: "İlk Adım", on: stats.totalWords >= 1 },
-                { e: "🔥", l: "7 Gün", on: stats.streakDays >= 7 },
-                { e: "⚡", l: "100 Kelime", on: stats.totalWords >= 100 },
+                { icon: ICONS.leaf, l: "İlk Adım", on: stats.totalWords >= 1 },
+                { icon: ICONS.flame, l: "7 Gün", on: stats.streakDays >= 7 },
+                { icon: ICONS.bolt, l: "100 Kelime", on: stats.totalWords >= 100 },
               ].map((b) => (
                 <View key={b.l} style={{ flex: 1, alignItems: "center" }}>
                   <View
@@ -197,7 +197,7 @@ export default function ProfileScreen() {
                       },
                     ]}
                   >
-                    <Text style={{ fontSize: 22 }}>{b.e}</Text>
+                    <Icon d={b.icon} size={22} stroke={b.on ? c.accent : c.textMuted} sw={1.5} />
                   </View>
                   <Text style={s.miniBadgeLbl}>{b.l}</Text>
                 </View>

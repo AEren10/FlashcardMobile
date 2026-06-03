@@ -23,6 +23,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "./Icon";
 import PremiumButton from "./PremiumButton";
+const STAT_ICONS = { clock: ICONS.clock, brain: ICONS.lightbulb, books: ICONS.books };
 import DonutChart from "./DonutChart";
 import StaggerEnter from "./StaggerEnter";
 import LottieSuccess from "./LottieSuccess";
@@ -87,16 +88,16 @@ export default function StudyResultScreen({
 
           {/* Quick stats */}
           <View style={s.statsRow}>
-            <StatBox icon="⏱" value={timeStr} label="Süre" c={c} s={s} />
+            <StatBox iconPath={STAT_ICONS.clock} value={timeStr} label="Süre" c={c} s={s} />
             <StatBox
-              icon="🧠"
+              iconPath={STAT_ICONS.brain}
               value={`%${retentionEstimate}`}
               label="24s sonra"
               c={c}
               s={s}
             />
             <StatBox
-              icon="📚"
+              iconPath={STAT_ICONS.books}
               value={mistakesAdded > 0 ? `+${mistakesAdded}` : "0"}
               label="Listene"
               c={c}
@@ -108,7 +109,7 @@ export default function StudyResultScreen({
           {mistakesAdded > 0 && (
             <View style={s.infoCard}>
               <View style={s.infoIcon}>
-                <Text style={{ fontSize: 18 }}>🎯</Text>
+                <Icon d={ICONS.target} size={18} stroke={c.accent} sw={1.5} />
               </View>
               <Text style={s.infoTxt}>
                 <Text style={{ fontFamily: c.fontBodyBold, color: c.textPrimary }}>
@@ -247,10 +248,10 @@ function WrongCard({ word, c, s }) {
   );
 }
 
-function StatBox({ icon, value, label, c, s }) {
+function StatBox({ iconPath, value, label, c, s }) {
   return (
     <View style={s.statBox}>
-      <Text style={s.statIcon}>{icon}</Text>
+      <Icon d={iconPath} size={20} stroke={c.accent} sw={1.8} />
       <Text style={s.statVal}>{value}</Text>
       <Text style={s.statLbl}>{label}</Text>
     </View>

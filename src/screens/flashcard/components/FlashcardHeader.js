@@ -53,13 +53,13 @@ export default function FlashcardHeader({
 
       <View style={s.actions}>
         <Pressable onPress={onShare} hitSlop={8} accessibilityLabel="Listeyi paylaş" style={s.iconBtn}>
-          <Text style={s.icon}>📤</Text>
+          <Icon d={ICONS.share} size={18} stroke={c.textSec} sw={1.8} />
         </Pressable>
 
         {isOwner ? (
           <>
             <Pressable onPress={onEdit} hitSlop={8} accessibilityLabel="Listeyi düzenle" style={s.iconBtn}>
-              <Text style={s.icon}>✏️</Text>
+              <Icon d={ICONS.pencil} size={18} stroke={c.textSec} sw={1.8} />
             </Pressable>
             <Pressable
               onPress={onDelete}
@@ -67,7 +67,7 @@ export default function FlashcardHeader({
               accessibilityLabel="Listeyi sil"
               style={[s.iconBtn, { borderColor: c.error + "33" }]}
             >
-              <Text style={s.icon}>🗑️</Text>
+              <Icon d={ICONS.x} size={18} stroke={c.error} sw={2} />
             </Pressable>
           </>
         ) : (

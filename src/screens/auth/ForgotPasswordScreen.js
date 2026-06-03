@@ -18,6 +18,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import Icon, { ICONS } from "../../components/design/Icon";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -74,7 +75,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 
             {sent ? (
               <View style={s.successCard}>
-                <Text style={{ fontSize: 36 }}>✉️</Text>
+                <Icon d={ICONS.mail} size={36} stroke="#D4AE5E" sw={1.5} />
                 <Text style={s.successTitle}>E-posta yollandı</Text>
                 <Text style={s.successSub}>
                   Gelen kutunu kontrol et. Bağlantı 24 saat geçerli.

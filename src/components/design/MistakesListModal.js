@@ -3,6 +3,7 @@
  * Study/Quiz sonrası, 5+ yeni kelime mistakes listesine eklenirse açılır.
  */
 import React, { useEffect, useRef } from "react";
+import Icon, { ICONS } from "./Icon";
 import {
   Modal,
   View,
@@ -114,7 +115,7 @@ export default function MistakesListModal({
           />
 
           <View style={[s.iconCircle, { backgroundColor: c.accentGlow, borderColor: c.borderAccent }]}>
-            <Text style={{ fontSize: 42 }}>🎯</Text>
+            <Icon d={ICONS.target} size={42} stroke={c.accent} sw={1.5} />
           </View>
 
           <Text style={[s.title, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>

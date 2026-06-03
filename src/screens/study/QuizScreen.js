@@ -247,7 +247,7 @@ export default function QuizScreen({ route, navigation }) {
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }}>
           <EmptyState
-            emoji="🧩"
+            kind="search"
             title="Quiz için yeterli kelime yok"
             subtitle="Quiz en az 4 kelime gerektirir. Listeye daha fazla kelime ekle."
             actionLabel="Geri dön"

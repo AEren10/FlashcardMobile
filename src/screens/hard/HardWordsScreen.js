@@ -44,7 +44,7 @@ export default function HardWordsScreen({ navigation }) {
     return (
       <View style={s.root}>
         <SafeAreaView edges={["top"]} style={s.center}>
-          <Text style={s.emptyEmoji}>🎯</Text>
+          <Icon d={ICONS.target} size={48} stroke={c.accent} sw={1.5} />
           <Text style={s.emptyTitle}>Zor kelimen yok</Text>
           <Text style={s.emptySub}>
             Çalışmaya başlayınca yanlış cevapladığın kelimeler burada birikir.
@@ -79,7 +79,7 @@ export default function HardWordsScreen({ navigation }) {
             })
           }
         >
-          <Text style={s.ctaText}>🧠 Bu {words.length} kelimeyi şimdi çalış</Text>
+          <Text style={s.ctaText}>Bu {words.length} kelimeyi şimdi çalış</Text>
         </Pressable>
 
         <FlatList
@@ -171,7 +171,6 @@ function makeStyles(c) {
       backgroundColor: c.errorDim,
     },
     badgeText: { color: c.error, fontSize: 11, fontFamily: c.fontBodyBold },
-    emptyEmoji: { fontSize: 48, marginBottom: 12 },
     emptyTitle: { fontSize: 20, fontFamily: c.fontBodyBold, color: c.textPrimary, marginBottom: 6 },
     emptySub: {
       fontSize: 14,

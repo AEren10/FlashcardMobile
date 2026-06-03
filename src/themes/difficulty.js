@@ -16,51 +16,68 @@ export const DIFFICULTY = {
   beginner: {
     key: "beginner",
     label: "Başlangıç",
-    color: "#6EE7B7",
-    glow: "rgba(110, 231, 183, 0.18)",
-    border: "rgba(110, 231, 183, 0.28)",
-    stops: ["#A7F3D0", "#6EE7B7", "#39BE8C"],
-    textOn: "#0A1019",
+    color: "#A8C5B4",
+    glow: "rgba(168, 197, 180, 0.18)",
+    border: "rgba(168, 197, 180, 0.28)",
+    stops: ["#C4D9CC", "#A8C5B4", "#7FA896"],
+    textOn: "#1A1A18",
   },
   easy: {
     key: "easy",
     label: "Kolay",
-    color: "#818CF8",
-    glow: "rgba(129, 140, 248, 0.18)",
-    border: "rgba(129, 140, 248, 0.28)",
-    stops: ["#A5B4FC", "#818CF8", "#5E5DD8"],
-    textOn: "#FFFFFF",
+    color: "#8BA4C4",
+    glow: "rgba(139, 164, 196, 0.18)",
+    border: "rgba(139, 164, 196, 0.28)",
+    stops: ["#ADBDD4", "#8BA4C4", "#6A84A8"],
+    textOn: "#FFFDF7",
   },
   intermediate: {
     key: "intermediate",
     label: "Orta",
-    color: "#FBBF24",
-    glow: "rgba(251, 191, 36, 0.20)",
-    border: "rgba(251, 191, 36, 0.30)",
-    stops: ["#FCD34D", "#FBBF24", "#D97706"],
-    textOn: "#0A1019",
+    color: "#C8A96E",
+    glow: "rgba(200, 169, 110, 0.20)",
+    border: "rgba(200, 169, 110, 0.30)",
+    stops: ["#DBBF88", "#C8A96E", "#A68B52"],
+    textOn: "#1A1A18",
   },
   hard: {
     key: "hard",
     label: "Zor",
-    color: "#FF8B73",
-    glow: "rgba(255, 139, 115, 0.18)",
-    border: "rgba(255, 139, 115, 0.28)",
-    stops: ["#FFB29B", "#FF8B73", "#E66B53"],
-    textOn: "#FFFFFF",
+    color: "#C17B5A",
+    glow: "rgba(193, 123, 90, 0.18)",
+    border: "rgba(193, 123, 90, 0.28)",
+    stops: ["#D49A7E", "#C17B5A", "#A05E3F"],
+    textOn: "#FFFDF7",
   },
   master: {
     key: "master",
     label: "Ekstra",
-    color: "#A78BFA",
-    glow: "rgba(167, 139, 250, 0.18)",
-    border: "rgba(167, 139, 250, 0.28)",
-    stops: ["#C4B5FD", "#A78BFA", "#7C5DE3"],
-    textOn: "#FFFFFF",
+    color: "#6B6560",
+    glow: "rgba(107, 101, 96, 0.18)",
+    border: "rgba(200, 169, 110, 0.28)",
+    stops: ["#8A8480", "#6B6560", "#4A4542"],
+    textOn: "#C8A96E",
   },
 };
 
 export const DIFFICULTY_KEYS = ["beginner", "easy", "intermediate", "hard", "master"];
+
+/**
+ * XP çarpanı — liste zorluğuna göre kelime başına kazanılan puan.
+ * Kolay listeler 1 puan, zor listeler 3 puana kadar çıkar.
+ * Path / Roadmap "çok kolay atlanmasın" sorununu çözer.
+ */
+export const XP_PER_WORD = {
+  beginner: 1,
+  easy: 1,
+  intermediate: 2,
+  hard: 3,
+  master: 3,
+};
+
+export function getXpPerWord(level) {
+  return XP_PER_WORD[levelToKey(level)] ?? 1;
+}
 
 /**
  * Veritabanından gelen level string'ini ("Beginner", "Başlangıç", "B1" vb.)

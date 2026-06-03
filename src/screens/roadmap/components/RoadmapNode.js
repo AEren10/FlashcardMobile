@@ -86,9 +86,9 @@ export default function RoadmapNode({
           {isDone ? (
             <Icon d={ICONS.check} size={28} stroke={c.bgBase} sw={3.2} />
           ) : isLocked ? (
-            <Text style={{ fontSize: 22, opacity: 0.6 }}>🔒</Text>
+            <Icon d={ICONS.lock} size={22} stroke={c.textMuted} sw={1.5} />
           ) : (
-            <Text style={s.emoji}>{milestone.emoji}</Text>
+            <Icon d={milestone.icon || ICONS.star} size={24} stroke={accent} fill={accent + "33"} sw={1.5} />
           )}
         </View>
 

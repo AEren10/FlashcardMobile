@@ -105,11 +105,10 @@ export const AuthProvider = ({ children }) => {
         } catch (signInErr) {
           console.warn("Auto sign-in after signup failed:", signInErr.message);
         }
+        // Email doğrulama kapalı — auto sign-in başarısız olursa yine de success dön
         return {
           success: true,
           data,
-          needsConfirmation: true,
-          message: "Kayıt başarılı! Lütfen e-postanı onayla.",
         };
       }
 

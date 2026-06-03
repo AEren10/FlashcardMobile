@@ -25,6 +25,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
 import PremiumButton from "./PremiumButton";
+import Icon from "./Icon";
 
 const { width: W } = Dimensions.get("window");
 
@@ -172,7 +173,11 @@ export default function AchievementModal({ visible, badge, onClose }) {
             style={[StyleSheet.absoluteFill, { borderRadius: 32 }]}
             pointerEvents="none"
           />
-          <Text style={s.badgeEmoji}>{badge?.emoji || "🏆"}</Text>
+          {badge?.icon ? (
+            <Icon d={badge.icon} size={56} stroke={c.accent} fill={c.accentGlow} sw={1.8} />
+          ) : (
+            <Text style={s.badgeEmoji}>{badge?.emoji || "🏆"}</Text>
+          )}
         </Animated.View>
 
         {/* Text */}

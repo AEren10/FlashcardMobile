@@ -149,7 +149,7 @@ export default function HomeScreen({ navigation }) {
                 refresh();
                 loadUserData();
               }}
-              title="🔥 Çekip yenile..."
+              title="Yenile"
             />
           }
         >
@@ -245,7 +245,7 @@ export default function HomeScreen({ navigation }) {
               ))}
             </ScrollView>
           ) : recentLists.length === 0 ? (
-            <Text style={s.empty}>Henüz liste yok. İlk listeni oluştur ✨</Text>
+            <Text style={s.empty}>Henüz liste yok. İlk listeni oluştur</Text>
           ) : (
             <ScrollView
               horizontal
@@ -270,10 +270,10 @@ export default function HomeScreen({ navigation }) {
           {/* Senin İçin — kişisel akıllı kartlar */}
           {isAuthenticated() && (favoriteWordIds.length > 0 || mistakesList) && (
             <View style={{ marginTop: 26 }}>
-              <Text style={s.discoveryHeader}>✨ Senin İçin</Text>
+              <Text style={s.discoveryHeader}>Senin İçin</Text>
               {favoriteWordIds.length > 0 && (
                 <SmartListCard
-                  emoji="🔖"
+                  iconPath={ICONS.bookmark}
                   title="Favori Kelimelerim"
                   subtitle="Kart üstündeki yer iminden eklediklerin."
                   count={favoriteWordIds.length}
@@ -287,7 +287,7 @@ export default function HomeScreen({ navigation }) {
               )}
               {mistakesList && (
                 <SmartListCard
-                  emoji="🎯"
+                  iconPath={ICONS.target}
                   title={mistakesList.title}
                   subtitle="Takıldığın kelimeler. 3 kez doğru bilince çıkar."
                   count={mistakesList.word_count ?? 0}
@@ -301,20 +301,20 @@ export default function HomeScreen({ navigation }) {
 
           {/* Popüler listeler */}
           <DiscoveryRow
-            title="🌟 Popüler"
+            title="Popüler"
             subtitle="En çok çalışılan listeler"
             items={popularLists}
             accent={c.warning}
             loading={loading}
             onItemPress={openList}
             onSeeAll={() =>
-              openExplorer("popular", { title: "🌟 Popüler", accent: c.warning })
+              openExplorer("popular", { title: "Popüler", accent: c.warning })
             }
           />
 
           {/* Kategorik slider'lar — Spotify/App Store tarzı */}
           <DiscoveryRow
-            title="💼 İş & Kariyer"
+            title="İş & Kariyer"
             subtitle="Profesyonel İngilizce"
             items={byCategory("business")}
             accent={c.cobalt}
@@ -322,7 +322,7 @@ export default function HomeScreen({ navigation }) {
             onItemPress={openList}
             onSeeAll={() =>
               openExplorer("category", {
-                title: "💼 İş & Kariyer",
+                title: "İş & Kariyer",
                 category: "business",
                 accent: c.cobalt,
               })
@@ -330,7 +330,7 @@ export default function HomeScreen({ navigation }) {
           />
 
           <DiscoveryRow
-            title="✈️ Seyahat"
+            title="Seyahat"
             subtitle="Yolda işine yarayacak"
             items={byCategory("travel")}
             accent={c.info}
@@ -338,7 +338,7 @@ export default function HomeScreen({ navigation }) {
             onItemPress={openList}
             onSeeAll={() =>
               openExplorer("category", {
-                title: "✈️ Seyahat",
+                title: "Seyahat",
                 category: "travel",
                 accent: c.info,
               })
@@ -346,7 +346,7 @@ export default function HomeScreen({ navigation }) {
           />
 
           <DiscoveryRow
-            title="🎓 Akademik"
+            title="Akademik"
             subtitle="Sınav ve akademi"
             items={byCategory("academic")}
             accent={c.accent}
@@ -354,7 +354,7 @@ export default function HomeScreen({ navigation }) {
             onItemPress={openList}
             onSeeAll={() =>
               openExplorer("category", {
-                title: "🎓 Akademik",
+                title: "Akademik",
                 category: "academic",
                 accent: c.accent,
               })
@@ -362,7 +362,7 @@ export default function HomeScreen({ navigation }) {
           />
 
           <DiscoveryRow
-            title="💻 Teknoloji"
+            title="Teknoloji"
             subtitle="Modern yazılım & AI"
             items={byCategory("tech")}
             accent={c.success}
@@ -370,7 +370,7 @@ export default function HomeScreen({ navigation }) {
             onItemPress={openList}
             onSeeAll={() =>
               openExplorer("category", {
-                title: "💻 Teknoloji",
+                title: "Teknoloji",
                 category: "tech",
                 accent: c.success,
               })
@@ -378,7 +378,7 @@ export default function HomeScreen({ navigation }) {
           />
 
           <DiscoveryRow
-            title="🍔 Yemek & Mutfak"
+            title="Yemek & Mutfak"
             subtitle="Restoran ve günlük yemek"
             items={byCategory("food")}
             accent={c.warning}
@@ -386,7 +386,7 @@ export default function HomeScreen({ navigation }) {
             onItemPress={openList}
             onSeeAll={() =>
               openExplorer("category", {
-                title: "🍔 Yemek & Mutfak",
+                title: "Yemek & Mutfak",
                 category: "food",
                 accent: c.warning,
               })

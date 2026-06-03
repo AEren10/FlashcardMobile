@@ -61,6 +61,8 @@ export default function FlashcardCardArea({
           word={current.word}
           meaning={current.meaning}
           example={current.example}
+          exampleTr={current.example_tr || current.exampleTr}
+          onReport={() => console.log("[Report]", current.id)}
         />
       </View>
 
