@@ -28,6 +28,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "./Icon";
 import PremiumButton from "./PremiumButton";
 import StaggerEnter from "./StaggerEnter";
+import LottieSuccess from "./LottieSuccess";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
 
 const { width: W } = Dimensions.get("window");
@@ -128,6 +129,11 @@ export default function QuizResultScreen({
               />
               <Text style={s.medalEmoji}>{emoji}</Text>
             </Animated.View>
+            {isExcellent && (
+              <View style={{ position: "absolute", top: -6, right: -6 }}>
+                <LottieSuccess size={48} />
+              </View>
+            )}
 
             <Text style={s.scoreNum}>
               {displayScore}

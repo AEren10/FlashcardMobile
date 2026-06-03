@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { toggleFavorite, selectIsFavorite } from "../../../store/favoritesSlice";
 import { useAuth } from "../../../contexts/AuthContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
+import PressableScale from "../../../components/design/PressableScale";
 
 const CATEGORY_EMOJI = {
   daily: "☀️",
@@ -34,11 +35,9 @@ const FavoriteCard = ({ item, onPress }) => {
   };
 
   return (
-    <Pressable
-      style={({ pressed }) => [
-        styles.listItem,
-        { transform: [{ scale: pressed ? 0.98 : 1 }] },
-      ]}
+    <PressableScale
+      style={styles.listItem}
+      scaleDown={0.98}
       onPress={() => onPress(item)}
     >
       <View style={styles.emojiBox}>
@@ -64,7 +63,7 @@ const FavoriteCard = ({ item, onPress }) => {
           />
         </Pressable>
       )}
-    </Pressable>
+    </PressableScale>
   );
 };
 

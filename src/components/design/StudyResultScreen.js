@@ -25,6 +25,7 @@ import Icon, { ICONS } from "./Icon";
 import PremiumButton from "./PremiumButton";
 import DonutChart from "./DonutChart";
 import StaggerEnter from "./StaggerEnter";
+import LottieSuccess from "./LottieSuccess";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
 
 const { width: W } = Dimensions.get("window");
@@ -66,13 +67,20 @@ export default function StudyResultScreen({
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
           {/* Hero */}
           <View style={s.hero}>
-            <DonutChart
-              percent={pct}
-              size={150}
-              strokeWidth={14}
-              color={pct >= 70 ? c.success : pct >= 40 ? c.warning : c.error}
-              label={`${correct}/${total}`}
-            />
+            <View style={{ position: "relative" }}>
+              <DonutChart
+                percent={pct}
+                size={150}
+                strokeWidth={14}
+                color={pct >= 70 ? c.success : pct >= 40 ? c.warning : c.error}
+                label={`${correct}/${total}`}
+              />
+              {isExcellent && (
+                <View style={{ position: "absolute", top: -10, right: -10 }}>
+                  <LottieSuccess size={56} />
+                </View>
+              )}
+            </View>
             <Text style={s.title}>{titleFor(ratio)}</Text>
             <Text style={s.sub}>{subtitleFor(ratio)}</Text>
           </View>

@@ -8,6 +8,7 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
 import CategoryCover from "../../../components/design/CategoryCover";
 import StaggerEnter from "../../../components/design/StaggerEnter";
+import PressableScale from "../../../components/design/PressableScale";
 
 export default function DiscoveryRow({
   title,
@@ -88,19 +89,13 @@ const SkelCard = memo(function SkelCard({ c }) {
 
 const MiniCard = memo(function MiniCard({ item, c, onPress }) {
   return (
-    <Pressable
+    <PressableScale
       onPress={() => {
         Haptics.selectionAsync();
         onPress();
       }}
-      style={({ pressed }) => [
-        s.card,
-        {
-          backgroundColor: c.bgElevated,
-          borderColor: c.border,
-          transform: [{ scale: pressed ? 0.96 : 1 }],
-        },
-      ]}
+      style={[s.card, { backgroundColor: c.bgElevated, borderColor: c.border }]}
+      scaleDown={0.96}
     >
       <View style={{ borderRadius: 13, overflow: "hidden" }}>
         <CategoryCover difficulty={item.level} height={100} />
@@ -119,7 +114,7 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
           {item.study_count > 0 ? ` · ${item.study_count}` : ""}
         </Text>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 });
 

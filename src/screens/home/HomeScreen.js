@@ -25,6 +25,7 @@ import Icon, { ICONS } from "../../components/design/Icon";
 import CategoryCover from "../../components/design/CategoryCover";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import SmartListCard from "../../components/design/SmartListCard";
+import PressableScale from "../../components/design/PressableScale";
 import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
 import HomeSearchBar from "./components/HomeSearchBar";
@@ -170,7 +171,7 @@ export default function HomeScreen({ navigation }) {
           )}
 
           {/* Challenge hero card */}
-          <Pressable onPress={startChallenge} style={s.challengeCard}>
+          <PressableScale onPress={startChallenge} style={s.challengeCard}>
             <LinearGradient
               colors={[c.bgElevated, c.bgSurface]}
               start={{ x: 0, y: 0 }}
@@ -197,7 +198,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={s.primaryBtnTxt}>Başla</Text>
               <Icon d={ICONS.arrow} size={17} stroke={c.textOnAccent} sw={2.2} />
             </View>
-          </Pressable>
+          </PressableScale>
 
           {/* Level mini card — challenge'tan sonra "ilerleme" sekansı */}
           {!loading && isAuthenticated() && (
@@ -412,10 +413,7 @@ export default function HomeScreen({ navigation }) {
 
 const ContinueCard = React.memo(function ContinueCard({ title, count, pct, level, c, onPress }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [{ width: 165, transform: [{ scale: pressed ? 0.96 : 1 }] }]}
-    >
+    <PressableScale onPress={onPress} style={{ width: 165 }} scaleDown={0.96}>
       <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 10 }}>
         <CategoryCover difficulty={level} height={100} />
       </View>
@@ -446,7 +444,7 @@ const ContinueCard = React.memo(function ContinueCard({ title, count, pct, level
           }}
         />
       </View>
-    </Pressable>
+    </PressableScale>
   );
 });
 
