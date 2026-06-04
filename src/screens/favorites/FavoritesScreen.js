@@ -251,6 +251,17 @@ function ZorTab({ hardWords, c, s, lapsedWords, navigation }) {
             <Text style={{ color: c.error, fontFamily: c.fontBodyBold }}>yanlış cevapladığında</Text>{" "}
             burada birikir. SRS, bu kelimeleri sık aralıklarla tekrar gösterir.
           </Text>
+          <Pressable
+            onPress={() => navigation.getParent()?.navigate("MyLists")}
+            style={({ pressed }) => [
+              s.emptyCta,
+              { backgroundColor: c.accent, opacity: pressed ? 0.85 : 1 },
+            ]}
+          >
+            <Text style={[s.emptyCtaTxt, { color: c.textOnAccent, fontFamily: c.fontBodyBold }]}>
+              Bir Listeye Başla
+            </Text>
+          </Pressable>
         </View>
       </View>
     );
@@ -307,6 +318,8 @@ function QuizTab({ lists, c, s, navigation }) {
           kind="list"
           title="Quiz için liste lazım"
           subtitle="Kütüphane'den bir liste seç veya kendi listeni oluştur."
+          actionLabel="Kütüphaneye Git"
+          onAction={() => navigation.getParent()?.navigate("MyLists")}
         />
       </View>
     );
@@ -475,6 +488,17 @@ function makeStyles(c) {
       fontSize: 13,
       lineHeight: 19,
       textAlign: "center",
+    },
+    emptyCta: {
+      marginTop: 18,
+      alignSelf: "stretch",
+      paddingVertical: 12,
+      borderRadius: 14,
+      alignItems: "center",
+    },
+    emptyCtaTxt: {
+      fontSize: 14,
+      letterSpacing: 0.3,
     },
     zorCta: {
       paddingVertical: 14,

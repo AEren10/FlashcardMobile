@@ -16,8 +16,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import LottieView from "lottie-react-native";
+import { Alert } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
+import { enableReminders } from "../../lib/notifications";
 
 const LOTTIE_SOURCES = {
   network: require("../../assets/lottie/network.json"),
@@ -70,14 +72,39 @@ export default function OnboardingScreen({ onFinish }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollX = useRef(new Animated.Value(0)).current;
 
+  const finishWithReminders = () => {
+    // SRS algoritması bildirimsiz değer kaybeder — kullanıcıya proactive sor
+    Alert.alert(
+      "Hatırlatıcı kuralım mı?",
+      "Her gün 12:30 ve 20:00'da seni nazikçe hatırlatalım. Akıllı tekrar sistemi bildirimle çalışıyor.",
+      [
+        {
+          text: "Hayır, şimdi olmasın",
+          style: "cancel",
+          onPress: () => {
+            markOnboardingSeen();
+            onFinish();
+          },
+        },
+        {
+          text: "Evet, kur",
+          onPress: async () => {
+            await enableReminders().catch(() => {});
+            markOnboardingSeen();
+            onFinish();
+          },
+        },
+      ]
+    );
+  };
+
   const handleNext = () => {
     Haptics.selectionAsync();
     if (activeIndex < SLIDES.length - 1) {
       flatRef.current?.scrollToIndex({ index: activeIndex + 1, animated: true });
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      markOnboardingSeen();
-      onFinish();
+      finishWithReminders();
     }
   };
 

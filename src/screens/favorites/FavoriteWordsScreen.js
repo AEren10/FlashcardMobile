@@ -65,6 +65,8 @@ export default function FavoriteWordsScreen({ navigation }) {
             kind="search"
             title="Favori kelimen yok"
             subtitle="Çalışırken kartın sağ üstündeki yer imine (bookmark) bas — gözden kaçırmak istemediklerin buraya gelir."
+            actionLabel="Listelere Göz At"
+            onAction={() => navigation.navigate("MyListsMain")}
           />
         ) : (
           <FlatList

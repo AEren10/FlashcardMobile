@@ -146,6 +146,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   }
 
   if (error || words.length === 0) {
+    const isEmpty = !error && words.length === 0;
     return (
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }}>
@@ -155,10 +156,26 @@ export default function FlashcardDetailScreen({ route, navigation }) {
             subtitle={
               error
                 ? "Lütfen internet bağlantını kontrol edip tekrar dene."
-                : "Önce listeye kelime ekle."
+                : isOwner
+                  ? "Listene kelime ekle, sonra çalışmaya başla."
+                  : "Bu liste boş görünüyor."
             }
-            actionLabel={error ? "Tekrar dene" : "Geri dön"}
-            onAction={error ? fetchWords : () => navigation.goBack()}
+            actionLabel={
+              error
+                ? "Tekrar dene"
+                : isEmpty && isOwner
+                  ? "Kelime Ekle"
+                  : "Geri dön"
+            }
+            onAction={
+              error
+                ? fetchWords
+                : isEmpty && isOwner
+                  ? () => navigation.navigate("CreateList", { listId })
+                  : () => navigation.goBack()
+            }
+            secondaryLabel={isEmpty && isOwner ? "Geri dön" : undefined}
+            onSecondary={isEmpty && isOwner ? () => navigation.goBack() : undefined}
           />
         </SafeAreaView>
       </View>

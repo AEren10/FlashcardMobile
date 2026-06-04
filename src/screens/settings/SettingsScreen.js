@@ -12,15 +12,16 @@ import { useAuth } from "../../contexts/AuthContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 import {
   getReminderPref,
-  scheduleDailyReminder,
+  enableReminders,
   cancelDailyReminder,
+  DEFAULT_TIMES,
 } from "../../lib/notifications";
 
 export default function SettingsScreen({ navigation }) {
   const { c, preference } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const { signOut, deleteAccount, isGuestUser } = useAuth();
-  const [reminder, setReminder] = useState({ enabled: false, hour: 20, minute: 0 });
+  const [reminder, setReminder] = useState({ enabled: false, times: DEFAULT_TIMES });
 
   useEffect(() => {
     getReminderPref().then(setReminder);
@@ -38,8 +39,8 @@ export default function SettingsScreen({ navigation }) {
       await cancelDailyReminder();
       setReminder({ ...reminder, enabled: false });
     } else {
-      const r = await scheduleDailyReminder(20, 0);
-      if (r.success) setReminder({ enabled: true, hour: 20, minute: 0 });
+      const r = await enableReminders();
+      if (r.success) setReminder((prev) => ({ ...prev, enabled: true }));
       else Alert.alert("İzin gerekli", "Bildirim izni verilmedi.");
     }
   };

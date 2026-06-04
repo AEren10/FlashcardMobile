@@ -81,14 +81,42 @@ export default function CreateListScreen({ route }) {
           Alert.alert("Uyarı", "Görsel yüklenemedi, mevcut görsel korunacak.");
         }
       }
-      await editor.save(finalUrl);
+      const saved = await editor.save(finalUrl);
       // Public lists cache'i geçersiz kıl — diğer ekranlar fresh data alsın
       await invalidatePublicLists();
       toast.show({
         message: editor.isEdit ? "Liste güncellendi ✓" : "Liste oluşturuldu ✓",
         type: "success",
       });
-      navigation.goBack();
+
+      // Yeni liste oluşturulduysa "Şimdi Çalış?" sor
+      const validWordCount = editor.words.filter(
+        (w) => w.word.trim() && w.meaning.trim()
+      ).length;
+      if (!editor.isEdit && saved?.id && validWordCount > 0) {
+        Alert.alert(
+          "Liste hazır!",
+          `${validWordCount} kelime ile listeyi şimdi çalışmak ister misin?`,
+          [
+            {
+              text: "Sonra",
+              style: "cancel",
+              onPress: () => navigation.goBack(),
+            },
+            {
+              text: "Şimdi Çalış",
+              onPress: () => {
+                navigation.replace("Study", {
+                  listId: saved.id,
+                  listTitle: editor.title.trim(),
+                });
+              },
+            },
+          ]
+        );
+      } else {
+        navigation.goBack();
+      }
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {

@@ -57,7 +57,7 @@ const trLevel = (lvl) => {
 export default function MyListsScreen() {
   const { c } = useTheme();
   const navigation = useNavigation();
-  const { isAuthenticated, isGuestUser, getUserId } = useAuth();
+  const { isAuthenticated, isGuestUser, getUserId, signOut } = useAuth();
   const userId = getUserId();
   const [tab, setTab] = useState("Listelerim");
   const [myLists, setMyLists] = useState([]);
@@ -101,7 +101,9 @@ export default function MyListsScreen() {
     (item) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const isOwner = userId && item.user_id === userId;
-      const shareLink = Linking.createURL(`/list/${item.id}`);
+      // Deep link AppNavigator linking config'iyle uyumlu olmalı: MainTabs > Home > FlashcardDetail
+      // Tam path: "home/list/:listId" (Home stack altındaki FlashcardDetail = "list/:listId")
+      const shareLink = Linking.createURL(`/home/list/${item.id}`);
       const buttons = [];
 
       buttons.push({
@@ -293,7 +295,21 @@ export default function MyListsScreen() {
             ) : items.length === 0 ? (
               <Empty
                 tab={tab}
-                onCreate={() => navigation.navigate("CreateList")}
+                isGuest={isGuestUser()}
+                onCreate={() => {
+                  if (isGuestUser()) {
+                    Alert.alert(
+                      "Kayıt gerekli",
+                      "Kendi listeni oluşturmak için hesap açmalısın. Kayıt olmak istiyor musun?",
+                      [
+                        { text: "Vazgeç", style: "cancel" },
+                        { text: "Kayıt Ol", onPress: () => signOut?.() ?? null },
+                      ]
+                    );
+                    return;
+                  }
+                  navigation.navigate("CreateList");
+                }}
               />
             ) : (
               items.map((item, i) => (
@@ -361,15 +377,19 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
   );
 }
 
-function Empty({ tab, onCreate }) {
+function Empty({ tab, isGuest, onCreate }) {
   if (tab === "Listelerim") {
     return (
       <View style={{ paddingVertical: 30 }}>
         <EmptyState
           kind="list"
-          title="Kendine ait listen yok"
-          subtitle="İlk listeni oluştur — toplu yapıştır ile saniyeler içinde 50 kelime ekleyebilirsin."
-          actionLabel="İlk Listeni Oluştur"
+          title={isGuest ? "Misafir modundayken liste oluşturulamaz" : "Kendine ait listen yok"}
+          subtitle={
+            isGuest
+              ? "Kendi listeni yapmak, ilerlemeni cihazlar arası senkronize etmek için kayıt ol."
+              : "İlk listeni oluştur — toplu yapıştır ile saniyeler içinde 50 kelime ekleyebilirsin."
+          }
+          actionLabel={isGuest ? "Kayıt Ol" : "İlk Listeni Oluştur"}
           onAction={onCreate}
         />
       </View>

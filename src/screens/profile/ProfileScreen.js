@@ -12,11 +12,6 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { getStudyStats } from "../../supabase/progress";
-import {
-  scheduleDailyReminder,
-  cancelDailyReminder,
-  getReminderPref,
-} from "../../lib/notifications";
 import Icon, { ICONS } from "../../components/design/Icon";
 import useUserLevel from "../../hooks/useUserLevel";
 
@@ -33,7 +28,6 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const { user, signOut, getUserEmail, isGuestUser, deleteAccount } = useAuth();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
-  const [reminder, setReminder] = useState({ enabled: false, hour: 20, minute: 0 });
 
   const appearanceLabel = () => {
     if (preference === "system") return "Otomatik";
@@ -47,21 +41,8 @@ export default function ProfileScreen() {
     if (!isGuestUser()) {
       getStudyStats().then(setStats).catch(() => {});
     }
-    getReminderPref().then(setReminder);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const toggleReminder = async () => {
-    Haptics.selectionAsync();
-    if (reminder.enabled) {
-      await cancelDailyReminder();
-      setReminder({ ...reminder, enabled: false });
-    } else {
-      const r = await scheduleDailyReminder(20, 0);
-      if (r.success) setReminder({ enabled: true, hour: 20, minute: 0 });
-      else Alert.alert("İzin gerekli", "Bildirim izni verilmedi.");
-    }
-  };
 
   const displayName = () => {
     const m = user?.user_metadata;

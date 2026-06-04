@@ -151,12 +151,22 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     setIndex((i) => i + 1);
   }, [current]);
 
-  // "Yanlış çeviri bildir" — TODO: Supabase report tablosuna yaz
-  // Şimdilik just console log + local marker
-  const reportCurrent = useCallback(() => {
+  // "Yanlış çeviri bildir" — Supabase word_reports tablosuna yaz
+  const reportCurrent = useCallback(async (reason = "wrong_translation", note = null) => {
     if (!current) return;
-    // TODO: supabase reportWordTranslation(current.id, reason)
-    console.log("[Report]", { wordId: current.id, word: current.word });
+    try {
+      const supabase = (await import("../supabase/client")).default;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await supabase.from("word_reports").insert({
+        user_id: user.id,
+        word_id: current.id,
+        reason,
+        note,
+      });
+    } catch (err) {
+      console.warn("[reportCurrent] failed", err?.message);
+    }
   }, [current]);
 
   const restart = useCallback(() => {

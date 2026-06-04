@@ -67,7 +67,18 @@ export default function StreakScreen({ navigation }) {
           <View style={s.hero}>
             <AnimatedFlame size={64} streak={stats.streakDays} />
             <Text style={s.heroNum}>{stats.streakDays}</Text>
-            <Text style={s.heroCap}>gün üst üste</Text>
+            <Text style={s.heroCap}>
+              {stats.streakDays === 0
+                ? "henüz seri yok — bugün başla"
+                : stats.streakDays === 1
+                  ? "ilk gün — devam et"
+                  : "gün üst üste"}
+            </Text>
+            {stats.streakDays === 0 && (
+              <Text style={[s.heroNext, { color: c.warning, fontFamily: c.fontBodySemi }]}>
+                Bugün 5 dakikalık çalışma seri başlatır
+              </Text>
+            )}
             {streak.next && (
               <Text style={s.heroNext}>
                 Sonraki:{" "}

@@ -247,7 +247,33 @@ export default function HomeScreen({ navigation }) {
               ))}
             </ScrollView>
           ) : recentLists.length === 0 ? (
-            <Text style={s.empty}>Henüz liste yok. İlk listeni oluştur</Text>
+            <PressableScale
+              onPress={() =>
+                navigation.getParent()?.navigate("MyLists", { screen: "MyListsMain" })
+              }
+              style={s.emptyCta}
+              scaleDown={0.97}
+              accessibilityLabel="Kütüphaneye git"
+            >
+              <LinearGradient
+                colors={[c.accentGlow, "transparent"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={[s.emptyCtaIcon, { backgroundColor: c.accentGlow, borderColor: c.borderAccent }]}>
+                <Icon d={ICONS.plus} size={22} stroke={c.accent} sw={2} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.emptyCtaTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
+                  Henüz liste yok
+                </Text>
+                <Text style={[s.emptyCtaSub, { color: c.textSec, fontFamily: c.fontBody }]}>
+                  Hazır listelerden birini seç veya kendi listeni oluştur.
+                </Text>
+              </View>
+              <Icon d={ICONS.arrow} size={18} stroke={c.accent} sw={2} />
+            </PressableScale>
           ) : (
             <ScrollView
               horizontal
@@ -578,6 +604,33 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       marginTop: 16,
       fontSize: 13,
+    },
+    emptyCta: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+      padding: 16,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: c.borderAccent,
+      backgroundColor: c.bgElevated,
+      marginTop: 8,
+      overflow: "hidden",
+    },
+    emptyCtaIcon: {
+      width: 44,
+      height: 44,
+      borderRadius: 14,
+      borderWidth: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    emptyCtaTitle: {
+      fontSize: 15,
+    },
+    emptyCtaSub: {
+      fontSize: 12,
+      marginTop: 3,
     },
     discoveryHeader: {
       fontFamily: c.fontBodyBold,
