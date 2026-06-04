@@ -14,6 +14,8 @@ import {
   getReminderPref,
   enableReminders,
   cancelDailyReminder,
+  sendTestNotification,
+  getPermissionStatus,
   DEFAULT_TIMES,
 } from "../../lib/notifications";
 
@@ -22,10 +24,42 @@ export default function SettingsScreen({ navigation }) {
   const s = useMemo(() => makeStyles(c), [c]);
   const { signOut, deleteAccount, isGuestUser } = useAuth();
   const [reminder, setReminder] = useState({ enabled: false, times: DEFAULT_TIMES });
+  const [permStatus, setPermStatus] = useState(null);
 
   useEffect(() => {
     getReminderPref().then(setReminder);
+    getPermissionStatus().then(setPermStatus);
   }, []);
+
+  const handleTestNotification = async () => {
+    Haptics.selectionAsync();
+    const r = await sendTestNotification();
+    if (r.success) {
+      Alert.alert(
+        "Test bildirimi gönderildi",
+        "5 saniye içinde gelmeli. Gelmezse cihaz ayarlarından bildirim iznini kontrol et."
+      );
+    } else {
+      Alert.alert(
+        "Bildirim izni yok",
+        "Cihaz ayarlarından FlashcardMobile için bildirimleri aç, sonra tekrar dene."
+      );
+    }
+    getPermissionStatus().then(setPermStatus);
+  };
+
+  const permDetail = (() => {
+    if (permStatus === "granted") return "İzin verildi";
+    if (permStatus === "denied") return "İzin reddedildi — ayarlardan aç";
+    if (permStatus === "device_only") return "Simulator'da çalışmaz";
+    return "Henüz sorulmadı";
+  })();
+
+  const reminderDetail = (() => {
+    if (!reminder.enabled) return "Kapalı";
+    const times = reminder.times || DEFAULT_TIMES;
+    return times.map((t) => `${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`).join(" · ");
+  })();
 
   const appearanceLabel = () => {
     if (preference === "system") return "Otomatik";
@@ -110,8 +144,23 @@ export default function SettingsScreen({ navigation }) {
             <Row
               iconPath={ICONS.sound}
               label="Günlük Hatırlatıcı"
-              detail={reminder.enabled ? "20:00 ✓" : "Kapalı"}
+              detail={reminderDetail}
               onPress={toggleReminder}
+              c={c}
+              s={s}
+            />
+            <Row
+              iconPath={ICONS.bolt}
+              label="Test Bildirimi Gönder"
+              detail="5 saniye sonra gelir"
+              onPress={handleTestNotification}
+              c={c}
+              s={s}
+            />
+            <Row
+              iconPath={ICONS.shield}
+              label="Bildirim İzni"
+              detail={permDetail}
               c={c}
               s={s}
             />

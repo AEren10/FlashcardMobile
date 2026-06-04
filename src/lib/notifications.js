@@ -21,19 +21,19 @@ const MAX_REMINDERS = 4;
 
 // Default 2 fix bildirim — kullanıcı eklemediği sürece bunlar atılır
 export const DEFAULT_TIMES = [
-  { hour: 12, minute: 30 }, // öğle
+  { hour: 9, minute: 0 },   // sabah
   { hour: 20, minute: 0 },  // akşam
 ];
 
 // Rotating mesajlar — her bildirim aynı yazıyı atmasın
-const NOON_MESSAGES = [
-  { title: "Öğle molası", body: "5 dakika kelime çalış, beynini tazele." },
-  { title: "Kısa bir mola", body: "Bugünkü 10 kelimene bakalım mı?" },
-  { title: "Aralıklı tekrar zamanı", body: "Beynin tam unutmaya başladı — şimdi öğrenmek tam zamanı." },
+const MORNING_MESSAGES = [
+  { title: "Günaydın", body: "Güne 5 kelime ile başla — beynin en taze anı." },
+  { title: "Sabah molası", body: "Bugünkü 10 kelimene bakalım mı?" },
+  { title: "Yeni gün, yeni kelimeler", body: "Aralıklı tekrar zamanı — birkaç dakika ayır." },
 ];
 
 const EVENING_MESSAGES = [
-  { title: "Seri bozulmasın", body: "Bugün biraz çalışmadıysan kısa bir oturum yeter." },
+  { title: "Seri bozulmasın", body: "Bugün çalışmadıysan kısa bir oturum yeter." },
   { title: "Günün özeti", body: "Yatmadan birkaç kelime daha." },
   { title: "Akşam tekrarı", body: "Yarın hatırlamak için bu akşamki 5 dakika." },
 ];
@@ -67,8 +67,8 @@ async function cancelAll() {
 }
 
 function pickMessage(hour) {
-  // saat 0-13 arası → noon, 14+ → evening
-  const pool = hour < 14 ? NOON_MESSAGES : EVENING_MESSAGES;
+  // saat 0-14 arası → morning, 14+ → evening
+  const pool = hour < 14 ? MORNING_MESSAGES : EVENING_MESSAGES;
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
@@ -151,4 +151,51 @@ export async function getReminderPref() {
 // Geriye uyumluluk — eski API çağrıları için
 export async function scheduleDailyReminder(hour = 20, minute = 0) {
   return scheduleReminders([{ hour, minute }]);
+}
+
+/**
+ * Test bildirimi — 5 saniye sonra tetiklenir.
+ * Permission yoksa false döner, ayrıca permission status'unu da raporlar.
+ */
+export async function sendTestNotification() {
+  const ok = await requestPermissions();
+  if (!ok) return { success: false, reason: "permission_denied" };
+
+  if (Platform.OS === "android") {
+    await Notifications.setNotificationChannelAsync("default", {
+      name: "Çalışma Hatırlatıcısı",
+      importance: Notifications.AndroidImportance.HIGH,
+    });
+  }
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "Test bildirimi",
+      body: "Bildirimler çalışıyor — sabah 9'da ve akşam 8'de görüşürüz.",
+      sound: "default",
+    },
+    trigger: {
+      type: SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 5,
+      channelId: "default",
+    },
+  });
+  return { success: true };
+}
+
+/**
+ * Zamanlanmış bildirim sayısını döndür — debug için.
+ */
+export async function getScheduledCount() {
+  const all = await Notifications.getAllScheduledNotificationsAsync().catch(() => []);
+  return all.filter((n) => (n.identifier || "").startsWith(NOTIF_ID_PREFIX)).length;
+}
+
+/**
+ * Permission status — "granted" | "denied" | "undetermined".
+ */
+export async function getPermissionStatus() {
+  if (!Device.isDevice) return "device_only";
+  const { status } = await Notifications.getPermissionsAsync().catch(() => ({ status: "undetermined" }));
+  return status;
 }
