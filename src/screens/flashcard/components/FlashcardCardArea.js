@@ -139,7 +139,7 @@ const s = StyleSheet.create({
   fill: { height: "100%", borderRadius: 99 },
   counter: { fontSize: 12, minWidth: 36, textAlign: "right" },
 
-  cardArea: { flex: 1, justifyContent: "center", paddingHorizontal: 28, minHeight: 200 },
+  cardArea: { flex: 1, justifyContent: "center", paddingHorizontal: 28, paddingVertical: 18 },
 
   navRow: {
     flexDirection: "row",

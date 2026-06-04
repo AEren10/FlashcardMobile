@@ -101,7 +101,7 @@ export default function AchievementModal({ visible, badge, onClose }) {
     ]).start();
 
     // Text + button fade in (parallel start at 800ms)
-    setTimeout(() => {
+    const textTimer = setTimeout(() => {
       Animated.parallel([
         Animated.timing(textOp, {
           toValue: 1,
@@ -116,6 +116,7 @@ export default function AchievementModal({ visible, badge, onClose }) {
         }),
       ]).start();
     }, 800);
+    return () => clearTimeout(textTimer);
   }, [visible, backdrop, badgeScale, badgeY, wave1, wave2, wave3, textOp, buttonOp]);
 
   if (!visible) return null;

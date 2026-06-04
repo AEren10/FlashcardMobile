@@ -122,20 +122,3 @@ export const transformListData = (rawListData) => {
   };
 };
 
-// Örnek kullanım:
-/*
-const sampleData = [
-  {
-    title: "Günlük İngilizce",
-    description: "Temel günlük kelimeler",
-    level: "Beginner",
-    words: [
-      { word: "Hello", meaning: "Merhaba", example: "Hello world!" },
-      { word: "Goodbye", meaning: "Hoşçakal", example: "Goodbye my friend!" },
-    ]
-  }
-];
-
-// Kullanım:
-importListsAndWords(sampleData);
-*/

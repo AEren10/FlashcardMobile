@@ -6,22 +6,40 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { getHardWords } from "../../supabase/views";
 import { SkeletonWordCard } from "../../components/design/Skeleton";
 import Icon, { ICONS } from "../../components/design/Icon";
+import { FlameRefreshControl } from "../../components/design/FlameRefresh";
+import EmptyState from "../../components/EmptyState";
 
 export default function HardWordsScreen({ navigation }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   const goBack = () => navigation.goBack();
 
   const load = useCallback(async () => {
-    setLoading(true);
-    const data = await getHardWords();
-    setWords(data);
-    setLoading(false);
+    try {
+      setError(null);
+      const data = await getHardWords();
+      setWords(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError("Kelimeler yüklenemedi — internet bağlantını kontrol et");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    load();
+  }, [load]);
+
+  useFocusEffect(useCallback(() => {
+    setLoading(true);
+    load();
+  }, [load]));
 
   if (loading) {
     return (
@@ -35,6 +53,27 @@ export default function HardWordsScreen({ navigation }) {
               <SkeletonWordCard key={i} />
             ))}
           </ScrollView>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={s.root}>
+        <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+          <EmptyState
+            kind="offline"
+            title="Bağlantı sorunu"
+            subtitle={error}
+            actionLabel="Tekrar dene"
+            onAction={() => {
+              setLoading(true);
+              load();
+            }}
+            secondaryLabel="Geri dön"
+            onSecondary={goBack}
+          />
         </SafeAreaView>
       </View>
     );
@@ -86,6 +125,7 @@ export default function HardWordsScreen({ navigation }) {
           data={words}
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 16, gap: 8 }}
+          refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item }) => (
             <View style={s.row}>
               <View style={{ flex: 1 }}>

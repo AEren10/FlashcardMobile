@@ -22,7 +22,7 @@ import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
-import supabase from "../../supabase/client";
+import { getProfile, updateProfile, uploadAvatar } from "../../supabase/profile";
 import { useToast } from "../../contexts/ToastContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 import PremiumButton from "../../components/design/PremiumButton";
@@ -39,19 +39,14 @@ export default function EditProfileScreen({ navigation }) {
   const [avatarUri, setAvatarUri] = useState(null);
   const [originalAvatar, setOriginalAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("display_name, avatar_url")
-        .eq("id", userId)
-        .maybeSingle();
-      if (data) {
-        setDisplayName(data.display_name || "");
-        setOriginalAvatar(data.avatar_url || null);
+      const res = await getProfile(userId);
+      if (res.success && res.data) {
+        setDisplayName(res.data.display_name || "");
+        setOriginalAvatar(res.data.avatar_url || null);
       }
       setLoading(false);
     })();
@@ -75,50 +70,34 @@ export default function EditProfileScreen({ navigation }) {
     }
   };
 
-  const save = async () => {
+  const save = () => {
     if (!displayName.trim()) {
       Alert.alert("İsim gerekli", "Lütfen bir görünen isim gir.");
       return;
     }
-    setSaving(true);
-    try {
+    // OPTIMISTIC: kullanıcıyı hemen geri gönder, background'da kaydet
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    toast.show({ message: "Profil güncellendi ✓", type: "success" });
+    navigation.goBack();
+
+    (async () => {
       let avatarUrl = originalAvatar;
       if (avatarUri) {
-        // Upload to storage
-        const fileExt = avatarUri.split(".").pop();
-        const fileName = `${userId}/avatar.${fileExt}`;
-        const response = await fetch(avatarUri);
-        const blob = await response.blob();
-        const { error: upErr } = await supabase.storage
-          .from("avatars")
-          .upload(fileName, blob, { upsert: true, contentType: blob.type });
-        if (upErr) console.warn("Avatar upload fail:", upErr.message);
-        else {
-          const { data: urlData } = supabase.storage
-            .from("avatars")
-            .getPublicUrl(fileName);
-          avatarUrl = urlData?.publicUrl;
-        }
+        const up = await uploadAvatar(userId, avatarUri);
+        if (up.success && up.url) avatarUrl = up.url;
       }
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({
-          display_name: displayName.trim(),
-          avatar_url: avatarUrl,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId);
-      if (error) throw error;
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      toast.show({ message: "Profil güncellendi ✓", type: "success" });
-      navigation.goBack();
-    } catch (e) {
-      Alert.alert("Hata", e.message || "Profil kaydedilemedi.");
-    } finally {
-      setSaving(false);
-    }
+      const res = await updateProfile(userId, {
+        display_name: displayName.trim(),
+        avatar_url: avatarUrl,
+      });
+      if (!res.success) {
+        toast.show({
+          message: "Güncelleme başarısız — internet kontrol et",
+          type: "error",
+          duration: 4000,
+        });
+      }
+    })();
   };
 
   const previewUri = avatarUri || originalAvatar;
@@ -191,7 +170,7 @@ export default function EditProfileScreen({ navigation }) {
                 label="Kaydet"
                 variant="primary"
                 onPress={save}
-                disabled={saving || loading}
+                disabled={loading}
                 hapticStyle="success"
                 block
                 size="lg"

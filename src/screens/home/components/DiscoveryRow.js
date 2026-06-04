@@ -9,6 +9,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import CategoryCover from "../../../components/design/CategoryCover";
 import StaggerEnter from "../../../components/design/StaggerEnter";
 import PressableScale from "../../../components/design/PressableScale";
+import { Skeleton } from "../../../components/design/Skeleton";
 
 export default function DiscoveryRow({
   title,
@@ -59,6 +60,9 @@ export default function DiscoveryRow({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        decelerationRate="fast"
+        snapToAlignment="start"
         contentContainerStyle={{ gap: 12, paddingTop: 4, paddingBottom: 6, paddingRight: 8 }}
       >
         {loading
@@ -78,10 +82,10 @@ export default function DiscoveryRow({
 const SkelCard = memo(function SkelCard({ c }) {
   return (
     <View style={[s.card, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
-      <View style={{ height: 100, backgroundColor: c.bgSurface }} />
+      <Skeleton width="100%" height={100} radius={0} />
       <View style={{ padding: 12, gap: 8 }}>
-        <View style={{ height: 12, width: "75%", borderRadius: 6, backgroundColor: c.bgSurface }} />
-        <View style={{ height: 9, width: "50%", borderRadius: 4, backgroundColor: c.bgSurface }} />
+        <Skeleton width="75%" height={12} radius={6} />
+        <Skeleton width="50%" height={9} radius={4} />
       </View>
     </View>
   );

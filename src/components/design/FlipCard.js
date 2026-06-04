@@ -122,7 +122,15 @@ export default function FlipCard({
       {/* FRONT — purely visual, pointerEvents="none" */}
       <Animated.View style={[s.face, { borderColor: c.borderAccent, shadowColor: c.accent }, frontStyle]} pointerEvents="none">
         <LinearGradient colors={[c.bgElevated, c.bgSurface]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
-        <View style={[s.radial, { backgroundColor: c.accentGlow, top: -40, left: -30 }]} />
+        {/* Premium gradient blob — accent → cobalt yumuşak geçiş */}
+        <View style={[s.radial, { top: -40, left: -30, overflow: "hidden" }]}>
+          <LinearGradient
+            colors={[c.accent + "55", c.cobalt + "33", "transparent"]}
+            start={{ x: 0.3, y: 0.2 }}
+            end={{ x: 0.9, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
         <Animated.View style={[s.glint, frontGlintStyle]} />
         <View style={s.topRow}>
           <View style={[s.chip, { borderColor: c.borderAccent, backgroundColor: c.accentGlow }]}>
@@ -134,13 +142,20 @@ export default function FlipCard({
           <Text style={[s.word, { color: c.text }]}>{word}</Text>
           <Text style={[s.meta, { color: c.textMuted }]}>{pron ? `${pron} · ` : ""}{tag}</Text>
         </View>
-        <Text style={[s.hint, { color: c.textMuted }]}>Anlamı görmek için dokun</Text>
       </Animated.View>
 
       {/* BACK — purely visual, pointerEvents="none" */}
       <Animated.View style={[s.face, { borderColor: c.cobaltGlow, shadowColor: c.cobalt }, backStyle]} pointerEvents="none">
         <LinearGradient colors={[c.bgSurface, c.bgElevated]} start={{ x: 0.15, y: 1 }} end={{ x: 0.85, y: 0 }} style={StyleSheet.absoluteFill} />
-        <View style={[s.radial, { backgroundColor: c.cobaltGlow, bottom: -40, right: -30 }]} />
+        {/* Premium gradient blob — cobalt → accent geçiş */}
+        <View style={[s.radial, { bottom: -40, right: -30, overflow: "hidden" }]}>
+          <LinearGradient
+            colors={[c.cobalt + "55", c.accent + "33", "transparent"]}
+            start={{ x: 0.3, y: 0.2 }}
+            end={{ x: 0.9, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </View>
         <Animated.View style={[s.glint, backGlintStyle]} />
         <View style={s.topRow}>
           <View style={[s.chip, { borderColor: "transparent", backgroundColor: c.cobaltDim }]}>
@@ -159,7 +174,6 @@ export default function FlipCard({
             </View>
           )}
         </View>
-        <Text style={[s.hint, { color: c.textMuted }]}>Tekrar görmek için dokun</Text>
       </Animated.View>
 
       {/* Interactive overlay — bookmark + sound + menu, front face only */}

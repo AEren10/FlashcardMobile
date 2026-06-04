@@ -36,7 +36,8 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }) {
           width,
           height,
           borderRadius: radius,
-          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(15,25,37,0.05)",
+          // Light mode'da daha vurgulu zemin — shimmer net görünsün
+          backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(44,37,32,0.10)",
         },
         style,
       ]}
@@ -45,9 +46,10 @@ export function Skeleton({ width = "100%", height = 16, radius = 8, style }) {
         style={[
           StyleSheet.absoluteFill,
           {
+            // Shimmer bandı: dark'ta açık, light'ta parlak beyaz band geçsin
             backgroundColor: isDark
-              ? "rgba(255,255,255,0.06)"
-              : "rgba(15,25,37,0.04)",
+              ? "rgba(255,255,255,0.08)"
+              : "rgba(255,255,255,0.55)",
             transform: [
               {
                 translateX: shimmer.interpolate({

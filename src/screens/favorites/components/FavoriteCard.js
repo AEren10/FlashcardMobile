@@ -4,22 +4,9 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { toggleFavorite, selectIsFavorite } from "../../../store/favoritesSlice";
 import { useAuth } from "../../../contexts/AuthContext";
-import Icon, { ICONS } from "../../../components/design/Icon";
+import Icon from "../../../components/design/Icon";
 import PressableScale from "../../../components/design/PressableScale";
-
-const CATEGORY_ICON = {
-  daily: ICONS.sun,
-  travel: ICONS.plane,
-  business: ICONS.briefcase,
-  learning: ICONS.books,
-  popular: ICONS.flame,
-  colors: ICONS.palette,
-};
-
-function getCategoryIcon(cat) {
-  if (!cat) return ICONS.books;
-  return CATEGORY_ICON[cat.toLowerCase()] || ICONS.books;
-}
+import { getCategoryIcon } from "../../../lib/categoryMeta";
 
 const FavoriteCard = ({ item, onPress }) => {
   const { c } = useTheme();

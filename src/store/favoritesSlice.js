@@ -37,7 +37,7 @@ export const toggleFavorite = createAsyncThunk(
         if (result.success) {
           return { listId, action: "remove" };
         } else {
-          return rejectWithValue(result.error);
+          return rejectWithValue({ listId, isFavorite, error: result.error });
         }
       } else {
         // Add to favorites
@@ -45,11 +45,11 @@ export const toggleFavorite = createAsyncThunk(
         if (result.success) {
           return { listId, action: "add", data: result.data };
         } else {
-          return rejectWithValue(result.error);
+          return rejectWithValue({ listId, isFavorite, error: result.error });
         }
       }
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({ listId, isFavorite, error: error.message });
     }
   }
 );
@@ -92,37 +92,48 @@ const favoritesSlice = createSlice({
         state.error = action.payload;
       });
 
-    // Toggle favorite
+    // Toggle favorite — OPTIMISTIC: UI'da hemen güncelle, fail olursa rollback
     builder
-      .addCase(toggleFavorite.pending, (state) => {
-        state.loading = true;
+      .addCase(toggleFavorite.pending, (state, action) => {
+        // Optimistic update — server'ı beklemeden state'i değiştir
         state.error = null;
-      })
-      .addCase(toggleFavorite.fulfilled, (state, action) => {
-        state.loading = false;
-        const { listId, action: favoriteAction, data } = action.payload;
-
-        if (favoriteAction === "add") {
-          // Add to favorites
+        const { listId, isFavorite } = action.meta.arg;
+        if (isFavorite) {
+          // Was favorite, removing
+          state.favoriteListIds = state.favoriteListIds.filter((id) => id !== listId);
+          state.favoriteLists = state.favoriteLists.filter((fav) => fav.list_id !== listId);
+        } else {
+          // Was not favorite, adding (placeholder until server confirms data)
           if (!state.favoriteListIds.includes(listId)) {
             state.favoriteListIds.push(listId);
           }
-          if (data && !state.favoriteLists.find((fav) => fav.list_id === listId)) {
+        }
+      })
+      .addCase(toggleFavorite.fulfilled, (state, action) => {
+        // Server confirmed — sadece "add" case'inde data ile favoriteLists'i güncelle
+        const { listId, action: favoriteAction, data } = action.payload;
+        if (favoriteAction === "add" && data) {
+          if (!state.favoriteLists.find((fav) => fav.list_id === listId)) {
             state.favoriteLists.push(data);
           }
-        } else if (favoriteAction === "remove") {
-          // Remove from favorites
-          state.favoriteListIds = state.favoriteListIds.filter(
-            (id) => id !== listId
-          );
-          state.favoriteLists = state.favoriteLists.filter(
-            (fav) => fav.list_id !== listId
-          );
         }
       })
       .addCase(toggleFavorite.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        // ROLLBACK — optimistic update'i geri al
+        const payload = action.payload || {};
+        const { listId, isFavorite } = payload;
+        state.error = payload.error || "Favori güncellenemedi";
+        if (listId == null) return;
+        if (isFavorite) {
+          // Remove had failed — geri ekle
+          if (!state.favoriteListIds.includes(listId)) {
+            state.favoriteListIds.push(listId);
+          }
+        } else {
+          // Add had failed — geri çıkar
+          state.favoriteListIds = state.favoriteListIds.filter((id) => id !== listId);
+          state.favoriteLists = state.favoriteLists.filter((fav) => fav.list_id !== listId);
+        }
       });
   },
 });

@@ -2,7 +2,7 @@
  * FlashcardDetailScreen — orchestrator.
  * Alt parçalar `./components/` altında.
  */
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo } from "react";
 import { View, StyleSheet, Alert, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -21,7 +21,6 @@ import useDifficultyTint from "../../hooks/useDifficultyTint";
 import FlashcardHeader from "./components/FlashcardHeader";
 import FlashcardCardArea from "./components/FlashcardCardArea";
 import FlashcardCTAs from "./components/FlashcardCTAs";
-import WordChipList from "./components/WordChipList";
 import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
 
 export default function FlashcardDetailScreen({ route, navigation }) {
@@ -68,6 +67,13 @@ export default function FlashcardDetailScreen({ route, navigation }) {
       fetchWords();
     }, [fetchWords])
   );
+
+  // Bu ekranda tab bar'ı sakla — Çalış/Quiz butonları görünür kalsın
+  useLayoutEffect(() => {
+    const parent = navigation.getParent();
+    parent?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => parent?.setOptions({ tabBarStyle: undefined });
+  }, [navigation]);
 
   const title = listTitle ?? "Liste";
 
@@ -218,12 +224,6 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           onQuiz={() =>
             navigation.navigate("Quiz", { listId, listTitle: title, listLevel })
           }
-        />
-
-        <WordChipList
-          words={words}
-          currentIndex={currentIndex}
-          onSelect={setCurrentIndex}
         />
       </SafeAreaView>
     </View>

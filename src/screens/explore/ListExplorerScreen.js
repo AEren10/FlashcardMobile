@@ -35,7 +35,7 @@ export default function ListExplorerScreen({ route, navigation }) {
   } = route.params ?? {};
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
-  const { lists: allLists, loading } = usePublicLists();
+  const { lists: allLists, loading, error, reload } = usePublicLists();
   const [query, setQuery] = useState("");
   const favIds = useSelector(selectFavoriteListIds);
   const favSet = useMemo(() => new Set(favIds.map(String)), [favIds]);
@@ -151,6 +151,16 @@ export default function ListExplorerScreen({ route, navigation }) {
               <SkeletonListItem key={i} />
             ))}
           </ScrollView>
+        ) : error && allLists.length === 0 ? (
+          <EmptyState
+            kind="offline"
+            title="Listeler yüklenemedi"
+            subtitle="İnternet bağlantını kontrol et ve tekrar dene."
+            actionLabel="Tekrar dene"
+            onAction={() => reload?.()}
+            secondaryLabel="Geri dön"
+            onSecondary={() => navigation.goBack?.()}
+          />
         ) : visibleLists.length === 0 ? (
           <EmptyState
             kind="search"

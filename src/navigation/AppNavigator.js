@@ -78,9 +78,13 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 // Auth Context
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
+import { PremiumProvider } from "../contexts/PremiumContext";
+import { AchievementsProvider, useAchievements } from "../contexts/AchievementsContext";
+import AchievementModal from "../components/design/AchievementModal";
 
 // Import Screens
 import HomeScreen from "../screens/home/HomeScreen";
+import ExamHomeScreen from "../screens/home/ExamHomeScreen";
 import MyListsScreen from "../screens/mylists/MyListsScreen";
 import CreateListScreen from "../screens/mylists/CreateListScreen";
 import FavoritesScreen from "../screens/favorites/FavoritesScreen";
@@ -109,6 +113,12 @@ import AppearanceScreen from "../screens/settings/AppearanceScreen";
 import LanguageScreen from "../screens/settings/LanguageScreen";
 import SettingsScreen from "../screens/settings/SettingsScreen";
 import EditProfileScreen from "../screens/profile/EditProfileScreen";
+
+// Paywall
+import PaywallScreen from "../screens/paywall/PaywallScreen";
+
+// Achievements
+import AchievementsScreen from "../screens/achievements/AchievementsScreen";
 
 // Onboarding
 import OnboardingScreen, { hasSeenOnboarding } from "../screens/onboarding/OnboardingScreen";
@@ -165,7 +175,24 @@ function AuthStackNavigator() {
 function HomeStackNavigator() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
-      <HomeStack.Screen name="HomeMain" component={HomeScreen} />
+      <HomeStack.Screen
+        name="HomeMain"
+        component={HomeScreen}
+        options={{
+          animation: "fade",
+          animationDuration: 220,
+          animationTypeForReplace: "pop",
+        }}
+      />
+      <HomeStack.Screen
+        name="ExamHome"
+        component={ExamHomeScreen}
+        options={{
+          animation: "fade",
+          animationDuration: 220,
+          animationTypeForReplace: "pop",
+        }}
+      />
       <HomeStack.Screen
         name="FlashcardDetail"
         component={FlashcardDetailScreen}
@@ -277,8 +304,18 @@ function ProfileStackNavigator() {
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <ProfileStack.Screen
+        name="Streak"
+        component={StreakScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
         name="Roadmap"
         component={RoadmapScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Achievements"
+        component={AchievementsScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <ProfileStack.Screen
@@ -387,7 +424,14 @@ function RootNavigator() {
       }}
     >
       {isAuthenticated() ? (
-        <RootStack.Screen name="MainTabs" component={BottomTabNavigator} />
+        <>
+          <RootStack.Screen name="MainTabs" component={BottomTabNavigator} />
+          <RootStack.Screen
+            name="Paywall"
+            component={PaywallScreen}
+            options={{ presentation: "modal", animation: "slide_from_bottom" }}
+          />
+        </>
       ) : (
         <RootStack.Screen name="Auth" component={AuthStackNavigator} />
       )}
@@ -395,13 +439,30 @@ function RootNavigator() {
   );
 }
 
-// Main App Navigator with Auth Provider
+// Global Achievement Modal — yeni rozet kazanıldığında otomatik gösterir
+function GlobalAchievementBridge() {
+  const { newlyUnlocked, dismissNew } = useAchievements();
+  return (
+    <AchievementModal
+      visible={!!newlyUnlocked}
+      badge={newlyUnlocked}
+      onClose={dismissNew}
+    />
+  );
+}
+
+// Main App Navigator with all providers
 const AppNavigator = () => {
   return (
     <AuthProvider>
-      <NavigationContainer linking={linking} fallback={<LoadingScreen />}>
-        <RootNavigator />
-      </NavigationContainer>
+      <PremiumProvider>
+        <AchievementsProvider>
+          <NavigationContainer linking={linking} fallback={<LoadingScreen />}>
+            <RootNavigator />
+          </NavigationContainer>
+          <GlobalAchievementBridge />
+        </AchievementsProvider>
+      </PremiumProvider>
     </AuthProvider>
   );
 };

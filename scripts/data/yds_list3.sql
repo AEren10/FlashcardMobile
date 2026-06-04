@@ -1,0 +1,55 @@
+DO $$
+DECLARE
+  v_list_id UUID;
+BEGIN
+  INSERT INTO lists (title, description, level, category, is_public, user_id, inserted_at, updated_at)
+  VALUES ('YDS · Genişletilmiş', 'YDS orta-ileri akademik kelime havuzu — 45 kelime', 'Orta', 'exam', true, NULL, NOW(), NOW())
+  RETURNING id INTO v_list_id;
+
+  INSERT INTO words (list_id, word, meaning, example, example_tr, position, inserted_at) VALUES
+    (v_list_id, 'deduce', 'çıkarsama yapmak, sonuç çıkarmak', 'From the available evidence, scientists deduced that the artifact dated back centuries.', 'Mevcut kanıtlardan bilim insanları, eserin yüzyıllar öncesine ait olduğunu çıkardı.', 1, NOW()),
+    (v_list_id, 'defy', 'meydan okumak, karşı koymak', 'The findings defy conventional wisdom about how children acquire abstract concepts.', 'Bulgular, çocukların soyut kavramları nasıl edindiğine dair yerleşik görüşe meydan okur.', 2, NOW()),
+    (v_list_id, 'deliberate', 'kasıtlı; tartışmak', 'The committee deliberated for hours before reaching a unanimous decision on policy.', 'Komite, politika konusunda oybirliğine varmadan önce saatlerce müzakere etti.', 3, NOW()),
+    (v_list_id, 'denote', 'belirtmek, göstermek', 'In scientific texts, this symbol denotes the average value of the variable.', 'Bilimsel metinlerde bu sembol, değişkenin ortalama değerini gösterir.', 4, NOW()),
+    (v_list_id, 'depict', 'tasvir etmek, betimlemek', 'The novel depicts urban poverty in nineteenth-century European industrial cities.', 'Roman, on dokuzuncu yüzyıl Avrupa sanayi şehirlerindeki kent yoksulluğunu tasvir eder.', 5, NOW()),
+    (v_list_id, 'deplete', 'tüketmek, azaltmak', 'Overfishing has rapidly depleted fish stocks in many parts of the world.', 'Aşırı avlanma, dünyanın birçok bölgesinde balık stoklarını hızla tüketmiştir.', 6, NOW()),
+    (v_list_id, 'deprive', 'mahrum bırakmak', 'War deprived an entire generation of access to quality education and healthcare.', 'Savaş, bütün bir kuşağı nitelikli eğitim ve sağlık hizmetine erişimden mahrum bıraktı.', 7, NOW()),
+    (v_list_id, 'designate', 'belirlemek, atamak', 'The area has been designated a protected zone for endangered bird species.', 'Bölge, nesli tükenmekte olan kuş türleri için koruma alanı olarak belirlenmiştir.', 8, NOW()),
+    (v_list_id, 'detect', 'tespit etmek, saptamak', 'New sensors can detect microscopic pollutants in drinking water within seconds.', 'Yeni sensörler, içme suyundaki mikroskobik kirleticileri saniyeler içinde saptayabiliyor.', 9, NOW()),
+    (v_list_id, 'deteriorate', 'kötüleşmek, bozulmak', 'Diplomatic relations between the two nations have deteriorated since last summer.', 'İki ulus arasındaki diplomatik ilişkiler, geçen yazdan beri kötüleşmiştir.', 10, NOW()),
+    (v_list_id, 'devote', 'adamak, ayırmak', 'Many scholars have devoted their lives to understanding the origins of language.', 'Birçok akademisyen yaşamını, dilin kökenini anlamaya adamıştır.', 11, NOW()),
+    (v_list_id, 'diminish', 'azaltmak, küçültmek', 'Repeated exposure to misinformation can diminish public trust in scientific authorities.', 'Yanlış bilgiye sürekli maruz kalmak, bilimsel otoritelere kamu güvenini azaltabilir.', 12, NOW()),
+    (v_list_id, 'discard', 'atmak, elden çıkarmak', 'Outdated theories are gradually discarded as new empirical evidence accumulates.', 'Geçersizleşen teoriler, yeni görgül kanıtlar biriktikçe yavaş yavaş terk edilir.', 13, NOW()),
+    (v_list_id, 'discern', 'fark etmek, ayırt etmek', 'It is difficult to discern subtle shifts in public opinion from a single survey.', 'Tek bir anketten kamuoyundaki ince kaymaları ayırt etmek zordur.', 14, NOW()),
+    (v_list_id, 'disclose', 'açıklamak, ifşa etmek', 'The company refused to disclose details of its negotiations with foreign partners.', 'Şirket, yabancı ortaklarıyla yaptığı görüşmelerin ayrıntılarını açıklamayı reddetti.', 15, NOW()),
+    (v_list_id, 'discourage', 'cesaretini kırmak, vazgeçirmek', 'High registration fees may discourage students from applying to graduate programs.', 'Yüksek kayıt ücretleri, öğrencileri lisansüstü programlara başvurmaktan caydırabilir.', 16, NOW()),
+    (v_list_id, 'disregard', 'görmezden gelmek, dikkate almamak', 'The committee disregarded several warnings issued by independent safety inspectors.', 'Komite, bağımsız güvenlik müfettişlerinin yaptığı çeşitli uyarıları görmezden geldi.', 17, NOW()),
+    (v_list_id, 'distinguish', 'ayırt etmek', 'Students must learn to distinguish reliable sources from unreliable ones online.', 'Öğrenciler, çevrimiçi güvenilir kaynakları güvenilmez olanlardan ayırt etmeyi öğrenmelidir.', 18, NOW()),
+    (v_list_id, 'diverse', 'çeşitli, farklı', 'The university hosts students from highly diverse cultural and linguistic backgrounds.', 'Üniversite, son derece çeşitli kültürel ve dilsel geçmişlerden öğrenciler barındırır.', 19, NOW()),
+    (v_list_id, 'dominant', 'baskın, hakim', 'English remains the dominant language of international academic publishing today.', 'İngilizce, günümüzde uluslararası akademik yayıncılığın baskın dili olmayı sürdürür.', 20, NOW()),
+    (v_list_id, 'elaborate', 'ayrıntılı; ayrıntılarıyla anlatmak', 'The author elaborated on the social implications of artificial intelligence at length.', 'Yazar, yapay zekânın toplumsal sonuçlarını uzun uzadıya ayrıntılarıyla ele aldı.', 21, NOW()),
+    (v_list_id, 'eliminate', 'ortadan kaldırmak, elemek', 'New treatments could eventually eliminate certain genetic diseases altogether.', 'Yeni tedaviler, nihayetinde bazı genetik hastalıkları tamamen ortadan kaldırabilir.', 22, NOW()),
+    (v_list_id, 'embrace', 'benimsemek; kucaklamak', 'Many institutions have embraced digital transformation to remain competitive globally.', 'Birçok kurum, küresel ölçekte rekabetçi kalmak için dijital dönüşümü benimsemiştir.', 23, NOW()),
+    (v_list_id, 'emerge', 'ortaya çıkmak, belirmek', 'New evidence has emerged suggesting that the species adapts faster than expected.', 'Türün beklenenden hızlı uyum sağladığına işaret eden yeni kanıtlar ortaya çıktı.', 24, NOW()),
+    (v_list_id, 'emphasize', 'vurgulamak, önemini belirtmek', 'The author emphasizes the role of education in reducing long-term social inequality.', 'Yazar, eğitimin uzun vadeli toplumsal eşitsizliği azaltmadaki rolünü vurgular.', 25, NOW()),
+    (v_list_id, 'enable', 'olanaklı kılmak, mümkün kılmak', 'New imaging techniques enable scientists to study brain activity in real time.', 'Yeni görüntüleme teknikleri, bilim insanlarının beyin aktivitesini gerçek zamanlı incelemesine olanak tanır.', 26, NOW()),
+    (v_list_id, 'endure', 'katlanmak, dayanmak', 'Many migrants endure harsh conditions in pursuit of better economic opportunities.', 'Birçok göçmen, daha iyi ekonomik fırsatlar uğruna ağır koşullara katlanır.', 27, NOW()),
+    (v_list_id, 'enforce', 'yürürlüğe koymak, uygulamak', 'Local authorities must enforce regulations consistently to maintain public trust.', 'Yerel yetkililer, kamu güvenini korumak için düzenlemeleri tutarlı biçimde uygulamalıdır.', 28, NOW()),
+    (v_list_id, 'enhance', 'artırmak, geliştirmek, iyileştirmek', 'Collaboration between universities and industry can significantly enhance research outcomes.', 'Üniversite-sanayi iş birliği, araştırma sonuçlarını önemli ölçüde iyileştirebilir.', 29, NOW()),
+    (v_list_id, 'entail', 'gerektirmek, içermek', 'The new role entails extensive travel and considerable administrative responsibility.', 'Yeni görev, kapsamlı seyahat ve önemli ölçüde idari sorumluluk gerektiriyor.', 30, NOW()),
+    (v_list_id, 'envisage', 'tasavvur etmek, öngörmek', 'Economists envisage modest growth in the service sector over the next decade.', 'Ekonomistler, önümüzdeki on yılda hizmet sektöründe ılımlı bir büyüme öngörüyor.', 31, NOW()),
+    (v_list_id, 'establish', 'kurmak; saptamak', 'Researchers have established a clear link between physical activity and mental health.', 'Araştırmacılar, fiziksel aktivite ile ruh sağlığı arasında net bir bağ kurmuştur.', 32, NOW()),
+    (v_list_id, 'evaluate', 'değerlendirmek', 'The agency evaluates funding proposals based on innovation, feasibility, and impact.', 'Kurum, fon başvurularını yenilik, uygulanabilirlik ve etki açısından değerlendirir.', 33, NOW()),
+    (v_list_id, 'exceed', 'aşmak, geçmek', 'The cost of the project has already exceeded the initial budget by twenty percent.', 'Proje maliyeti, başlangıç bütçesini şimdiden yüzde yirmi oranında aşmıştır.', 34, NOW()),
+    (v_list_id, 'exclude', 'dışlamak, hariç tutmak', 'The survey excluded participants under the age of eighteen for ethical reasons.', 'Anket, etik nedenlerle on sekiz yaşın altındaki katılımcıları kapsam dışında bıraktı.', 35, NOW()),
+    (v_list_id, 'exert', 'uygulamak, göstermek', 'Pressure groups exert considerable influence over policy debates in many democracies.', 'Baskı grupları, birçok demokraside politika tartışmaları üzerinde önemli bir etki uygular.', 36, NOW()),
+    (v_list_id, 'exhibit', 'sergilemek, göstermek', 'Patients with the condition often exhibit symptoms that resemble common allergies.', 'Hastalığa sahip hastalar, sıklıkla yaygın alerjilere benzer belirtiler sergiler.', 37, NOW()),
+    (v_list_id, 'expand', 'genişletmek, büyütmek', 'The company plans to expand its operations into three additional emerging markets.', 'Şirket, faaliyetlerini üç ek gelişmekte olan pazara genişletmeyi planlıyor.', 38, NOW()),
+    (v_list_id, 'exploit', 'sömürmek; yararlanmak', 'Colonial powers exploited the natural resources of conquered territories for centuries.', 'Sömürgeci güçler, fethettikleri toprakların doğal kaynaklarını yüzyıllarca sömürdü.', 39, NOW()),
+    (v_list_id, 'expose', 'maruz bırakmak; ifşa etmek', 'Children should not be exposed to advertising that targets unhealthy eating habits.', 'Çocuklar, sağlıksız beslenmeyi hedefleyen reklamlara maruz bırakılmamalıdır.', 40, NOW()),
+    (v_list_id, 'extend', 'uzatmak, genişletmek', 'The deadline for submission has been extended by two additional weeks.', 'Başvuru için son tarih, ek olarak iki hafta daha uzatılmıştır.', 41, NOW()),
+    (v_list_id, 'facilitate', 'kolaylaştırmak', 'International trade agreements facilitate the exchange of goods between nations.', 'Uluslararası ticaret anlaşmaları, ülkeler arasındaki mal alışverişini kolaylaştırır.', 42, NOW()),
+    (v_list_id, 'fallacy', 'yanılgı, safsata', 'It is a common fallacy to assume that wealth automatically guarantees personal happiness.', 'Zenginliğin otomatik olarak kişisel mutluluğu garantilediğini varsaymak yaygın bir yanılgıdır.', 43, NOW()),
+    (v_list_id, 'feasible', 'uygulanabilir, yapılabilir', 'Many experts question whether the proposed climate targets are economically feasible.', 'Birçok uzman, önerilen iklim hedeflerinin ekonomik olarak uygulanabilir olup olmadığını sorgulamaktadır.', 44, NOW()),
+    (v_list_id, 'fluctuate', 'dalgalanmak, değişmek', 'Currency exchange rates fluctuate based on numerous economic and political factors.', 'Döviz kurları, çok sayıda ekonomik ve siyasi faktöre bağlı olarak dalgalanır.', 45, NOW());
+END $$;

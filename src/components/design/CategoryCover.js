@@ -72,9 +72,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: "rgba(0,0,0,0.22)",
+    // Cover gradient zaten koyu — chip kontrastını garantilemek için biraz daha vurgulu zemin
+    backgroundColor: "rgba(0,0,0,0.38)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
+    borderColor: "rgba(255,255,255,0.28)",
   },
   chipTxt: {
     fontSize: 10.5,

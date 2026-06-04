@@ -22,6 +22,7 @@ import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useAchievements } from "../../contexts/AchievementsContext";
 import supabaseApiService from "../../services/supabaseApi";
 import {
   selectFavoriteListIds,
@@ -58,6 +59,7 @@ export default function MyListsScreen() {
   const { c } = useTheme();
   const navigation = useNavigation();
   const { isAuthenticated, isGuestUser, getUserId, signOut } = useAuth();
+  const { trigger: triggerAchievement } = useAchievements();
   const userId = getUserId();
   const [tab, setTab] = useState("Listelerim");
   const [myLists, setMyLists] = useState([]);
@@ -115,6 +117,7 @@ export default function MyListsScreen() {
               url: shareLink,
               title: item.title,
             });
+            triggerAchievement?.("list_shared");
           } catch {}
         },
       });
@@ -159,18 +162,30 @@ export default function MyListsScreen() {
     [userId, navigation, load]
   );
 
-  const favoriteSet = new Set(favIds.map(String));
-  const favoritesList = publicLists.filter((l) => favoriteSet.has(String(l.id)));
+  const favoriteSet = useMemo(() => new Set(favIds.map(String)), [favIds]);
+  const favoritesList = useMemo(
+    () => publicLists.filter((l) => favoriteSet.has(String(l.id))),
+    [publicLists, favoriteSet]
+  );
 
   // Listelerim: mistakes listesini ayır (özel pin alanında gösterilecek)
-  const mistakesList = myLists.find((l) => l.kind === "mistakes");
-  const regularMyLists = myLists.filter((l) => l.kind !== "mistakes");
+  const mistakesList = useMemo(
+    () => myLists.find((l) => l.kind === "mistakes"),
+    [myLists]
+  );
+  const regularMyLists = useMemo(
+    () => myLists.filter((l) => l.kind !== "mistakes"),
+    [myLists]
+  );
 
-  const dataByTab = {
-    Listelerim: regularMyLists,
-    Favoriler: favoritesList,
-    Keşfet: publicLists.filter((l) => l.kind !== "mistakes"),
-  };
+  const dataByTab = useMemo(
+    () => ({
+      Listelerim: regularMyLists,
+      Favoriler: favoritesList,
+      Keşfet: publicLists.filter((l) => l.kind !== "mistakes"),
+    }),
+    [regularMyLists, favoritesList, publicLists]
+  );
   const rawItems = dataByTab[tab] || [];
 
   // Sort

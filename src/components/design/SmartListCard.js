@@ -6,7 +6,7 @@ import React, { useEffect, useRef } from "react";
 import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
-import Icon from "./Icon";
+import Icon, { ICONS } from "./Icon";
 
 export default function SmartListCard({
   emoji,

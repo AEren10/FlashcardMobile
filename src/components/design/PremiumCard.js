@@ -70,10 +70,10 @@ export default function PremiumCard({
         ]}
       />
 
-      {/* Top edge inner highlight (premium depth) */}
+      {/* Top edge inner highlight (premium depth) — light'ta minimal, dark'ta beyaz tint */}
       <LinearGradient
         colors={[
-          c.isDark === false ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.08)",
+          c.isDark === false ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.08)",
           "transparent",
         ]}
         start={{ x: 0, y: 0 }}

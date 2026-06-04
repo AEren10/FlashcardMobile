@@ -3,19 +3,18 @@
  * Card değil, full-bleed alan. Floating particles + radial daily goal + streak orbit.
  * Tap → ilgili sayfa.
  */
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { memo, useEffect, useMemo, useRef } from "react";
 import { View, Text, Pressable, Animated, Easing, StyleSheet, Dimensions } from "react-native";
-import Svg, { Circle, G } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Circle, G, Defs, LinearGradient as SvgGradient, Stop } from "react-native-svg";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useCountUp from "../../../hooks/useCountUp";
 import Icon, { ICONS } from "../../../components/design/Icon";
 
 const { width: W } = Dimensions.get("window");
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export default function HeroDashboard({
+function HeroDashboard({
   greeting,
   userName,
   streak = 0,
@@ -29,7 +28,6 @@ export default function HeroDashboard({
   const ratio = Math.min(1, dailyDone / Math.max(1, dailyTotal));
   const pct = Math.round(ratio * 100);
   const animStreak = useCountUp(streak, 1000);
-  const animPct = useCountUp(pct, 1400);
 
   return (
     <View style={s.wrap}>
@@ -93,14 +91,6 @@ export default function HeroDashboard({
           accessibilityLabel="Günlük hedef"
         >
           <RadialGoal ratio={ratio} c={c} />
-          <View style={s.goalCenter} pointerEvents="none">
-            <Text style={[s.goalPct, { color: c.textPrimary, fontFamily: c.fontNum }]}>
-              %{animPct}
-            </Text>
-            <Text style={[s.goalLbl, { color: c.textMuted, fontFamily: c.fontBody }]}>
-              {dailyDone}/{dailyTotal}
-            </Text>
-          </View>
         </Pressable>
       </View>
 
@@ -198,7 +188,11 @@ function StreakOrbit({ streak, c }) {
     };
   }, [scale, lift, shadowGlow, active]);
 
-  const flameColor = streak >= 30 ? c.error : c.warning;
+  // Streak'e göre renk gradient'i — yeni başlayanda turuncu, uzun streak'te kırmızı
+  const flameColor =
+    streak >= 30 ? "#E74C3C" :   // uzun streak — kırmızı
+    streak >= 7  ? "#F39C12" :   // orta streak — koyu turuncu
+                   "#FF6B4A";   // yeni başlayan — canlı turuncu
   const iconSize = 34 + intensity * 14;
 
   return (
@@ -215,34 +209,65 @@ function StreakOrbit({ streak, c }) {
   );
 }
 
-/** RadialGoal — büyük donut, animated stroke + entry scale + glow pulse (tamamlanınca) */
+// Memoize — sadece props değişince re-render
+export default memo(HeroDashboard);
+
+/** DailyGoal — üstte büyük yüzde + altta 10 dot horizontal bar.
+ *  Dolu dotlar cobalt (mavi), tamamlanınca success (yeşil). Pulse animasyonu.
+ */
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const RADIAL_SIZE = 100;
+const RADIAL_STROKE = 8;
+const RADIAL_R = (RADIAL_SIZE - RADIAL_STROKE) / 2;
+const RADIAL_C = 2 * Math.PI * RADIAL_R;
+
 function RadialGoal({ ratio, c }) {
-  const progress = useRef(new Animated.Value(0)).current;
-  const entryScale = useRef(new Animated.Value(0.6)).current;
-  const pulse = useRef(new Animated.Value(1)).current;
   const completed = ratio >= 1;
-  const size = 92;
-  const stroke = 10;
-  const r = (size - stroke) / 2;
-  const circ = 2 * Math.PI * r;
+  const pct = Math.round(ratio * 100);
+  const fillColor = completed ? c.success : c.cobalt;
+  const trackColor = c.border;
+
+  // Entry scale spring
+  const entryScale = useRef(new Animated.Value(0.8)).current;
+  // Progress arc (0 → ratio)
+  const arc = useRef(new Animated.Value(0)).current;
+  // Continuous rotation
+  const spin = useRef(new Animated.Value(0)).current;
+  // Pulse when complete
+  const pulse = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.spring(entryScale, {
+    Animated.spring(entryScale, {
+      toValue: 1,
+      useNativeDriver: true,
+      stiffness: 180,
+      damping: 14,
+    }).start();
+  }, [entryScale]);
+
+  useEffect(() => {
+    Animated.timing(arc, {
+      toValue: Math.min(1, ratio),
+      duration: 1100,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [ratio, arc]);
+
+  // Sürekli yavaş dönüş — completed olduğunda daha hızlı
+  useEffect(() => {
+    spin.setValue(0);
+    const loop = Animated.loop(
+      Animated.timing(spin, {
         toValue: 1,
+        duration: completed ? 4000 : 8000,
+        easing: Easing.linear,
         useNativeDriver: true,
-        stiffness: 180,
-        damping: 14,
-      }),
-      Animated.timing(progress, {
-        toValue: ratio,
-        duration: 1600,
-        delay: 200,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, [ratio, progress, entryScale]);
+      })
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [completed, spin]);
 
   useEffect(() => {
     if (!completed) {
@@ -269,46 +294,81 @@ function RadialGoal({ ratio, c }) {
     return () => loop.stop();
   }, [completed, pulse]);
 
-  const offset = progress.interpolate({
+  const strokeDashoffset = arc.interpolate({
     inputRange: [0, 1],
-    outputRange: [circ, 0],
+    outputRange: [RADIAL_C, 0],
   });
 
-  const fillColor = completed ? c.success : c.accent;
+  const rotate = spin.interpolate({
+    inputRange: [0, 1],
+    outputRange: ["0deg", "360deg"],
+  });
 
   return (
     <Animated.View
       style={{
+        width: RADIAL_SIZE,
+        height: RADIAL_SIZE,
+        alignItems: "center",
+        justifyContent: "center",
         transform: [{ scale: entryScale }, { scale: pulse }],
-        shadowColor: fillColor,
-        shadowOffset: { width: 0, height: 0 },
-        shadowOpacity: completed ? 0.5 : 0.3,
-        shadowRadius: 16,
       }}
     >
-      <Svg width={size} height={size}>
-        <G rotation="-90" origin={`${size / 2}, ${size / 2}`}>
+      <Animated.View
+        style={{
+          position: "absolute",
+          width: RADIAL_SIZE,
+          height: RADIAL_SIZE,
+          transform: [{ rotate }],
+        }}
+      >
+        <Svg width={RADIAL_SIZE} height={RADIAL_SIZE}>
+          <Defs>
+            <SvgGradient id="goalGrad" x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={fillColor} stopOpacity="1" />
+              <Stop offset="1" stopColor={c.accent || fillColor} stopOpacity="0.85" />
+            </SvgGradient>
+          </Defs>
+          {/* Track */}
           <Circle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            stroke={c.bgSurface}
-            strokeWidth={stroke}
+            cx={RADIAL_SIZE / 2}
+            cy={RADIAL_SIZE / 2}
+            r={RADIAL_R}
+            stroke={trackColor}
+            strokeWidth={RADIAL_STROKE}
             fill="none"
+            opacity={0.35}
           />
-          <AnimatedCircle
-            cx={size / 2}
-            cy={size / 2}
-            r={r}
-            stroke={fillColor}
-            strokeWidth={stroke}
-            fill="none"
-            strokeLinecap="round"
-            strokeDasharray={circ}
-            strokeDashoffset={offset}
-          />
-        </G>
-      </Svg>
+          {/* Progress arc — starts from top (rotate -90deg) */}
+          <G rotation={-90} origin={`${RADIAL_SIZE / 2}, ${RADIAL_SIZE / 2}`}>
+            <AnimatedCircle
+              cx={RADIAL_SIZE / 2}
+              cy={RADIAL_SIZE / 2}
+              r={RADIAL_R}
+              stroke="url(#goalGrad)"
+              strokeWidth={RADIAL_STROKE}
+              strokeLinecap="round"
+              fill="none"
+              strokeDasharray={`${RADIAL_C} ${RADIAL_C}`}
+              strokeDashoffset={strokeDashoffset}
+            />
+          </G>
+        </Svg>
+      </Animated.View>
+
+      <Text
+        style={{
+          fontFamily: c.fontNum,
+          fontSize: 24,
+          lineHeight: 26,
+          color: fillColor,
+          textShadowColor: fillColor,
+          textShadowRadius: 6,
+          textShadowOffset: { width: 0, height: 0 },
+        }}
+      >
+        %{pct}
+      </Text>
     </Animated.View>
   );
 }
@@ -434,11 +494,12 @@ function makeStyles(c) {
     streakLbl: { fontSize: 11, marginTop: 3, letterSpacing: 0.3 },
 
     goalBox: {
-      width: 92,
-      height: 92,
+      width: 100,
+      height: 100,
       alignItems: "center",
       justifyContent: "center",
-      borderRadius: 46,
+      borderRadius: 50,
+      marginRight: 6,
     },
     goalCenter: {
       position: "absolute",

@@ -25,6 +25,7 @@ import { ThemeProvider } from "./src/contexts/ThemeContext";
 import { ToastProvider } from "./src/contexts/ToastContext";
 import { initSentry, Sentry } from "./src/lib/sentry";
 import { startAutoFlush } from "./src/lib/offlineQueue";
+import { bootstrapReminders } from "./src/lib/notifications";
 import { getConsent, hasResolvedConsent } from "./src/lib/analyticsConsent";
 import ConsentModal from "./src/components/ConsentModal";
 import DynamicStatusBar from "./src/components/design/DynamicStatusBar";
@@ -47,6 +48,8 @@ import {
 import { View, ActivityIndicator } from "react-native";
 
 startAutoFlush();
+// Permission verilmişse base bildirimleri tazele (idempotent)
+bootstrapReminders().catch(() => {});
 
 function App() {
   const [fontsLoaded] = useSpaceGrotesk({

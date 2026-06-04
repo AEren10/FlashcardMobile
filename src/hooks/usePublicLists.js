@@ -14,17 +14,23 @@ export default function usePublicLists() {
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   const load = useCallback(async (opts = {}) => {
     if (!opts.silent) setLoading(true);
+    setError(null);
+    let gotData = false;
     try {
       await fetchPublicLists((data, isStale) => {
-        if (Array.isArray(data)) setLists(data);
-        // Stale data geldi → loader hâlâ açık, fresh gelince kapanır
+        if (Array.isArray(data)) {
+          setLists(data);
+          gotData = true;
+        }
         if (!isStale) setLoading(false);
       });
-    } catch {
-      // Network hata + cache de yok
+    } catch (e) {
+      // Cache de yoksa kullanıcıya error göster, varsa stale gösteriyoruz
+      if (!gotData) setError(e?.message || "Listeler yüklenemedi");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -41,7 +47,7 @@ export default function usePublicLists() {
     load();
   }, [load]);
 
-  return { lists, loading, refreshing, refresh, reload: load };
+  return { lists, loading, refreshing, refresh, reload: load, error };
 }
 
 /** Liste create/delete sonrası diğer ekranlar bunu çağırsın */

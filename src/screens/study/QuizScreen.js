@@ -58,6 +58,7 @@ export default function QuizScreen({ route, navigation }) {
 
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState(null);
   const [correct, setCorrect] = useState(0);
@@ -73,29 +74,42 @@ export default function QuizScreen({ route, navigation }) {
   const startedAt = useRef(Date.now());
   const title = presetTitle ?? listTitle ?? "Quiz";
 
+  const loadWords = React.useCallback(async () => {
+    setLoading(true);
+    setFetchError(false);
+    let list = null;
+    if (presetWords?.length) {
+      list = presetWords;
+    } else {
+      try {
+        const res = await getListWords(listId);
+        if (res?.success === false) {
+          setFetchError(true);
+          setLoading(false);
+          return;
+        }
+        list = res?.data ?? [];
+      } catch {
+        setFetchError(true);
+        setLoading(false);
+        return;
+      }
+    }
+    setWords(shuffle(list || []));
+    setLoading(false);
+    sessionRef.current = await startSession({ list_id: listId ?? null, mode: "quiz" });
+  }, [listId, presetWords]);
+
   useEffect(() => {
     let mounted = true;
     (async () => {
-      let list;
-      if (presetWords?.length) {
-        list = presetWords;
-      } else {
-        try {
-          const res = await getListWords(listId);
-          list = res.data ?? [];
-        } catch {
-          list = [];
-        }
-      }
       if (!mounted) return;
-      setWords(shuffle(list));
-      setLoading(false);
-      sessionRef.current = await startSession({ list_id: listId ?? null, mode: "quiz" });
+      await loadWords();
     })();
     return () => {
       mounted = false;
     };
-  }, [listId, presetWords]);
+  }, [loadWords]);
 
   const current = words[index];
 
@@ -237,6 +251,24 @@ export default function QuizScreen({ route, navigation }) {
               <Skeleton key={i} width="47%" height={72} radius={16} />
             ))}
           </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <View style={s.root}>
+        <SafeAreaView style={{ flex: 1 }}>
+          <EmptyState
+            kind="offline"
+            title="Kelimeler yüklenemedi"
+            subtitle="İnternet bağlantını kontrol et ve tekrar dene."
+            actionLabel="Tekrar dene"
+            onAction={loadWords}
+            secondaryLabel="Geri dön"
+            onSecondary={() => navigation.goBack()}
+          />
         </SafeAreaView>
       </View>
     );

@@ -5,7 +5,7 @@
  * Tap=çevir · Swipe sağ=Biliyorum · Swipe sol=Bilmiyorum
  * Stack peek, verdict badges, ✓/✗ feedback pop, confetti (streak ≥5), shake
  */
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Pressable,
   Dimensions,
   Animated as RNAnimated,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -55,6 +56,31 @@ export default function StudyScreen({ route, navigation }) {
     },
     onSwipe: (know) => handleAnswer(know),
   });
+
+  // Çalışma yarıda kalmışken çıkış engelleme — Alert ile onay
+  useEffect(() => {
+    const unsub = navigation.addListener("beforeRemove", (e) => {
+      // Henüz hiç cevap verilmediyse veya bitti ise serbest çık
+      if (engine.done || engine.loading) return;
+      if (!engine.words?.length) return;
+      if (engine.index === 0 && !feedback) return;
+
+      e.preventDefault();
+      Alert.alert(
+        "Çalışmayı bırakmak istiyor musun?",
+        "İlerlemen kaydedilmeyecek ve baştan başlaman gerekecek.",
+        [
+          { text: "Devam et", style: "cancel", onPress: () => {} },
+          {
+            text: "Çık",
+            style: "destructive",
+            onPress: () => navigation.dispatch(e.data.action),
+          },
+        ]
+      );
+    });
+    return unsub;
+  }, [navigation, engine.done, engine.loading, engine.index, engine.words, feedback]);
 
   const handleAnswer = (know) => {
     if (feedback || !engine.current) return;
@@ -161,7 +187,7 @@ export default function StudyScreen({ route, navigation }) {
                 onReport={() => engine.reportCurrent?.()}
               />
               <VerdictBadges s={s} c={c} know={knowAmt} dont={dontAmt} />
-              {feedback && <CenterPop s={s} c={c} type={feedback} scale={swipe.popScale} />}
+              {feedback && <CenterPop s={s} c={c} type={feedback} />}
             </RNAnimated.View>
           </View>
         </View>
@@ -174,6 +200,11 @@ export default function StudyScreen({ route, navigation }) {
             <Text style={[s.arrowTxt, { color: c.success }]}>Biliyorum →</Text>
           </Pressable>
         </View>
+
+        {/* Swipe ipucu — kart altında tek satır */}
+        <Text style={[s.swipeHint, { color: c.textMuted, fontFamily: c.fontBody }]}>
+          Sola at: bilmiyorum  ·  Karta dokun: çevir  ·  Sağa at: biliyorum
+        </Text>
 
         {showConfetti && (
           <ConfettiCannon
@@ -232,13 +263,52 @@ function VerdictBadges({ s, c, know, dont }) {
   );
 }
 
-function CenterPop({ s, c, type, scale }) {
+function CenterPop({ s, c, type }) {
+  const scale = useRef(new RNAnimated.Value(0)).current;
+  const opacity = useRef(new RNAnimated.Value(0)).current;
+
+  useEffect(() => {
+    RNAnimated.parallel([
+      RNAnimated.sequence([
+        RNAnimated.spring(scale, {
+          toValue: 1.15,
+          useNativeDriver: true,
+          tension: 200,
+          friction: 8,
+        }),
+        RNAnimated.spring(scale, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 150,
+          friction: 10,
+        }),
+      ]),
+      RNAnimated.sequence([
+        RNAnimated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }),
+        RNAnimated.delay(250),
+        RNAnimated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+      ]),
+    ]).start();
+  }, [scale, opacity, type]);
+
+  const isKnow = type === "know";
   return (
     <RNAnimated.View
       pointerEvents="none"
-      style={[s.centerPop, { backgroundColor: type === "know" ? c.success : c.error, transform: [{ scale }] }]}
+      style={[
+        s.centerPop,
+        {
+          backgroundColor: isKnow ? c.success : c.error,
+          opacity,
+          transform: [{ scale }],
+          shadowColor: isKnow ? c.success : c.error,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.6,
+          shadowRadius: 20,
+        },
+      ]}
     >
-      <Text style={s.popIcon}>{type === "know" ? "✓" : "✕"}</Text>
+      <Text style={s.popIcon}>{isKnow ? "✓" : "✕"}</Text>
     </RNAnimated.View>
   );
 }
@@ -265,11 +335,23 @@ function LoadingState({ s, c }) {
 }
 
 function DoneState({ engine, navigation, listId }) {
-  const correctWords = engine.correctIds.map((id) => engine.words.find((w) => w.id === id)).filter(Boolean);
-  const wrongWordsList = engine.wrongIds
-    .map((id) => engine.words.find((w) => w.id === id))
-    .filter(Boolean)
-    .map((w) => ({ ...w, list_id: listId }));
+  // O(1) lookup — n^2 yerine
+  const wordsById = useMemo(
+    () => new Map(engine.words.map((w) => [w.id, w])),
+    [engine.words]
+  );
+  const correctWords = useMemo(
+    () => engine.correctIds.map((id) => wordsById.get(id)).filter(Boolean),
+    [engine.correctIds, wordsById]
+  );
+  const wrongWordsList = useMemo(
+    () =>
+      engine.wrongIds
+        .map((id) => wordsById.get(id))
+        .filter(Boolean)
+        .map((w) => ({ ...w, list_id: listId })),
+    [engine.wrongIds, wordsById, listId]
+  );
 
   const goToMistakesList = () => {
     engine.setShowMistakesModal(false);
@@ -399,5 +481,14 @@ function makeStyles(c) {
     },
     arrowBtn: { paddingVertical: 12, paddingHorizontal: 6 },
     arrowTxt: { fontFamily: c.fontBodyBold, fontSize: 15, letterSpacing: 0.3 },
+    swipeHint: {
+      textAlign: "center",
+      fontSize: 11,
+      letterSpacing: 0.2,
+      paddingHorizontal: 22,
+      paddingBottom: 8,
+      marginTop: -4,
+      opacity: 0.7,
+    },
   });
 }

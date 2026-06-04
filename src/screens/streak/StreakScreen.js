@@ -2,7 +2,7 @@
  * StreakScreen — Claude Design v2 spec.
  * Hero flame (animated float) + 3 stat tiles with trends + 35-day grid + badges.
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -15,22 +15,41 @@ import AchievementModal from "../../components/design/AchievementModal";
 import Last30BarChart from "../../components/design/Last30BarChart";
 import Last7DaysDots from "../../components/design/Last7DaysDots";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
+import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 
 export default function StreakScreen({ navigation }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
   const [days, setDays] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { newBadge, dismiss } = useBadgeWatcher({
     streakDays: stats.streakDays,
     totalWords: stats.totalWords,
   });
 
-  useEffect(() => {
-    getStudyStats().then(setStats).catch(() => {});
-    getDailyActivity(35).then(setDays).catch(() => {});
+  const load = useCallback(async () => {
+    try {
+      const [statsRes, daysRes] = await Promise.allSettled([
+        getStudyStats(),
+        getDailyActivity(35),
+      ]);
+      if (statsRes.status === "fulfilled" && statsRes.value) setStats(statsRes.value);
+      if (daysRes.status === "fulfilled" && Array.isArray(daysRes.value)) setDays(daysRes.value);
+    } finally {
+      setRefreshing(false);
+    }
   }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const accuracy = stats.totalSessions
     ? Math.round((stats.totalWords / Math.max(stats.totalSessions * 10, 1)) * 100)
@@ -44,6 +63,7 @@ export default function StreakScreen({ navigation }) {
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: 180 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           {/* Header */}
           <View style={s.header}>
@@ -186,23 +206,41 @@ function StatTile({ value, label, trend, accent, c, s }) {
 }
 
 function BadgeCell({ badge, unlocked, c, s }) {
+  const color = badge.color || c.accent;
   return (
     <View style={{ flex: 1, alignItems: "center" }}>
       <View
         style={[
           s.badgeBox,
           unlocked
-            ? { backgroundColor: c.accentGlow, borderColor: c.borderAccent, opacity: 1 }
-            : { backgroundColor: c.bgSurface, borderColor: c.border, opacity: 0.45 },
+            ? {
+                backgroundColor: color + "22",
+                borderColor: color + "55",
+                opacity: 1,
+                shadowColor: color,
+                shadowOffset: { width: 0, height: 0 },
+                shadowOpacity: 0.35,
+                shadowRadius: 10,
+              }
+            : { backgroundColor: c.bgSurface, borderColor: c.border, opacity: 0.4 },
         ]}
       >
-        {badge.icon ? (
-          <Icon d={badge.icon} size={26} stroke={unlocked ? c.accent : c.textMuted} fill={unlocked ? c.accentGlow : "none"} sw={1.5} />
-        ) : (
-          <Text style={{ fontSize: 26 }}>{badge.emoji}</Text>
-        )}
+        <Icon
+          d={badge.icon}
+          size={26}
+          stroke={unlocked ? color : c.textMuted}
+          fill={unlocked ? color + "33" : "none"}
+          sw={1.6}
+        />
       </View>
-      <Text style={s.badgeLbl}>{badge.label}</Text>
+      <Text
+        style={[
+          s.badgeLbl,
+          unlocked && { color: color, fontFamily: c.fontBodyBold },
+        ]}
+      >
+        {badge.label}
+      </Text>
     </View>
   );
 }

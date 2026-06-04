@@ -9,43 +9,91 @@ import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { usePremium } from "../../contexts/PremiumContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 import {
-  getReminderPref,
-  enableReminders,
-  cancelDailyReminder,
-  sendTestNotification,
+  getExtraReminders,
+  addExtraReminder,
+  removeExtraReminder,
+  activateRemindersWithPrompt,
   getPermissionStatus,
-  DEFAULT_TIMES,
 } from "../../lib/notifications";
+import TimePickerModal from "../../components/design/TimePickerModal";
 
 export default function SettingsScreen({ navigation }) {
   const { c, preference } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const { signOut, deleteAccount, isGuestUser } = useAuth();
-  const [reminder, setReminder] = useState({ enabled: false, times: DEFAULT_TIMES });
+  const { isPro } = usePremium();
   const [permStatus, setPermStatus] = useState(null);
+  const [extras, setExtras] = useState([]);
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const refresh = async () => {
+    setPermStatus(await getPermissionStatus());
+    setExtras(await getExtraReminders());
+  };
 
   useEffect(() => {
-    getReminderPref().then(setReminder);
-    getPermissionStatus().then(setPermStatus);
+    refresh();
   }, []);
 
-  const handleTestNotification = async () => {
+  const handleActivate = async () => {
     Haptics.selectionAsync();
-    const r = await sendTestNotification();
-    if (r.success) {
+    const r = await activateRemindersWithPrompt();
+    if (!r.success) {
       Alert.alert(
-        "Test bildirimi gönderildi",
-        "5 saniye içinde gelmeli. Gelmezse cihaz ayarlarından bildirim iznini kontrol et."
+        "İzin gerekli",
+        "Bildirimleri açabilmek için cihaz ayarlarından FlashcardMobile'a izin vermen gerek."
       );
     } else {
-      Alert.alert(
-        "Bildirim izni yok",
-        "Cihaz ayarlarından FlashcardMobile için bildirimleri aç, sonra tekrar dene."
-      );
+      Alert.alert("Aktif", "Sabah 09:00 ve akşam 20:00'da hatırlatma alacaksın.");
     }
-    getPermissionStatus().then(setPermStatus);
+    refresh();
+  };
+
+  const handleOpenPicker = () => {
+    Haptics.selectionAsync();
+    if (extras.length >= 4) {
+      Alert.alert("Limit", "En fazla 4 ek hatırlatıcı eklenebilir. Bir tanesini sil.");
+      return;
+    }
+    setPickerOpen(true);
+  };
+
+  const handlePickerConfirm = async (h, m) => {
+    setPickerOpen(false);
+    const r = await addExtraReminder(h, m);
+    if (!r.success) {
+      const msg = {
+        no_permission: "Önce bildirim izni ver.",
+        max_reached: "En fazla 4 ek hatırlatıcı eklenebilir.",
+        duplicate: "Bu saatte zaten bir hatırlatıcı var.",
+        base_clash: "Bu saat sabit hatırlatma ile çakışıyor — başka saat seç.",
+      }[r.reason] || "Eklenemedi.";
+      Alert.alert("Hata", msg);
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    refresh();
+  };
+
+  const handleRemoveExtra = (index, time) => {
+    Alert.alert(
+      "Hatırlatıcıyı kaldır",
+      `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")} hatırlatıcısı silinsin mi?`,
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Sil",
+          style: "destructive",
+          onPress: async () => {
+            await removeExtraReminder(index);
+            refresh();
+          },
+        },
+      ]
+    );
   };
 
   const permDetail = (() => {
@@ -55,28 +103,10 @@ export default function SettingsScreen({ navigation }) {
     return "Henüz sorulmadı";
   })();
 
-  const reminderDetail = (() => {
-    if (!reminder.enabled) return "Kapalı";
-    const times = reminder.times || DEFAULT_TIMES;
-    return times.map((t) => `${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`).join(" · ");
-  })();
-
   const appearanceLabel = () => {
     if (preference === "system") return "Otomatik";
     if (preference === "light") return "Açık";
     return "Koyu";
-  };
-
-  const toggleReminder = async () => {
-    Haptics.selectionAsync();
-    if (reminder.enabled) {
-      await cancelDailyReminder();
-      setReminder({ ...reminder, enabled: false });
-    } else {
-      const r = await enableReminders();
-      if (r.success) setReminder((prev) => ({ ...prev, enabled: true }));
-      else Alert.alert("İzin gerekli", "Bildirim izni verilmedi.");
-    }
   };
 
   const confirmDelete = () => {
@@ -121,6 +151,19 @@ export default function SettingsScreen({ navigation }) {
         </View>
 
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+          <Section title="Abonelik" c={c} s={s}>
+            <Row
+              iconPath={ICONS.crown}
+              label={isPro ? "Pro Aktif" : "Pro'ya Geç"}
+              detail={isPro ? "Tüm özellikler açık" : "Sınırsız kelime + reklamsız"}
+              onPress={() =>
+                !isPro && navigation.getParent()?.navigate("Paywall", { source: "settings" })
+              }
+              c={c}
+              s={s}
+            />
+          </Section>
+
           <Section title="Görünüm" c={c} s={s}>
             <Row
               iconPath={ICONS.sun}
@@ -143,22 +186,35 @@ export default function SettingsScreen({ navigation }) {
           <Section title="Bildirimler" c={c} s={s}>
             <Row
               iconPath={ICONS.sound}
-              label="Günlük Hatırlatıcı"
-              detail={reminderDetail}
-              onPress={toggleReminder}
+              label="Günlük Hatırlatma"
+              detail={extras.length === 0 ? "İstediğin saati ekle" : `${extras.length}/4 — yeni ekle`}
+              onPress={handleOpenPicker}
               c={c}
               s={s}
             />
+            {extras.map((t, i) => (
+              <Row
+                key={`extra-${i}`}
+                iconPath={ICONS.clock}
+                label={`${String(t.hour).padStart(2, "0")}:${String(t.minute).padStart(2, "0")}`}
+                detail="Kaldırmak için dokun"
+                onPress={() => handleRemoveExtra(i, t)}
+                c={c}
+                s={s}
+              />
+            ))}
+            {permStatus !== "granted" && (
+              <Row
+                iconPath={ICONS.shield}
+                label="Bildirimleri Aç"
+                detail="İzin gerekli — bildirim için"
+                onPress={handleActivate}
+                c={c}
+                s={s}
+              />
+            )}
             <Row
-              iconPath={ICONS.bolt}
-              label="Test Bildirimi Gönder"
-              detail="5 saniye sonra gelir"
-              onPress={handleTestNotification}
-              c={c}
-              s={s}
-            />
-            <Row
-              iconPath={ICONS.shield}
+              iconPath={ICONS.check}
               label="Bildirim İzni"
               detail={permDetail}
               c={c}
@@ -213,6 +269,15 @@ export default function SettingsScreen({ navigation }) {
 
           <Text style={s.versionTxt}>FlashcardMobile v1.0.0</Text>
         </ScrollView>
+
+        <TimePickerModal
+          visible={pickerOpen}
+          initialHour={14}
+          initialMinute={0}
+          onConfirm={handlePickerConfirm}
+          onClose={() => setPickerOpen(false)}
+          title="Ek hatırlatma saati"
+        />
       </SafeAreaView>
     </View>
   );

@@ -23,11 +23,13 @@ import {
   bumpMistakesStreak,
   resetMistakesStreak,
 } from "../supabase/mistakesList";
+import { useAchievements } from "../contexts/AchievementsContext";
 
 const MISTAKES_MODAL_THRESHOLD = 5;
 const CONFETTI_STREAK = 5;
 
 export default function useStudyEngine({ listId, presetWords, presetMode }) {
+  const { trigger: triggerAchievement } = useAchievements();
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -147,9 +149,11 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     bumpMistakesStreak(current.id, current.word, current.meaning).catch(() => {});
     setCorrect((c) => c + 1);
     setCorrectIds((arr) => [...arr, current.id]);
+    // Achievement: ilk graduate
+    triggerAchievement?.("word_graduated");
     // Sonraki karta geç
     setIndex((i) => i + 1);
-  }, [current]);
+  }, [current, triggerAchievement]);
 
   // "Yanlış çeviri bildir" — Supabase word_reports tablosuna yaz
   const reportCurrent = useCallback(async (reason = "wrong_translation", note = null) => {

@@ -19,7 +19,7 @@ import LottieView from "lottie-react-native";
 import { Alert } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
-import { enableReminders } from "../../lib/notifications";
+import { activateRemindersWithPrompt } from "../../lib/notifications";
 
 const LOTTIE_SOURCES = {
   network: require("../../assets/lottie/network.json"),
@@ -73,13 +73,13 @@ export default function OnboardingScreen({ onFinish }) {
   const scrollX = useRef(new Animated.Value(0)).current;
 
   const finishWithReminders = () => {
-    // SRS algoritması bildirimsiz değer kaybeder — kullanıcıya proactive sor
+    // 2 sabit bildirim (09:00 + 20:00) — akıllı tekrar sistemi bildirim olmadan çalışmaz.
     Alert.alert(
-      "Hatırlatıcı kuralım mı?",
-      "Her gün 12:30 ve 20:00'da seni nazikçe hatırlatalım. Akıllı tekrar sistemi bildirimle çalışıyor.",
+      "Bildirim İzni",
+      "Sana sabah 09:00 ve akşam 20:00'da nazikçe hatırlatacağız. Akıllı tekrar sistemi bildirim ister.",
       [
         {
-          text: "Hayır, şimdi olmasın",
+          text: "Daha sonra",
           style: "cancel",
           onPress: () => {
             markOnboardingSeen();
@@ -87,9 +87,9 @@ export default function OnboardingScreen({ onFinish }) {
           },
         },
         {
-          text: "Evet, kur",
+          text: "İzin Ver",
           onPress: async () => {
-            await enableReminders().catch(() => {});
+            await activateRemindersWithPrompt().catch(() => {});
             markOnboardingSeen();
             onFinish();
           },

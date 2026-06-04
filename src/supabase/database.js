@@ -4,7 +4,7 @@
  */
 
 import supabase from "./client";
-import { TABLES, DEFAULT_LISTS } from "./config";
+import { TABLES } from "./config";
 
 // ==================== LISTS OPERATIONS ====================
 
@@ -340,49 +340,11 @@ export const deleteWord = async (wordId) => {
  * @param {string} userId - User ID
  * @returns {Promise<Object>} Creation result
  */
-export const createDefaultLists = async (userId) => {
-  try {
-    const createdLists = [];
-
-    // Create each default list
-    for (const listTemplate of DEFAULT_LISTS) {
-      // Create the list
-      const { data: list, error: listError } = await supabase
-        .from(TABLES.LISTS)
-        .insert([
-          {
-            title: listTemplate.title,
-            description: listTemplate.description,
-            level: listTemplate.level,
-            image_url: listTemplate.image_url,
-            user_id: userId,
-            inserted_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
-
-      if (listError) throw listError;
-
-      // Create words for this list
-      const wordsToInsert = listTemplate.words.map((word) => ({
-        ...word,
-        list_id: list.id,
-        inserted_at: new Date().toISOString(),
-      }));
-
-      const { error: wordsError } = await supabase.from(TABLES.WORDS).insert(wordsToInsert);
-
-      if (wordsError) throw wordsError;
-
-      createdLists.push(list);
-    }
-
-    return { success: true, data: createdLists };
-  } catch (error) {
-    console.error("Create default lists error:", error.message);
-    return { success: false, error: error.message };
-  }
+// DEPRECATED: createDefaultLists kaldırıldı.
+// Public seed listeler artık supabase/migrations/0001_schema.sql'de.
+// Yeni kullanıcılara public listeler "Keşfet" sekmesinden zaten görünür.
+export const createDefaultLists = async () => {
+  return { success: true, data: [] };
 };
 
 /**

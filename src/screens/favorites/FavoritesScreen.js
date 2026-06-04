@@ -28,6 +28,7 @@ import CategoryCover from "../../components/design/CategoryCover";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
 import { Skeleton, SkeletonListItem } from "../../components/design/Skeleton";
+import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 
 const TABS = ["Bugün", "Zor Kelimeler", "Quiz"];
 
@@ -37,7 +38,7 @@ export default function FavoritesScreen() {
   const navigation = useNavigation();
   const [tab, setTab] = useState("Bugün");
   const [dueCount, setDueCount] = useState(0);
-  const { lists, loading: listsLoading } = usePublicLists();
+  const { lists, loading: listsLoading, refresh: refreshLists } = usePublicLists();
   const [hardWords, setHardWords] = useState([]);
   const [categories, setCategories] = useState({
     newWords: [],
@@ -45,6 +46,7 @@ export default function FavoritesScreen() {
     lapsedWords: [],
   });
   const [otherLoading, setOtherLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const loading = listsLoading || otherLoading;
 
   const s = useMemo(() => makeStyles(c), [c]);
@@ -61,8 +63,14 @@ export default function FavoritesScreen() {
       setCategories(cats);
     } finally {
       setOtherLoading(false);
+      setRefreshing(false);
     }
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([load(), refreshLists?.()].filter(Boolean));
+  }, [load, refreshLists]);
 
   useFocusEffect(
     useCallback(() => {
@@ -76,6 +84,7 @@ export default function FavoritesScreen() {
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
+          refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <Text style={s.title}>Çalış</Text>
 

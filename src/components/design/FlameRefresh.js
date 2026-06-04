@@ -26,16 +26,18 @@ const PULL_THRESHOLD = 80;
  * stil; üzerine animasyonlu overlay opsiyonel.
  */
 export function FlameRefreshControl({ refreshing, onRefresh, title = "Çekip yenile..." }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
+  // Light mode'da bgCard near-white → spinner kayboluyordu.
+  // Android'in progressBackgroundColor'ı zıt ton olsun: dark'ta açık card, light'ta koyu accent zemin.
   return (
     <RefreshControl
       refreshing={refreshing}
       onRefresh={onRefresh}
       tintColor={c.accent}
       colors={[c.accent, c.warning]}
-      progressBackgroundColor={c.bgCard}
+      progressBackgroundColor={isDark ? c.bgCard : c.bgSurface}
       title={title}
-      titleColor={c.textSec}
+      titleColor={c.textPrimary}
     />
   );
 }

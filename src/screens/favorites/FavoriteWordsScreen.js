@@ -23,21 +23,39 @@ import BookmarkButton from "../../components/design/BookmarkButton";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import EmptyState from "../../components/EmptyState";
 import { SkeletonWordCard } from "../../components/design/Skeleton";
+import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 
 export default function FavoriteWordsScreen({ navigation }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
-    setLoading(true);
-    const res = await getFavoriteWords();
-    if (res.success) setItems(res.data);
-    setLoading(false);
+    try {
+      setError(null);
+      const res = await getFavoriteWords();
+      if (res.success) setItems(res.data || []);
+      else setError(res.error || "Favoriler yüklenemedi");
+    } catch (e) {
+      setError("Favoriler yüklenemedi — internet bağlantını kontrol et");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, []);
 
-  useFocusEffect(useCallback(() => { load(); }, [load]));
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    load();
+  }, [load]);
+
+  useFocusEffect(useCallback(() => {
+    setLoading(true);
+    load();
+  }, [load]));
 
   return (
     <View style={s.root}>
@@ -60,6 +78,17 @@ export default function FavoriteWordsScreen({ navigation }) {
               <SkeletonWordCard key={i} />
             ))}
           </ScrollView>
+        ) : error ? (
+          <EmptyState
+            kind="offline"
+            title="Bağlantı sorunu"
+            subtitle={error}
+            actionLabel="Tekrar dene"
+            onAction={() => {
+              setLoading(true);
+              load();
+            }}
+          />
         ) : items.length === 0 ? (
           <EmptyState
             kind="search"
@@ -72,6 +101,7 @@ export default function FavoriteWordsScreen({ navigation }) {
           <FlatList
             data={items}
             keyExtractor={(item) => String(item.word_id)}
+            refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             ListHeaderComponent={
               <Text style={s.count}>{items.length} kelime</Text>
             }

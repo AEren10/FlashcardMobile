@@ -2,16 +2,17 @@
  * ProfileScreen — Claude Design v2.
  * Avatar gradient + level chip + motivation glow card + settings list.
  */
-import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { getStudyStats } from "../../supabase/progress";
+import { getProfile } from "../../supabase/profile";
 import Icon, { ICONS } from "../../components/design/Icon";
 import useUserLevel from "../../hooks/useUserLevel";
 
@@ -28,6 +29,8 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const { user, signOut, getUserEmail, isGuestUser, deleteAccount } = useAuth();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
+  const [profile, setProfile] = useState({ display_name: null, avatar_url: null });
+  const [statsError, setStatsError] = useState(false);
 
   const appearanceLabel = () => {
     if (preference === "system") return "Otomatik";
@@ -37,14 +40,36 @@ export default function ProfileScreen() {
 
   const s = useMemo(() => makeStyles(c), [c]);
 
+  const loadStats = useCallback(() => {
+    if (isGuestUser()) return;
+    setStatsError(false);
+    getStudyStats()
+      .then((data) => {
+        if (data) setStats(data);
+        else setStatsError(true);
+      })
+      .catch(() => setStatsError(true));
+  }, [isGuestUser]);
+
   useEffect(() => {
-    if (!isGuestUser()) {
-      getStudyStats().then(setStats).catch(() => {});
-    }
+    loadStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Profil bilgilerini her ekran odaklandığında yenile (EditProfile'dan dönüşte güncel kalır)
+  useFocusEffect(
+    useCallback(() => {
+      if (isGuestUser() || !user?.id) return;
+      getProfile(user.id).then((res) => {
+        if (res.success && res.data) {
+          setProfile(res.data);
+        }
+      });
+    }, [user?.id, isGuestUser])
+  );
+
   const displayName = () => {
+    if (profile.display_name) return profile.display_name;
     const m = user?.user_metadata;
     if (m?.full_name) return m.full_name;
     if (m?.first_name) return m.last_name ? `${m.first_name} ${m.last_name}` : m.first_name;
@@ -106,14 +131,18 @@ export default function ProfileScreen() {
           {/* Avatar + name + level */}
           <View style={s.headerBlock}>
             <View style={s.avatarWrap}>
-              <LinearGradient
-                colors={[c.cobalt, c.accent]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={s.avatarGrad}
-              >
-                <Text style={s.avatarTxt}>{initials()}</Text>
-              </LinearGradient>
+              {profile.avatar_url ? (
+                <Image source={{ uri: profile.avatar_url }} style={s.avatarGrad} />
+              ) : (
+                <LinearGradient
+                  colors={[c.cobalt, c.accent]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={s.avatarGrad}
+                >
+                  <Text style={s.avatarTxt}>{initials()}</Text>
+                </LinearGradient>
+              )}
             </View>
             <Text style={s.name}>{displayName()}</Text>
             <Pressable
@@ -138,8 +167,39 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* Motivation card */}
-          <View style={s.motivationCard}>
+          {/* Bağlantı sorunu banner */}
+          {statsError && (
+            <Pressable
+              onPress={loadStats}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: 12,
+                backgroundColor: c.warning + "1A",
+                borderWidth: 1,
+                borderColor: c.warning + "55",
+                marginBottom: 14,
+              }}
+            >
+              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: 12 }}>
+                İstatistikler yüklenemedi — dokun ve yenile
+              </Text>
+              <Text style={{ color: c.warning, fontSize: 14 }}>↻</Text>
+            </Pressable>
+          )}
+
+          {/* Motivation card — tıklanabilir, Stats sayfasına gider */}
+          <Pressable
+            onPress={() => navigation.navigate("Streak")}
+            style={({ pressed }) => [
+              s.motivationCard,
+              { transform: [{ scale: pressed ? 0.99 : 1 }] },
+            ]}
+            accessibilityLabel="İstatistikler"
+          >
             <LinearGradient
               colors={[c.bgElevated, c.bgSurface]}
               start={{ x: 0, y: 0 }}
@@ -155,41 +215,45 @@ export default function ProfileScreen() {
               style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
               pointerEvents="none"
             />
-            <Text style={s.motTitle}>
-              Bu hafta {Math.min(stats.totalWords, 99)} kelime öğrendin 🎉
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Text style={s.motTitle}>
+                Bu hafta {Math.min(stats.totalWords, 99)} kelime öğrendin
+              </Text>
+              <Icon d={ICONS.sparkle} size={20} stroke={c.warning} fill={c.warning} sw={1.5} />
+            </View>
             <Text style={s.motSub}>
-              Harika gidiyorsun — devam ettikçe daha kalıcı olur.
+              Harika gidiyorsun — devam ettikçe daha kalıcı olur. Detayları gör →
             </Text>
             <View style={s.miniBadges}>
               {[
-                { icon: ICONS.leaf, l: "İlk Adım", on: stats.totalWords >= 1 },
-                { icon: ICONS.flame, l: "7 Gün", on: stats.streakDays >= 7 },
-                { icon: ICONS.bolt, l: "100 Kelime", on: stats.totalWords >= 100 },
+                { icon: ICONS.leaf, l: "İlk Adım", on: stats.totalWords >= 1, color: "#7BB661" },
+                { icon: ICONS.flame, l: "7 Gün", on: stats.streakDays >= 7, color: "#FF8A4C" },
+                { icon: ICONS.bolt, l: "100 Kelime", on: stats.totalWords >= 100, color: "#7BAEC8" },
               ].map((b) => (
                 <View key={b.l} style={{ flex: 1, alignItems: "center" }}>
                   <View
                     style={[
                       s.miniBadgeBox,
                       {
-                        backgroundColor: b.on ? c.accentGlow : c.bgSurface,
-                        borderColor: b.on ? c.borderAccent : c.border,
-                        opacity: b.on ? 1 : 0.45,
+                        backgroundColor: b.on ? b.color + "22" : c.bgSurface,
+                        borderColor: b.on ? b.color + "55" : c.border,
+                        opacity: b.on ? 1 : 0.4,
                       },
                     ]}
                   >
-                    <Icon d={b.icon} size={22} stroke={b.on ? c.accent : c.textMuted} sw={1.5} />
+                    <Icon d={b.icon} size={22} stroke={b.on ? b.color : c.textMuted} fill={b.on ? b.color + "33" : "none"} sw={1.6} />
                   </View>
-                  <Text style={s.miniBadgeLbl}>{b.l}</Text>
+                  <Text style={[s.miniBadgeLbl, b.on && { color: b.color, fontFamily: c.fontBodyBold }]}>{b.l}</Text>
                 </View>
               ))}
             </View>
-          </View>
+          </Pressable>
 
-          {/* Quick actions — sade */}
+          {/* Quick actions — renkli icon'larla */}
           <View style={s.list}>
             <Row
-              icon="🗺️"
+              iconPath={ICONS.target}
+              iconColor="#8B5CF6"
               label="Yol Haritam"
               detail="Seviye + İlerleme"
               onPress={() => navigation.navigate("Roadmap")}
@@ -197,14 +261,25 @@ export default function ProfileScreen() {
               s={s}
             />
             <Row
-              icon="👤"
+              iconPath={ICONS.trophy}
+              iconColor="#D4AE5E"
+              label="Başarımlar"
+              detail="Tüm rozetlerin"
+              onPress={() => navigation.navigate("Achievements")}
+              c={c}
+              s={s}
+            />
+            <Row
+              iconPath={ICONS.user}
+              iconColor="#7BAEC8"
               label="Profili Düzenle"
               onPress={() => navigation.navigate("EditProfile")}
               c={c}
               s={s}
             />
             <Row
-              icon="⚙️"
+              iconPath={ICONS.bolt}
+              iconColor="#6DB585"
               label="Ayarlar"
               detail="Tema, Dil, Bildirim…"
               onPress={() => navigation.navigate("Settings")}
@@ -212,7 +287,8 @@ export default function ProfileScreen() {
               s={s}
             />
             <Row
-              icon="ℹ️"
+              iconPath={ICONS.shield}
+              iconColor="#A8B0B5"
               label="Hakkında"
               onPress={() =>
                 Alert.alert(
@@ -248,14 +324,31 @@ export default function ProfileScreen() {
   );
 }
 
-function Row({ icon, label, detail, onPress, c, s, last }) {
+function Row({ icon, iconPath, iconColor, label, detail, onPress, c, s, last }) {
   return (
     <Pressable
       onPress={onPress}
       style={[s.row, last ? { borderBottomWidth: 0 } : { borderBottomColor: c.divider }]}
     >
-      <Text style={{ fontSize: 18, width: 24, textAlign: "center" }}>{icon}</Text>
-      <Text style={{ flex: 1, fontFamily: c.fontBody, fontSize: 15, color: c.textPrimary }}>
+      {iconPath ? (
+        <View
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: 9,
+            backgroundColor: (iconColor || c.accent) + "1F",
+            borderWidth: 1,
+            borderColor: (iconColor || c.accent) + "44",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon d={iconPath} size={17} stroke={iconColor || c.accent} sw={1.8} />
+        </View>
+      ) : (
+        <Text style={{ fontSize: 18, width: 24, textAlign: "center" }}>{icon}</Text>
+      )}
+      <Text style={{ flex: 1, fontFamily: c.fontBody, fontSize: 15, color: c.textPrimary, marginLeft: 4 }}>
         {label}
       </Text>
       {detail && (
@@ -271,7 +364,7 @@ function Row({ icon, label, detail, onPress, c, s, last }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    headerBlock: { alignItems: "center", paddingVertical: 14 },
+    headerBlock: { alignItems: "center", paddingTop: 8, paddingBottom: 22 },
     avatarWrap: {
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 0 },
@@ -288,7 +381,7 @@ function makeStyles(c) {
       justifyContent: "center",
     },
     avatarTxt: { fontFamily: c.fontNum, fontSize: 30, color: "#FFFFFF" },
-    name: { fontFamily: c.fontBodyBold, fontSize: 22, color: c.textPrimary },
+    name: { fontFamily: c.fontBodyBold, fontSize: 22, color: c.textPrimary, marginTop: 14 },
     levelChip: {
       marginTop: 8,
       paddingHorizontal: 12,
@@ -311,6 +404,7 @@ function makeStyles(c) {
       borderColor: c.borderAccent,
       overflow: "hidden",
       marginTop: 8,
+      marginBottom: 20,
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.35,

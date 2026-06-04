@@ -21,6 +21,7 @@ import { useNavigation } from "@react-navigation/native";
 import Svg, { Path } from "react-native-svg";
 
 import { useTheme } from "../../contexts/ThemeContext";
+import { useAchievements } from "../../contexts/AchievementsContext";
 import useImageUpload from "../../hooks/useImageUpload";
 import useListEditor from "../../hooks/useListEditor";
 import { useToast } from "../../contexts/ToastContext";
@@ -32,6 +33,7 @@ export default function CreateListScreen({ route }) {
   const { c } = useTheme();
   const styles = useMemo(() => makeStyles(c), [c]);
   const toast = useToast();
+  const { trigger: triggerAchievement } = useAchievements();
   const listId = route?.params?.listId;
   const editor = useListEditor(listId);
   const img = useImageUpload();
@@ -84,6 +86,8 @@ export default function CreateListScreen({ route }) {
       const saved = await editor.save(finalUrl);
       // Public lists cache'i geçersiz kıl — diğer ekranlar fresh data alsın
       await invalidatePublicLists();
+      // Achievement: ilk liste
+      if (!editor.isEdit) triggerAchievement?.("list_created");
       toast.show({
         message: editor.isEdit ? "Liste güncellendi ✓" : "Liste oluşturuldu ✓",
         type: "success",

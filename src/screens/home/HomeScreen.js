@@ -17,6 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useAchievements } from "../../contexts/AchievementsContext";
 import supabaseApiService from "../../services/supabaseApi";
 import { getStudyStats } from "../../supabase/progress";
 import { getMistakesList } from "../../supabase/mistakesList";
@@ -31,9 +32,16 @@ import HeroDashboard from "./components/HeroDashboard";
 import HomeSearchBar from "./components/HomeSearchBar";
 import LevelMiniCard from "./components/LevelMiniCard";
 import RandomReviewModal from "../../components/design/RandomReviewModal";
+import ModeSegment from "../../components/design/ModeSegment";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SkeletonContinueCard, SkeletonStatRow } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import usePublicLists from "../../hooks/usePublicLists";
+import {
+  DISCOVERY_CATEGORIES,
+  normalizeCategorySlug,
+  getCategoryMeta,
+} from "../../lib/categoryMeta";
 
 const DAILY_TOTAL = 10;
 
@@ -55,9 +63,12 @@ export default function HomeScreen({ navigation }) {
   const [authLoading, setAuthLoading] = useState(true);
   const [randomReviewOpen, setRandomReviewOpen] = useState(false);
   const favoriteWordIds = useSelector(selectFavoriteWordIds);
+  const { syncStats: syncAchievements } = useAchievements();
   const loading = listsLoading || authLoading;
 
   const s = useMemo(() => makeStyles(c), [c]);
+
+  const [dataError, setDataError] = useState(false);
 
   const loadUserData = useCallback(async () => {
     if (!isAuthenticated()) {
@@ -65,16 +76,36 @@ export default function HomeScreen({ navigation }) {
       return;
     }
     try {
-      const [statsRes, mistakesRes] = await Promise.all([
-        getStudyStats().catch(() => null),
-        getMistakesList().catch(() => null),
+      const [statsRes, mistakesRes] = await Promise.allSettled([
+        getStudyStats(),
+        getMistakesList(),
       ]);
-      if (statsRes) setStats(statsRes);
-      if (mistakesRes?.success) setMistakesList(mistakesRes.data);
+
+      const statsOk = statsRes.status === "fulfilled" && statsRes.value;
+      const mistakesOk = mistakesRes.status === "fulfilled";
+
+      // Her ikisi de fail olduysa kullanıcıya bilgi ver — kısmi veri sessiz devam etsin
+      setDataError(!statsOk && !mistakesOk);
+
+      if (statsOk) {
+        setStats(statsRes.value);
+        const accuracy = statsRes.value.totalSessions
+          ? Math.round((statsRes.value.totalWords / Math.max(statsRes.value.totalSessions * 10, 1)) * 100)
+          : 0;
+        syncAchievements({
+          streakDays: statsRes.value.streakDays || 0,
+          totalWords: statsRes.value.totalWords || 0,
+          totalSessions: statsRes.value.totalSessions || 0,
+          accuracy,
+          favoritedWords: favoriteWordIds.length,
+        });
+      }
+      if (mistakesOk && mistakesRes.value?.success) setMistakesList(mistakesRes.value.data);
     } finally {
       setAuthLoading(false);
     }
-  }, [isAuthenticated]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, favoriteWordIds.length, syncAchievements]);
 
   useFocusEffect(
     useCallback(() => {
@@ -93,7 +124,7 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const recentLists = lists.slice(0, 5);
+  const recentLists = useMemo(() => lists.slice(0, 5), [lists]);
   const popularLists = useMemo(
     () => [...lists].sort((a, b) => (b.study_count ?? 0) - (a.study_count ?? 0)).slice(0, 8),
     [lists]
@@ -106,21 +137,56 @@ export default function HomeScreen({ navigation }) {
     [lists]
   );
 
-  // Kategorileri bir kez grupla — her DiscoveryRow için filter() çalıştırma maliyetini sıfırla
+  // Kategorileri bir kez grupla — DB'den gelen kategorileri canonical slug'a normalize et
   const categoryMap = useMemo(() => {
     const map = {};
     for (const l of lists) {
-      const k = (l.category || "").toLowerCase();
-      if (!k) continue;
-      (map[k] = map[k] || []).push(l);
+      const slug = normalizeCategorySlug(l.category);
+      if (!slug || slug === "other") continue;
+      (map[slug] = map[slug] || []).push(l);
     }
     return map;
   }, [lists]);
 
-  const byCategory = useCallback(
-    (cat) => (categoryMap[cat.toLowerCase()] || []).slice(0, 8),
-    [categoryMap]
-  );
+  // DB'de gerçekten veri olan kategoriler — DISCOVERY_CATEGORIES sırasına göre.
+  // Normal modda "exam" slider'ını GİZLE — Sınav modunda ayrı sayfa var.
+  // Az dolu kategoriler (1 liste) "Karışık" sliderına havuzlanır — sayfa boş hissetmesin.
+  const DENSE_MIN = 2;
+  const discoverySections = useMemo(() => {
+    const candidates = DISCOVERY_CATEGORIES.filter((slug) => slug !== "exam");
+    const dense = [];
+    const sparseItems = [];
+    for (const slug of candidates) {
+      const arr = categoryMap[slug] || [];
+      if (arr.length >= DENSE_MIN) {
+        dense.push({
+          slug,
+          meta: getCategoryMeta(slug),
+          items: arr.slice(0, 8),
+        });
+      } else if (arr.length > 0) {
+        // 1 listesi olan kategorilerin tek listesi "Karışık" havuzuna gider
+        sparseItems.push(...arr);
+      }
+    }
+
+    const sections = [...dense];
+    if (sparseItems.length > 0) {
+      sections.push({
+        slug: "mixed",
+        meta: {
+          name: "Karışık Konular",
+          subtitle: "Farklı kategorilerden seçmeler",
+          accent: "#C8A96E",
+        },
+        items: sparseItems.slice(0, 12),
+      });
+    }
+    return sections;
+  }, [categoryMap]);
+
+  // ModeSegment'in "Sınav" badge'i için: exam kategorisindeki liste sayısı
+  const examCount = useMemo(() => (categoryMap.exam || []).length, [categoryMap]);
 
   const openList = useCallback(
     (item) =>
@@ -155,6 +221,30 @@ export default function HomeScreen({ navigation }) {
             />
           }
         >
+          {/* Bağlantı sorunu banner — istatistikler yüklenemediyse */}
+          {dataError && !loading && (
+            <Pressable
+              onPress={() => loadUserData()}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 8,
+                paddingVertical: 10,
+                paddingHorizontal: 14,
+                borderRadius: 12,
+                backgroundColor: c.warning + "1A",
+                borderWidth: 1,
+                borderColor: c.warning + "55",
+                marginBottom: 14,
+              }}
+            >
+              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: 12 }}>
+                İstatistikler yüklenemedi — yenilemek için dokun
+              </Text>
+              <Text style={{ color: c.warning, fontSize: 14 }}>↻</Text>
+            </Pressable>
+          )}
+
           {/* Hero Dashboard — animasyonlu canlı üst alan */}
           {loading ? (
             <View style={{ marginBottom: 4 }}>
@@ -171,6 +261,18 @@ export default function HomeScreen({ navigation }) {
               onGoalPress={startChallenge}
             />
           )}
+
+          {/* Normal / Sınav modu toggle */}
+          <ModeSegment
+            mode="normal"
+            examCount={examCount}
+            onChange={(next) => {
+              if (next === "exam") {
+                AsyncStorage.setItem("@fc:homeMode", "exam").catch(() => {});
+                navigation.replace("ExamHome");
+              }
+            }}
+          />
 
           {/* Challenge hero card */}
           <PressableScale onPress={startChallenge} style={s.challengeCard}>
@@ -318,7 +420,7 @@ export default function HomeScreen({ navigation }) {
                   title="Favori Kelimelerim"
                   subtitle="Kart üstündeki yer iminden eklediklerin."
                   count={favoriteWordIds.length}
-                  accent={c.accent}
+                  accent={c.success}
                   onPress={() =>
                     navigation.getParent()?.navigate("MyLists", {
                       screen: "FavoriteWords",
@@ -353,86 +455,33 @@ export default function HomeScreen({ navigation }) {
             }
           />
 
-          {/* Kategorik slider'lar — Spotify/App Store tarzı */}
-          <DiscoveryRow
-            title="İş & Kariyer"
-            subtitle="Profesyonel İngilizce"
-            items={byCategory("business")}
-            accent={c.cobalt}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("category", {
-                title: "İş & Kariyer",
-                category: "business",
-                accent: c.cobalt,
-              })
-            }
-          />
-
-          <DiscoveryRow
-            title="Seyahat"
-            subtitle="Yolda işine yarayacak"
-            items={byCategory("travel")}
-            accent={c.info}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("category", {
-                title: "Seyahat",
-                category: "travel",
-                accent: c.info,
-              })
-            }
-          />
-
-          <DiscoveryRow
-            title="Akademik"
-            subtitle="Sınav ve akademi"
-            items={byCategory("academic")}
-            accent={c.accent}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("category", {
-                title: "Akademik",
-                category: "academic",
-                accent: c.accent,
-              })
-            }
-          />
-
-          <DiscoveryRow
-            title="Teknoloji"
-            subtitle="Modern yazılım & AI"
-            items={byCategory("tech")}
-            accent={c.success}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("category", {
-                title: "Teknoloji",
-                category: "tech",
-                accent: c.success,
-              })
-            }
-          />
-
-          <DiscoveryRow
-            title="Yemek & Mutfak"
-            subtitle="Restoran ve günlük yemek"
-            items={byCategory("food")}
-            accent={c.warning}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("category", {
-                title: "Yemek & Mutfak",
-                category: "food",
-                accent: c.warning,
-              })
-            }
-          />
+          {/* Kategorik slider'lar — DB'deki dolu kategorilerden DINAMIK render.
+              Boş kategori otomatik gizlenir (DiscoveryRow zaten null döner). */}
+          {discoverySections.map((sec) => (
+            <DiscoveryRow
+              key={sec.slug}
+              title={sec.meta.name}
+              subtitle={sec.meta.subtitle}
+              items={sec.items}
+              accent={sec.meta.accent}
+              loading={loading}
+              onItemPress={openList}
+              onSeeAll={() => {
+                if (sec.slug === "mixed") {
+                  openExplorer("newest", {
+                    title: sec.meta.name,
+                    accent: sec.meta.accent,
+                  });
+                } else {
+                  openExplorer("category", {
+                    title: sec.meta.name,
+                    category: sec.slug,
+                    accent: sec.meta.accent,
+                  });
+                }
+              }}
+            />
+          ))}
 
           {/* Yeni eklendi */}
           <DiscoveryRow
