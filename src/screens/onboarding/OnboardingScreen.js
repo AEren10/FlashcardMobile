@@ -15,8 +15,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
+import LottieView from "lottie-react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
+
+const LOTTIE_SOURCES = {
+  network: require("../../assets/lottie/network.json"),
+  stack: require("../../assets/lottie/stack.json"),
+  graph: require("../../assets/lottie/graph.json"),
+};
 
 const { width } = Dimensions.get("window");
 
@@ -100,10 +107,22 @@ export default function OnboardingScreen({ onFinish }) {
       extrapolate: "clamp",
     });
 
+    const lottieSrc = LOTTIE_SOURCES[item.kind];
+
     return (
       <View style={[styles.slide, { width }]}>
         <Animated.View style={{ opacity, transform: [{ scale }] }}>
-          <AbstractIllustration kind={item.kind} size={220} />
+          {lottieSrc ? (
+            <LottieView
+              source={lottieSrc}
+              autoPlay
+              loop
+              style={{ width: 260, height: 260 }}
+              resizeMode="contain"
+            />
+          ) : (
+            <AbstractIllustration kind={item.kind} size={220} />
+          )}
         </Animated.View>
         <Animated.Text
           style={[

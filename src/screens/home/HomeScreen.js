@@ -30,6 +30,7 @@ import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
 import HomeSearchBar from "./components/HomeSearchBar";
 import LevelMiniCard from "./components/LevelMiniCard";
+import RandomReviewModal from "../../components/design/RandomReviewModal";
 import { SkeletonContinueCard, SkeletonStatRow } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import usePublicLists from "../../hooks/usePublicLists";
@@ -52,6 +53,7 @@ export default function HomeScreen({ navigation }) {
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
   const [mistakesList, setMistakesList] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [randomReviewOpen, setRandomReviewOpen] = useState(false);
   const favoriteWordIds = useSelector(selectFavoriteWordIds);
   const loading = listsLoading || authLoading;
 
@@ -268,9 +270,22 @@ export default function HomeScreen({ navigation }) {
           )}
 
           {/* Senin İçin — kişisel akıllı kartlar */}
-          {isAuthenticated() && (favoriteWordIds.length > 0 || mistakesList) && (
+          {isAuthenticated() && (
             <View style={{ marginTop: 26 }}>
               <Text style={s.discoveryHeader}>Senin İçin</Text>
+
+              {/* Bildiklerinden Tekrar — herkese görünür (auth varsa) */}
+              {stats.totalWords > 0 && (
+                <SmartListCard
+                  iconPath={ICONS.refresh || ICONS.flame}
+                  title="Bildiklerinden Tekrar"
+                  subtitle="Rastgele eski kelimeler — unutmadan tazele."
+                  count={stats.totalWords}
+                  accent={c.cobalt}
+                  onPress={() => setRandomReviewOpen(true)}
+                />
+              )}
+
               {favoriteWordIds.length > 0 && (
                 <SmartListCard
                   iconPath={ICONS.bookmark}
@@ -407,6 +422,12 @@ export default function HomeScreen({ navigation }) {
           />
         </ScrollView>
       </SafeAreaView>
+
+      <RandomReviewModal
+        visible={randomReviewOpen}
+        onClose={() => setRandomReviewOpen(false)}
+        navigation={navigation}
+      />
     </View>
   );
 }

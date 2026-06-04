@@ -226,3 +226,69 @@ export async function getDailyActivity(days = 30) {
   }
   return result;
 }
+
+/**
+ * Kullanıcının "öğrenmiş sayılan" kelimelerinden N tane rastgele çek.
+ * Tanım: repetitions >= 2 ve lapses < 2 → kelime stabil öğrenilmiş.
+ * Random review modal için kullanılır.
+ *
+ * @param {number} count — kaç kelime
+ * @returns {Promise<Array>} words array (id, word, meaning, example, example_tr, list_id)
+ */
+export async function getRandomKnownWords(count = 10) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // 1) Öğrenilmiş word_id'leri çek
+  const { data: progressRows, error: pErr } = await supabase
+    .from(TABLES.WORD_PROGRESS)
+    .select("word_id, repetitions, lapses, last_reviewed")
+    .eq("user_id", user.id)
+    .gte("repetitions", 2)
+    .lt("lapses", 2)
+    .order("last_reviewed", { ascending: false })
+    .limit(500); // top 500 known
+
+  if (pErr || !progressRows?.length) return [];
+
+  // 2) Rastgele N tane seç
+  const shuffled = [...progressRows].sort(() => Math.random() - 0.5);
+  const picked = shuffled.slice(0, count);
+  const ids = picked.map((r) => r.word_id);
+
+  // 3) Kelime detaylarını al
+  const { data: words, error: wErr } = await supabase
+    .from(TABLES.WORDS)
+    .select("id, word, meaning, example, example_tr, list_id")
+    .in("id", ids);
+
+  if (wErr) {
+    console.warn("getRandomKnownWords words fetch", wErr.message);
+    return [];
+  }
+
+  // Orijinal sıraya göre dön (id sırası rastgele zaten)
+  return words || [];
+}
+
+/**
+ * Kaç tane öğrenilmiş kelimesi olduğunu döndür — modal'da "Toplam X kelime biliyorsun" göstermek için.
+ */
+export async function getKnownWordsCount() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  const { count, error } = await supabase
+    .from(TABLES.WORD_PROGRESS)
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("repetitions", 2)
+    .lt("lapses", 2);
+
+  if (error) return 0;
+  return count || 0;
+}
