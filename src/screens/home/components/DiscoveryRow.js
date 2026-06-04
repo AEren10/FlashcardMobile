@@ -127,10 +127,10 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  title: { fontSize: 17 },
-  sub: { fontSize: 11, marginTop: 2 },
+  title: { fontSize: 21, lineHeight: 24, letterSpacing: 0.1 },
+  sub: { fontSize: 12, marginTop: 3, lineHeight: 16 },
   seeAll: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -142,7 +142,7 @@ const s = StyleSheet.create({
     letterSpacing: 0.3,
   },
   card: {
-    width: 175,
+    width: 192,
     borderRadius: 16,
     borderWidth: 1,
     overflow: "hidden",

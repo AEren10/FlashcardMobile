@@ -22,6 +22,7 @@ import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useProfile } from "../../contexts/ProfileContext";
 import { getProfile, updateProfile, uploadAvatar } from "../../supabase/profile";
 import { useToast } from "../../contexts/ToastContext";
 import Icon, { ICONS } from "../../components/design/Icon";
@@ -31,6 +32,7 @@ export default function EditProfileScreen({ navigation }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const { getUserId, getUserEmail } = useAuth();
+  const { patchOptimistic, refresh: refreshProfile } = useProfile();
   const toast = useToast();
   const userId = getUserId();
   const email = getUserEmail();
@@ -80,21 +82,31 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   const save = () => {
-    if (!displayName.trim()) {
+    const trimmedName = displayName.trim();
+    if (!trimmedName) {
       Alert.alert("İsim gerekli", "Lütfen bir görünen isim gir.");
       return;
     }
-    // OPTIMISTIC: kullanıcıyı hemen geri gönder, background'da kaydet
+
+    // 1) OPTIMISTIC — UI'ı hemen güncelle.
+    //    Avatar local URI'yi context'e yaz (Image RN'de file://uri'yi destekler),
+    //    DB sync bitince cache-busted public URL ile değişir.
+    const localAvatar = avatarAsset?.uri || originalAvatar;
+    patchOptimistic({ display_name: trimmedName, avatar_url: localAvatar });
+
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     toast.show({ message: "Profil güncellendi ✓", type: "success" });
     navigation.goBack();
 
+    // 2) BACKGROUND — gerçek upload + DB write
     (async () => {
-      let avatarUrl = originalAvatar;
+      let finalAvatarUrl = originalAvatar;
       if (avatarAsset) {
         const up = await uploadAvatar(userId, avatarAsset);
         if (up.success && up.url) {
-          avatarUrl = up.url;
+          finalAvatarUrl = up.url;
+          // Public URL ile context'i de güncelle (sonraki app açılışında cache çalışsın)
+          patchOptimistic({ avatar_url: up.url });
         } else {
           toast.show({
             message: "Avatar yüklenemedi — " + (up.error || "tekrar dene"),
@@ -104,8 +116,8 @@ export default function EditProfileScreen({ navigation }) {
         }
       }
       const res = await updateProfile(userId, {
-        display_name: displayName.trim(),
-        avatar_url: avatarUrl,
+        display_name: trimmedName,
+        avatar_url: finalAvatarUrl,
       });
       if (!res.success) {
         toast.show({
@@ -113,6 +125,8 @@ export default function EditProfileScreen({ navigation }) {
           type: "error",
           duration: 4000,
         });
+        // Rollback için fresh fetch
+        refreshProfile?.();
       }
     })();
   };

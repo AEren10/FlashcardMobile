@@ -91,7 +91,9 @@ export default function RandomReviewModal({ visible, onClose, navigation }) {
     }
   };
 
-  const insufficient = knownCount !== null && knownCount < 5;
+  // Hiç bilinen kelime yoksa hepsi disabled. Az varsa sadece o option disabled
+  // ama mesaj informational olur, kullanıcıyı durdurmaz.
+  const noneKnown = knownCount !== null && knownCount === 0;
 
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
@@ -134,8 +136,8 @@ export default function RandomReviewModal({ visible, onClose, navigation }) {
             <Text style={[s.sub, { color: c.textSec, fontFamily: c.fontBody }]}>
               {knownCount === null
                 ? "Kelime sayın hesaplanıyor…"
-                : insufficient
-                  ? `Sadece ${knownCount} kelime biliyorsun. Önce biraz çalış.`
+                : noneKnown
+                  ? "Henüz öğrendiğin kelime yok — bir liste aç ve başla."
                   : `${knownCount} öğrendiğin kelimeden rastgele seçilecek.`}
             </Text>
           </View>
@@ -144,7 +146,8 @@ export default function RandomReviewModal({ visible, onClose, navigation }) {
         {/* Options */}
         <View style={{ marginTop: 18 }}>
           {OPTIONS.map((opt) => {
-            const disabled = insufficient || (knownCount !== null && knownCount < opt.count);
+            // Sadece o seçenek için yeterli kelime yoksa disabled, modal genel kullanılabilir
+            const disabled = noneKnown || (knownCount !== null && knownCount < opt.count);
             const loadingThis = loadingPick === opt.count;
             return (
               <PressableScale

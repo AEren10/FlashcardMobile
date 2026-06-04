@@ -136,6 +136,8 @@ export default function MilestoneModal({ milestone, visible, onDismiss }) {
   if (!visible || !milestone) return null;
 
   const color = milestone.color || c.accent;
+  // İkon her temada net görünsün diye sabit kontrast renk — beyaza yakın krem
+  const iconStroke = "#FFFDF7";
   const rotate = badgeRotate.interpolate({
     inputRange: [0, 1],
     outputRange: ["-12deg", "0deg"],
@@ -144,9 +146,10 @@ export default function MilestoneModal({ milestone, visible, onDismiss }) {
     inputRange: [0, 1],
     outputRange: [1, 1.12],
   });
+  // Halo opacity'yi düşür — ikon gözükebilsin diye
   const haloOpacityCombined = Animated.multiply(
     haloOpacity,
-    shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.6, 0.95] })
+    shimmer.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.45] })
   );
 
   return (
@@ -179,7 +182,7 @@ export default function MilestoneModal({ milestone, visible, onDismiss }) {
           ]}
         />
 
-        {/* Rozet */}
+        {/* Rozet — solid renk dolgu + beyaz ikon (kontrast garanti) */}
         <Animated.View
           style={[
             s.badgeWrap,
@@ -192,19 +195,37 @@ export default function MilestoneModal({ milestone, visible, onDismiss }) {
             style={[
               s.badgeOuter,
               {
-                backgroundColor: color + "1A",
-                borderColor: color + "AA",
+                backgroundColor: color + "22",
+                borderColor: color + "88",
                 shadowColor: color,
               },
             ]}
           >
+            {/* İç daire: solid renk → beyaz ikon net görünür */}
             <View
               style={[
                 s.badgeInner,
-                { backgroundColor: color + "22", borderColor: color + "66" },
+                {
+                  backgroundColor: color,
+                  borderColor: "rgba(255,253,247,0.25)",
+                },
               ]}
             >
-              <Icon d={milestone.icon} size={48} stroke={color} fill={color + "44"} sw={1.6} />
+              {/* Üst parlak highlight (premium derinlik) */}
+              <LinearGradient
+                colors={["rgba(255,255,255,0.28)", "transparent"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 0.55 }}
+                style={[StyleSheet.absoluteFill, { borderRadius: 54 }]}
+                pointerEvents="none"
+              />
+              <Icon
+                d={milestone.icon}
+                size={52}
+                stroke={iconStroke}
+                fill="none"
+                sw={2}
+              />
             </View>
           </View>
         </Animated.View>

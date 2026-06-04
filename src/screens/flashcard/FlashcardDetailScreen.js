@@ -68,11 +68,13 @@ export default function FlashcardDetailScreen({ route, navigation }) {
     }, [fetchWords])
   );
 
-  // Bu ekranda tab bar'ı sakla — Çalış/Quiz butonları görünür kalsın
+  // Bu ekranda tab bar'ı sakla — Çalış/Quiz butonları görünür kalsın.
+  // FlashcardDetail → HomeStack → BottomTab. tabBarStyle BottomTab'da set edilmeli.
   useLayoutEffect(() => {
-    const parent = navigation.getParent();
-    parent?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => parent?.setOptions({ tabBarStyle: undefined });
+    const stack = navigation.getParent();
+    const tab = stack?.getParent();
+    tab?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => tab?.setOptions({ tabBarStyle: undefined });
   }, [navigation]);
 
   const title = listTitle ?? "Liste";

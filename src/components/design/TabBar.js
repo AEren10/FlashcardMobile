@@ -6,6 +6,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Pressable, Text, StyleSheet, Platform, Animated, Easing } from "react-native";
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "./Icon";
 
@@ -27,10 +28,20 @@ const LABELS = {
   Profile: "Profil",
 };
 
-export default function TabBar({ state, navigation }) {
+export default function TabBar({ state, navigation, descriptors }) {
   const { c, isDark } = useTheme();
   const barWidth = useRef(0);
   const indicatorX = useRef(new Animated.Value(0)).current;
+
+  // Focused tab'da tabBarStyle.display === "none" ise tüm bar'ı render etme.
+  // Programmatic setOptions ile (FlashcardDetail/Study/Quiz) tab bar'ı saklamak için.
+  const focusedKey = state.routes[state.index]?.key;
+  const focusedOptions = descriptors?.[focusedKey]?.options;
+  const tabBarStyleOpt = focusedOptions?.tabBarStyle;
+  // Array veya object olabilir — display: "none" varsa render etme
+  const hidden = Array.isArray(tabBarStyleOpt)
+    ? tabBarStyleOpt.some((s) => s?.display === "none")
+    : tabBarStyleOpt?.display === "none";
 
   useEffect(() => {
     if (!barWidth.current) return;
@@ -42,6 +53,8 @@ export default function TabBar({ state, navigation }) {
       useNativeDriver: true,
     }).start();
   }, [state.index, state.routes.length, indicatorX]);
+
+  if (hidden) return null;
 
   return (
     <View pointerEvents="box-none" style={s.absoluteWrap}>
@@ -97,34 +110,149 @@ export default function TabBar({ state, navigation }) {
           };
 
           return (
-            <Pressable
+            <TabButton
               key={route.key}
+              isFocused={isFocused}
+              label={label}
+              iconPath={d}
               onPress={onPress}
-              style={s.tab}
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={`${label} sekmesi`}
-            >
-              <Icon
-                d={d}
-                size={23}
-                stroke={isFocused ? c.accent : c.textMuted}
-                fill={isFocused ? c.accentGlow : "none"}
-                sw={isFocused ? 1.6 : 1.7}
-              />
-              <Text
-                style={[
-                  s.label,
-                  { color: isFocused ? c.accent : c.textMuted, fontFamily: c.fontBodySemi },
-                ]}
-              >
-                {label}
-              </Text>
-            </Pressable>
+              c={c}
+            />
           );
         })}
       </View>
     </View>
+  );
+}
+
+/**
+ * TabButton — kendi animasyonlarını yönetir.
+ * Press: light haptic + scale 0.92 + ripple ring burst
+ * Active oluyor: icon kısa pulse + glow expand
+ */
+function TabButton({ isFocused, label, iconPath, onPress, c }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const ripple = useRef(new Animated.Value(0)).current;
+  const activePulse = useRef(new Animated.Value(0)).current;
+  const wasFocused = useRef(isFocused);
+
+  // Aktif olunca: kısa icon pulse + ripple burst
+  useEffect(() => {
+    if (isFocused && !wasFocused.current) {
+      // Yeni aktif oldu — celebration micro-pulse
+      Animated.sequence([
+        Animated.timing(activePulse, {
+          toValue: 1,
+          duration: 220,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.timing(activePulse, {
+          toValue: 0,
+          duration: 280,
+          easing: Easing.in(Easing.cubic),
+          useNativeDriver: true,
+        }),
+      ]).start();
+      // Aynı anda ripple ring
+      ripple.setValue(0);
+      Animated.timing(ripple, {
+        toValue: 1,
+        duration: 480,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    }
+    wasFocused.current = isFocused;
+  }, [isFocused, activePulse, ripple]);
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.92,
+      useNativeDriver: true,
+      stiffness: 380,
+      damping: 18,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      stiffness: 280,
+      damping: 16,
+    }).start();
+  };
+
+  const handlePress = () => {
+    Haptics.selectionAsync();
+    if (!isFocused) {
+      // Press anında ripple başlat (zaten focus useEffect'te de var, ama hemen feedback)
+      ripple.setValue(0);
+      Animated.timing(ripple, {
+        toValue: 1,
+        duration: 420,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start();
+    }
+    onPress?.();
+  };
+
+  const iconScale = Animated.add(
+    scale,
+    activePulse.interpolate({ inputRange: [0, 1], outputRange: [0, 0.18] })
+  );
+  const rippleScale = ripple.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.5, 2.2],
+  });
+  const rippleOpacity = ripple.interpolate({
+    inputRange: [0, 0.2, 1],
+    outputRange: [0, 0.6, 0],
+  });
+
+  return (
+    <Pressable
+      onPress={handlePress}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      style={s.tab}
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      accessibilityLabel={`${label} sekmesi`}
+    >
+      {/* Ripple ring — press ya da activate olunca dışa açılır */}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          s.ripple,
+          {
+            borderColor: c.accent,
+            opacity: rippleOpacity,
+            transform: [{ scale: rippleScale }],
+          },
+        ]}
+      />
+
+      <Animated.View style={{ transform: [{ scale: iconScale }], alignItems: "center" }}>
+        <Icon
+          d={iconPath}
+          size={23}
+          stroke={isFocused ? c.accent : c.textMuted}
+          fill={isFocused ? c.accentGlow : "none"}
+          sw={isFocused ? 1.6 : 1.7}
+        />
+        <Text
+          style={[
+            s.label,
+            { color: isFocused ? c.accent : c.textMuted, fontFamily: c.fontBodySemi },
+          ]}
+        >
+          {label}
+        </Text>
+      </Animated.View>
+    </Pressable>
   );
 }
 
@@ -155,6 +283,16 @@ const s = StyleSheet.create({
     justifyContent: "center",
     gap: 4,
     height: "100%",
+    position: "relative",
+  },
+  ripple: {
+    position: "absolute",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+    top: "50%",
+    marginTop: -22,
   },
   indicator: {
     position: "absolute",

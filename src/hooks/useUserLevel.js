@@ -15,17 +15,18 @@
 import { useMemo } from "react";
 import { ICONS } from "../components/design/Icon";
 
+// Stüdyo warm palette — açık yeşilden derin koyu kahveye doğru büyüme
 export const LEVELS = [
-  { lv: 0,  threshold: 0,    title: "Çaylak",        icon: ICONS.leaf,      color: "#6EE7B7" },
-  { lv: 1,  threshold: 10,   title: "Öğrenci",        icon: ICONS.books,     color: "#6EE7B7" },
-  { lv: 2,  threshold: 40,   title: "Hevesli",        icon: ICONS.sparkle,   color: "#818CF8" },
-  { lv: 3,  threshold: 90,   title: "Meraklı",        icon: ICONS.search,    color: "#818CF8" },
-  { lv: 5,  threshold: 250,  title: "Bilen",          icon: ICONS.lightbulb, color: "#FBBF24" },
-  { lv: 7,  threshold: 490,  title: "Sözlük Avcısı",  icon: ICONS.bookmark,  color: "#FBBF24" },
-  { lv: 10, threshold: 1000, title: "Polyglot",       icon: ICONS.globe,     color: "#FF8B73" },
-  { lv: 15, threshold: 2250, title: "Usta",           icon: ICONS.trophy,    color: "#FF8B73" },
-  { lv: 20, threshold: 4000, title: "Bilge",          icon: ICONS.brain,     color: "#A78BFA" },
-  { lv: 30, threshold: 9000, title: "Efsane",         icon: ICONS.crown,     color: "#A78BFA" },
+  { lv: 0,  threshold: 0,    title: "Çaylak",         icon: ICONS.leaf,      color: "#A8D582" }, // filiz yeşili
+  { lv: 1,  threshold: 10,   title: "Öğrenci",        icon: ICONS.books,     color: "#7BB661" }, // yaprak
+  { lv: 2,  threshold: 40,   title: "Hevesli",        icon: ICONS.sparkle,   color: "#7BAEC8" }, // cobalt — merak
+  { lv: 3,  threshold: 90,   title: "Meraklı",        icon: ICONS.search,    color: "#5A8FAB" }, // koyu cobalt
+  { lv: 5,  threshold: 250,  title: "Bilen",          icon: ICONS.lightbulb, color: "#D4AE5E" }, // altın
+  { lv: 7,  threshold: 490,  title: "Sözlük Avcısı",  icon: ICONS.bookmark,  color: "#B08A3F" }, // koyu altın
+  { lv: 10, threshold: 1000, title: "Polyglot",       icon: ICONS.globe,     color: "#C17B5A" }, // terracotta
+  { lv: 15, threshold: 2250, title: "Usta",           icon: ICONS.trophy,    color: "#A05E3F" }, // koyu terracotta
+  { lv: 20, threshold: 4000, title: "Bilge",          icon: ICONS.brain,     color: "#8B4789" }, // wine mor
+  { lv: 30, threshold: 9000, title: "Efsane",         icon: ICONS.crown,     color: "#5C4DAA" }, // koyu mor
 ];
 
 function levelFromXP(xp) {

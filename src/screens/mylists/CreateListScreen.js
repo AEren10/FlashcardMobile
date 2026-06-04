@@ -76,9 +76,9 @@ export default function CreateListScreen({ route }) {
     setSaving(true);
     try {
       let finalUrl = editor.existingImageUrl;
-      if (img.localUri) {
+      if (img.asset) {
         try {
-          finalUrl = await img.upload(img.localUri);
+          finalUrl = await img.upload(img.asset);
         } catch {
           Alert.alert("Uyarı", "Görsel yüklenemedi, mevcut görsel korunacak.");
         }

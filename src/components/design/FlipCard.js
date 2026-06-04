@@ -142,6 +142,12 @@ export default function FlipCard({
           <Text style={[s.word, { color: c.text }]}>{word}</Text>
           <Text style={[s.meta, { color: c.textMuted }]}>{pron ? `${pron} · ` : ""}{tag}</Text>
         </View>
+        {/* Çevirme ipucu — alt köşe */}
+        <View style={s.flipHint} pointerEvents="none">
+          <Text style={[s.flipHintTxt, { color: c.textMuted, fontFamily: c.fontBody }]}>
+            Anlamı görmek için dokun
+          </Text>
+        </View>
       </Animated.View>
 
       {/* BACK — purely visual, pointerEvents="none" */}
@@ -174,6 +180,12 @@ export default function FlipCard({
             </View>
           )}
         </View>
+        {/* Tekrar ipucu — alt köşe */}
+        <View style={s.flipHint} pointerEvents="none">
+          <Text style={[s.flipHintTxt, { color: c.textMuted, fontFamily: c.fontBody }]}>
+            Tekrar görmek için dokun
+          </Text>
+        </View>
       </Animated.View>
 
       {/* Interactive overlay — bookmark + sound + menu, front face only */}
@@ -196,15 +208,44 @@ export default function FlipCard({
     </>
   );
 
+  // Lift gesture — press anında kart hafif kalkıyor (elde tutuyorum hissi)
+  const liftScale = useSharedValue(1);
+  const liftShadow = useSharedValue(0);
+  const liftStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: liftScale.value }],
+    shadowOpacity: 0.4 + liftShadow.value * 0.35,
+    shadowRadius: 18 + liftShadow.value * 18,
+  }));
+  const onPressIn = () => {
+    liftScale.value = withTiming(1.025, { duration: 140, easing: Easing.out(Easing.quad) });
+    liftShadow.value = withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) });
+  };
+  const onPressOut = () => {
+    liftScale.value = withTiming(1, { duration: 220, easing: Easing.bezier(0.4, 0, 0.2, 1) });
+    liftShadow.value = withTiming(0, { duration: 260, easing: Easing.bezier(0.4, 0, 0.2, 1) });
+  };
+
   // Controlled mode: plain View — parent PanResponder handles taps
   // Uncontrolled mode: Pressable — handles taps directly
   if (isControlled) {
-    return <View style={s.stage} accessibilityLabel="Kartı çevir">{content}</View>;
+    return (
+      <Animated.View style={[s.stage, liftStyle, { shadowColor: c.accent }]} accessibilityLabel="Kartı çevir">
+        {content}
+      </Animated.View>
+    );
   }
   return (
-    <Pressable onPress={handleFlip} style={s.stage} accessibilityLabel="Kartı çevir">
-      {content}
-    </Pressable>
+    <Animated.View style={[s.stage, liftStyle, { shadowColor: c.accent }]}>
+      <Pressable
+        onPress={handleFlip}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={{ width: "100%", height: "100%" }}
+        accessibilityLabel="Kartı çevir"
+      >
+        {content}
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -315,6 +356,18 @@ function makeStyles(c) {
       maxWidth: 260,
       paddingHorizontal: 16,
       opacity: 0.85,
+    },
+    flipHint: {
+      position: "absolute",
+      bottom: 18,
+      left: 0,
+      right: 0,
+      alignItems: "center",
+    },
+    flipHintTxt: {
+      fontSize: 11.5,
+      letterSpacing: 0.5,
+      opacity: 0.55,
     },
     hint: {
       fontFamily: c.fontBody,

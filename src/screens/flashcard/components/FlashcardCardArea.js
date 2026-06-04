@@ -66,23 +66,25 @@ export default function FlashcardCardArea({
         />
       </View>
 
-      {/* Chevron gezinme — minimal */}
+      {/* Chevron gezinme — belirgin accent tonu */}
       <View style={s.navRow}>
         <Pressable
           onPress={goPrev}
           disabled={isFirst}
           hitSlop={14}
-          style={[
+          style={({ pressed }) => [
             s.chev,
             {
-              backgroundColor: c.bgSurface,
-              borderColor: c.border,
+              backgroundColor: c.accent + "18",
+              borderColor: c.accent + "55",
+              shadowColor: c.accent,
               opacity: isFirst ? 0.3 : 1,
+              transform: [{ scale: pressed ? 0.94 : 1 }],
             },
           ]}
           accessibilityLabel="Önceki kelime"
         >
-          <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.textPrimary} sw={2.2} />
+          <Icon d="M15 6l-6 6 6 6" size={22} stroke={c.accent} sw={2.6} />
         </Pressable>
 
         {isLast ? (
@@ -108,13 +110,18 @@ export default function FlashcardCardArea({
           <Pressable
             onPress={goNext}
             hitSlop={14}
-            style={[
+            style={({ pressed }) => [
               s.chev,
-              { backgroundColor: c.bgSurface, borderColor: c.border },
+              {
+                backgroundColor: c.accent + "18",
+                borderColor: c.accent + "55",
+                shadowColor: c.accent,
+                transform: [{ scale: pressed ? 0.94 : 1 }],
+              },
             ]}
             accessibilityLabel="Sonraki kelime"
           >
-            <Icon d="M9 6l6 6-6 6" size={18} stroke={c.textPrimary} sw={2.2} />
+            <Icon d="M9 6l6 6-6 6" size={22} stroke={c.accent} sw={2.6} />
           </Pressable>
         )}
       </View>
@@ -150,12 +157,16 @@ const s = StyleSheet.create({
     marginTop: 12,
   },
   chev: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    borderWidth: 1,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    borderWidth: 1.5,
     alignItems: "center",
     justifyContent: "center",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 14,
+    elevation: 3,
   },
   completeCta: {
     flexDirection: "row",

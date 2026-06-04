@@ -29,6 +29,7 @@ import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
 import { Skeleton, SkeletonListItem } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
+import StaggerEnter from "../../components/design/StaggerEnter";
 
 const TABS = ["Bugün", "Zor Kelimeler", "Quiz"];
 
@@ -196,36 +197,42 @@ function BugunTab({ dueCount, categories, c, s, navigation, lists }) {
       </Pressable>
 
       <Text style={s.sectionTitle}>Kategoriler</Text>
-      <DueRow
-        label="Yeni"
-        sub="Hiç görmediğin kelimeler"
-        count={newWords.length}
-        color={c.cobalt}
-        icon={ICONS.plus}
-        c={c}
-        s={s}
-        onPress={() => startWith(newWords, "Yeni Kelimeler")}
-      />
-      <DueRow
-        label="Tekrar"
-        sub="SRS aralığı dolan kelimeler"
-        count={reviewWords.length}
-        color={c.accent}
-        icon={ICONS.bolt}
-        c={c}
-        s={s}
-        onPress={() => startWith(reviewWords, "Tekrar")}
-      />
-      <DueRow
-        label="Unutulmuş"
-        sub="Daha önce yanlış cevapladığın"
-        count={lapsedWords.length}
-        color={c.error}
-        icon={ICONS.flame}
-        c={c}
-        s={s}
-        onPress={() => startWith(lapsedWords, "Unutulmuş Kelimeler")}
-      />
+      <StaggerEnter index={0} delay={70}>
+        <DueRow
+          label="Yeni"
+          sub="Hiç görmediğin kelimeler"
+          count={newWords.length}
+          color={c.cobalt}
+          icon={ICONS.plus}
+          c={c}
+          s={s}
+          onPress={() => startWith(newWords, "Yeni Kelimeler")}
+        />
+      </StaggerEnter>
+      <StaggerEnter index={1} delay={70}>
+        <DueRow
+          label="Tekrar"
+          sub="SRS aralığı dolan kelimeler"
+          count={reviewWords.length}
+          color={c.accent}
+          icon={ICONS.bolt}
+          c={c}
+          s={s}
+          onPress={() => startWith(reviewWords, "Tekrar")}
+        />
+      </StaggerEnter>
+      <StaggerEnter index={2} delay={70}>
+        <DueRow
+          label="Unutulmuş"
+          sub="Daha önce yanlış cevapladığın"
+          count={lapsedWords.length}
+          color={c.error}
+          icon={ICONS.flame}
+          c={c}
+          s={s}
+          onPress={() => startWith(lapsedWords, "Unutulmuş Kelimeler")}
+        />
+      </StaggerEnter>
     </>
   );
 }

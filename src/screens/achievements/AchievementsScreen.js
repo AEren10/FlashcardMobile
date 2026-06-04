@@ -15,6 +15,7 @@ import {
   groupByCategory,
 } from "../../lib/achievements";
 import Icon, { ICONS } from "../../components/design/Icon";
+import StaggerEnter from "../../components/design/StaggerEnter";
 
 export default function AchievementsScreen({ navigation }) {
   const { c } = useTheme();
@@ -96,12 +97,12 @@ export default function AchievementsScreen({ navigation }) {
                   </Text>
                 </View>
                 <View style={s.grid}>
-                  {list.map((ach) => {
+                  {list.map((ach, idx) => {
                     const isUnlocked = unlocked.has(ach.key);
                     const tier = TIER_COLORS[ach.tier];
                     return (
+                      <StaggerEnter key={ach.key} index={Math.min(idx, 6)} delay={55}>
                       <View
-                        key={ach.key}
                         style={[
                           s.card,
                           {
@@ -158,6 +159,7 @@ export default function AchievementsScreen({ navigation }) {
                           </Text>
                         </View>
                       </View>
+                      </StaggerEnter>
                     );
                   })}
                 </View>

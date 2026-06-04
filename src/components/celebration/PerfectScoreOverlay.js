@@ -112,26 +112,26 @@ export default function PerfectScoreOverlay({ ratio, total = 0, correct = 0 }) {
         ]}
       />
 
-      {/* Icon */}
+      {/* Icon — solid tint + beyaz ikon */}
       <Animated.View
         style={[
           s.iconRing,
           {
-            backgroundColor: tint + "1A",
-            borderColor: tint + "AA",
+            backgroundColor: tint,
+            borderColor: "rgba(255,253,247,0.25)",
             shadowColor: tint,
             transform: [{ scale }, { translateY: slideUp }],
           },
         ]}
       >
         <LinearGradient
-          colors={["rgba(255,255,255,0.12)", "transparent"]}
+          colors={["rgba(255,255,255,0.28)", "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 0.6 }}
           style={[StyleSheet.absoluteFill, { borderRadius: 36 }]}
           pointerEvents="none"
         />
-        <Icon d={icon} size={36} stroke={tint} fill={tint + "44"} sw={1.7} />
+        <Icon d={icon} size={38} stroke="#FFFDF7" fill="none" sw={2} />
       </Animated.View>
 
       {/* Tag */}

@@ -156,27 +156,27 @@ export default function AchievementModal({ visible, badge, onClose }) {
         <Animated.View style={[s.wave, { backgroundColor: tint + "55" }, waveStyle(wave2)]} />
         <Animated.View style={[s.wave, { backgroundColor: tint + "55" }, waveStyle(wave3)]} />
 
-        {/* Badge */}
+        {/* Badge — solid tint dolu + beyaz ikon (kontrast garanti) */}
         <Animated.View
           style={[
             s.badgeBox,
             {
-              backgroundColor: tint + "1A",
-              borderColor: tint + "AA",
+              backgroundColor: tint,
+              borderColor: "rgba(255,253,247,0.25)",
               shadowColor: tint,
               transform: [{ scale: badgeScale }, { translateY: badgeY }],
             },
           ]}
         >
           <LinearGradient
-            colors={["rgba(255,255,255,0.15)", "transparent"]}
+            colors={["rgba(255,255,255,0.28)", "transparent"]}
             start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 0.5 }}
+            end={{ x: 0, y: 0.55 }}
             style={[StyleSheet.absoluteFill, { borderRadius: 32 }]}
             pointerEvents="none"
           />
           {badge?.icon ? (
-            <Icon d={badge.icon} size={56} stroke={tint} fill={tint + "44"} sw={1.8} />
+            <Icon d={badge.icon} size={62} stroke="#FFFDF7" fill="none" sw={2} />
           ) : (
             <Text style={s.badgeEmoji}>{badge?.emoji || "🏆"}</Text>
           )}

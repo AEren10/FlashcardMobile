@@ -241,12 +241,12 @@ export async function getRandomKnownWords(count = 10) {
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  // 1) Öğrenilmiş word_id'leri çek
+  // 1) Öğrenilmiş word_id'leri çek — eşik gevşetildi: 1+ doğru cevap yeterli
   const { data: progressRows, error: pErr } = await supabase
     .from(TABLES.WORD_PROGRESS)
     .select("word_id, repetitions, lapses, last_reviewed")
     .eq("user_id", user.id)
-    .gte("repetitions", 2)
+    .gte("repetitions", 1)
     .lt("lapses", 2)
     .order("last_reviewed", { ascending: false })
     .limit(500); // top 500 known
@@ -286,8 +286,7 @@ export async function getKnownWordsCount() {
     .from(TABLES.WORD_PROGRESS)
     .select("*", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .gte("repetitions", 2)
-    .lt("lapses", 2);
+    .gte("repetitions", 1);
 
   if (error) return 0;
   return count || 0;

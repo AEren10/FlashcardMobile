@@ -2,7 +2,7 @@
  * HomeScreen — Claude Design v2 spec.
  * Greeting + 2 stat box + glow challenge card + horizontal "Devam Et" carousel.
  */
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,9 @@ import useMilestoneWatcher from "../../hooks/useMilestoneWatcher";
 import MilestoneModal from "../../components/celebration/MilestoneModal";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
 import AchievementModal from "../../components/design/AchievementModal";
+import useNudge from "../../hooks/useNudge";
+import NudgeModal from "../../components/design/NudgeModal";
+import { getKnownWordsCount } from "../../supabase/progress";
 import HomeSearchBar from "./components/HomeSearchBar";
 import LevelMiniCard from "./components/LevelMiniCard";
 import RandomReviewModal from "../../components/design/RandomReviewModal";
@@ -139,6 +142,37 @@ export default function HomeScreen({ navigation }) {
     streakDays: stats.streakDays || 0,
     totalWords: stats.totalWords || 0,
   });
+
+  // Bilinen kelime sayısı — Nudge için
+  const [knownWordsCount, setKnownWordsCount] = useState(0);
+  useEffect(() => {
+    if (!isAuthenticated()) return;
+    getKnownWordsCount().then(setKnownWordsCount).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stats.totalWords]);
+
+  // Tatlı öneri pop-up — kullanıcı arada bir görsün
+  const mistakesCount = mistakesList?.word_count || 0;
+  const { nudge, accept: acceptNudge, dismiss: dismissNudge } = useNudge({
+    stats,
+    mistakesCount,
+    knownCount: knownWordsCount,
+    ready: !loading && !authLoading,
+  });
+
+  const handleNudgeAccept = async () => {
+    const action = await acceptNudge();
+    if (action === "open_random_review") {
+      setRandomReviewOpen(true);
+    } else if (action === "open_challenge") {
+      startChallenge();
+    } else if (action === "open_mistakes" && mistakesList?.id) {
+      navigation.navigate("FlashcardDetail", {
+        listId: mistakesList.id,
+        listTitle: "Bilemediğin Kelimeler",
+      });
+    }
+  };
 
   const startChallenge = () => {
     if (lists.length) {
@@ -541,13 +575,21 @@ export default function HomeScreen({ navigation }) {
         badge={newBadge}
         onClose={dismissBadge}
       />
+
+      {/* Tatlı öneri pop-up'ı — arada bir gelir */}
+      <NudgeModal
+        visible={!!nudge}
+        nudge={nudge}
+        onAccept={handleNudgeAccept}
+        onDismiss={dismissNudge}
+      />
     </View>
   );
 }
 
 const ContinueCard = React.memo(function ContinueCard({ title, count, pct, level, c, onPress }) {
   return (
-    <PressableScale onPress={onPress} style={{ width: 165 }} scaleDown={0.96}>
+    <PressableScale onPress={onPress} style={{ width: 182 }} scaleDown={0.96}>
       <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 10 }}>
         <CategoryCover difficulty={level} height={100} />
       </View>
@@ -677,8 +719,10 @@ function makeStyles(c) {
     },
     sectionTitle: {
       fontFamily: c.fontBodyBold,
-      fontSize: 18,
+      fontSize: 22,
+      lineHeight: 26,
       color: c.textPrimary,
+      letterSpacing: 0.1,
     },
     sectionLink: {
       fontFamily: c.fontBodySemi,

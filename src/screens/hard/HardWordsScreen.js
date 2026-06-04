@@ -8,6 +8,7 @@ import { SkeletonWordCard } from "../../components/design/Skeleton";
 import Icon, { ICONS } from "../../components/design/Icon";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import EmptyState from "../../components/EmptyState";
+import StaggerEnter from "../../components/design/StaggerEnter";
 
 export default function HardWordsScreen({ navigation }) {
   const { c } = useTheme();
@@ -126,17 +127,19 @@ export default function HardWordsScreen({ navigation }) {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={{ padding: 16, gap: 8 }}
           refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          renderItem={({ item }) => (
-            <View style={s.row}>
-              <View style={{ flex: 1 }}>
-                <Text style={s.word}>{item.word}</Text>
-                <Text style={s.meaning}>{item.meaning}</Text>
+          renderItem={({ item, index }) => (
+            <StaggerEnter index={Math.min(index, 8)} delay={50}>
+              <View style={s.row}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.word}>{item.word}</Text>
+                  <Text style={s.meaning}>{item.meaning}</Text>
+                </View>
+                <View style={s.badge}>
+                  <Icon d={ICONS.flame} size={11} stroke={c.error} fill={c.error} sw={1.5} />
+                  <Text style={s.badgeText}>{item.lapses}×</Text>
+                </View>
               </View>
-              <View style={s.badge}>
-                <Icon d={ICONS.flame} size={11} stroke={c.error} fill={c.error} sw={1.5} />
-                <Text style={s.badgeText}>{item.lapses}×</Text>
-              </View>
-            </View>
+            </StaggerEnter>
           )}
           removeClippedSubviews
           maxToRenderPerBatch={10}

@@ -5,7 +5,7 @@
  * Tap=çevir · Swipe sağ=Biliyorum · Swipe sol=Bilmiyorum
  * Stack peek, verdict badges, ✓/✗ feedback pop, confetti (streak ≥5), shake
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -57,6 +57,14 @@ export default function StudyScreen({ route, navigation }) {
     onSwipe: (know) => handleAnswer(know),
   });
 
+  // Tab bar'ı tamamen sakla — Study ekranı full-screen deneyim olsun
+  useLayoutEffect(() => {
+    const stack = navigation.getParent();
+    const tab = stack?.getParent();
+    tab?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => tab?.setOptions({ tabBarStyle: undefined });
+  }, [navigation]);
+
   // Çalışma yarıda kalmışken çıkış engelleme — Alert ile onay
   useEffect(() => {
     const unsub = navigation.addListener("beforeRemove", (e) => {
@@ -93,7 +101,8 @@ export default function StudyScreen({ route, navigation }) {
     swipe.triggerCommit(know);
     if (!know) swipe.triggerShake();
 
-    const delay = know ? 380 : 600;
+    // Hem doğru hem yanlış için aynı süre — tik/çarpı tam görünür
+    const delay = know ? 620 : 700;
     setTimeout(() => {
       if (result.isLast) {
         engine.finishSeason(know, know ? null : result.wordId);
@@ -188,23 +197,71 @@ export default function StudyScreen({ route, navigation }) {
               />
               <VerdictBadges s={s} c={c} know={knowAmt} dont={dontAmt} />
               {feedback && <CenterPop s={s} c={c} type={feedback} />}
+              {feedback && <ScreenFlash type={feedback} />}
             </RNAnimated.View>
           </View>
         </View>
 
-        <View style={s.actions}>
-          <Pressable onPress={() => handleAnswer(false)} disabled={!!feedback} style={s.arrowBtn} hitSlop={16}>
-            <Text style={[s.arrowTxt, { color: c.error }]}>← Bilmiyorum</Text>
+        {/* Aksiyon + bilgilendirme tek satır — chip'ler hem tıklanabilir hem swipe rehberi */}
+        <View style={s.swipeGuide}>
+          <Pressable
+            onPress={() => handleAnswer(false)}
+            disabled={!!feedback}
+            style={({ pressed }) => [
+              s.guideItem,
+              {
+                backgroundColor: c.error + "16",
+                borderColor: c.error + "44",
+                shadowColor: c.error,
+                opacity: feedback ? 0.45 : 1,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+              },
+            ]}
+            accessibilityLabel="Bilmiyorum"
+          >
+            <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.6} />
+            <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodyBold }]}>Bilmiyorum</Text>
           </Pressable>
-          <Pressable onPress={() => handleAnswer(true)} disabled={!!feedback} style={s.arrowBtn} hitSlop={16}>
-            <Text style={[s.arrowTxt, { color: c.success }]}>Biliyorum →</Text>
+          <Pressable
+            onPress={() => {
+              if (feedback) return;
+              Haptics.selectionAsync();
+              setFlipped((f) => !f);
+            }}
+            disabled={!!feedback}
+            style={({ pressed }) => [
+              s.guideItem,
+              {
+                backgroundColor: c.bgSurface,
+                borderColor: c.border,
+                opacity: feedback ? 0.45 : 1,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+              },
+            ]}
+            accessibilityLabel="Çevir"
+          >
+            <Icon d={ICONS.refresh} size={18} stroke={c.textSec} sw={2.2} />
+            <Text style={[s.guideTxt, { color: c.textSec, fontFamily: c.fontBodyBold }]}>Çevir</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => handleAnswer(true)}
+            disabled={!!feedback}
+            style={({ pressed }) => [
+              s.guideItem,
+              {
+                backgroundColor: c.success + "16",
+                borderColor: c.success + "44",
+                shadowColor: c.success,
+                opacity: feedback ? 0.45 : 1,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+              },
+            ]}
+            accessibilityLabel="Biliyorum"
+          >
+            <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodyBold }]}>Biliyorum</Text>
+            <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.6} />
           </Pressable>
         </View>
-
-        {/* Swipe ipucu — kart altında tek satır */}
-        <Text style={[s.swipeHint, { color: c.textMuted, fontFamily: c.fontBody }]}>
-          Sola at: bilmiyorum  ·  Karta dokun: çevir  ·  Sağa at: biliyorum
-        </Text>
 
         {showConfetti && (
           <ConfettiCannon
@@ -271,22 +328,23 @@ function CenterPop({ s, c, type }) {
     RNAnimated.parallel([
       RNAnimated.sequence([
         RNAnimated.spring(scale, {
-          toValue: 1.15,
+          toValue: 1.25,
           useNativeDriver: true,
-          tension: 200,
-          friction: 8,
+          tension: 180,
+          friction: 7,
         }),
         RNAnimated.spring(scale, {
           toValue: 1,
           useNativeDriver: true,
-          tension: 150,
-          friction: 10,
+          tension: 130,
+          friction: 9,
         }),
       ]),
       RNAnimated.sequence([
-        RNAnimated.timing(opacity, { toValue: 1, duration: 150, useNativeDriver: true }),
-        RNAnimated.delay(250),
-        RNAnimated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
+        RNAnimated.timing(opacity, { toValue: 1, duration: 130, useNativeDriver: true }),
+        // Çarpı ile tikin aynı uzunlukta belirgin kalması — 420ms tam durma
+        RNAnimated.delay(420),
+        RNAnimated.timing(opacity, { toValue: 0, duration: 260, useNativeDriver: true }),
       ]),
     ]).start();
   }, [scale, opacity, type]);
@@ -303,13 +361,39 @@ function CenterPop({ s, c, type }) {
           transform: [{ scale }],
           shadowColor: isKnow ? c.success : c.error,
           shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0.6,
-          shadowRadius: 20,
+          shadowOpacity: 0.7,
+          shadowRadius: 28,
+          elevation: 12,
         },
       ]}
     >
       <Text style={s.popIcon}>{isKnow ? "✓" : "✕"}</Text>
     </RNAnimated.View>
+  );
+}
+
+/** Tam ekran soft glow flash — swipe sonrası anlık görsel feedback */
+function ScreenFlash({ type }) {
+  const opacity = useRef(new RNAnimated.Value(0)).current;
+  useEffect(() => {
+    RNAnimated.sequence([
+      RNAnimated.timing(opacity, { toValue: 1, duration: 80, useNativeDriver: true }),
+      RNAnimated.delay(160),
+      RNAnimated.timing(opacity, { toValue: 0, duration: 380, useNativeDriver: true }),
+    ]).start();
+  }, [opacity, type]);
+  // Yeşil/kırmızı yumuşak gradient — kart üzerinde halo gibi
+  const color = type === "know" ? "rgba(90, 184, 132, 0.22)" : "rgba(204, 92, 92, 0.22)";
+  return (
+    <RNAnimated.View
+      pointerEvents="none"
+      style={{
+        position: "absolute",
+        top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: color,
+        opacity,
+      }}
+    />
   );
 }
 
@@ -481,6 +565,33 @@ function makeStyles(c) {
     },
     arrowBtn: { paddingVertical: 12, paddingHorizontal: 6 },
     arrowTxt: { fontFamily: c.fontBodyBold, fontSize: 15, letterSpacing: 0.3 },
+    swipeGuide: {
+      flexDirection: "row",
+      gap: 8,
+      paddingHorizontal: 18,
+      paddingBottom: 18,
+      marginTop: 4,
+      justifyContent: "center",
+    },
+    guideItem: {
+      flex: 1,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 7,
+      paddingVertical: 13,
+      paddingHorizontal: 8,
+      borderRadius: 14,
+      borderWidth: 1,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.18,
+      shadowRadius: 10,
+      elevation: 2,
+    },
+    guideTxt: {
+      fontSize: 13,
+      letterSpacing: 0.2,
+    },
     swipeHint: {
       textAlign: "center",
       fontSize: 11,

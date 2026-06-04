@@ -80,6 +80,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import { PremiumProvider } from "../contexts/PremiumContext";
 import { AchievementsProvider, useAchievements } from "../contexts/AchievementsContext";
+import { ProfileProvider } from "../contexts/ProfileContext";
 import AchievementModal from "../components/design/AchievementModal";
 
 // Import Screens
@@ -180,8 +181,12 @@ function HomeStackNavigator() {
         component={HomeScreen}
         options={{
           animation: "fade",
-          animationDuration: 220,
+          animationDuration: 260,
           animationTypeForReplace: "pop",
+          // Replace sonrası önceki ekran detach edilmesin → cross-fade gerçek olur
+          detachPreviousScreen: false,
+          // Blur'da donmasın — geri dönüşte instant göründüğü için
+          freezeOnBlur: false,
         }}
       />
       <HomeStack.Screen
@@ -189,8 +194,10 @@ function HomeStackNavigator() {
         component={ExamHomeScreen}
         options={{
           animation: "fade",
-          animationDuration: 220,
+          animationDuration: 260,
           animationTypeForReplace: "pop",
+          detachPreviousScreen: false,
+          freezeOnBlur: false,
         }}
       />
       <HomeStack.Screen
@@ -455,14 +462,16 @@ function GlobalAchievementBridge() {
 const AppNavigator = () => {
   return (
     <AuthProvider>
-      <PremiumProvider>
-        <AchievementsProvider>
-          <NavigationContainer linking={linking} fallback={<LoadingScreen />}>
-            <RootNavigator />
-          </NavigationContainer>
-          <GlobalAchievementBridge />
-        </AchievementsProvider>
-      </PremiumProvider>
+      <ProfileProvider>
+        <PremiumProvider>
+          <AchievementsProvider>
+            <NavigationContainer linking={linking} fallback={<LoadingScreen />}>
+              <RootNavigator />
+            </NavigationContainer>
+            <GlobalAchievementBridge />
+          </AchievementsProvider>
+        </PremiumProvider>
+      </ProfileProvider>
     </AuthProvider>
   );
 };

@@ -6,7 +6,7 @@
  * Options: 2×2 grid, correct → green spring pop + auto-next 650ms,
  *          wrong → red shake + correct reveal in green + 1200ms hold
  */
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -73,6 +73,14 @@ export default function QuizScreen({ route, navigation }) {
   const sessionRef = useRef(null);
   const startedAt = useRef(Date.now());
   const title = presetTitle ?? listTitle ?? "Quiz";
+
+  // Tab bar'ı sakla — Quiz full-screen
+  useLayoutEffect(() => {
+    const stack = navigation.getParent();
+    const tab = stack?.getParent();
+    tab?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => tab?.setOptions({ tabBarStyle: undefined });
+  }, [navigation]);
 
   const loadWords = React.useCallback(async () => {
     setLoading(true);

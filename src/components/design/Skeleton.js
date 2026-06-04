@@ -88,7 +88,7 @@ export function SkeletonListCard() {
 
 export function SkeletonContinueCard() {
   return (
-    <View style={{ width: 165 }}>
+    <View style={{ width: 182 }}>
       <Skeleton height={100} radius={16} />
       <View style={{ marginTop: 10, gap: 6 }}>
         <Skeleton width="80%" height={14} radius={6} />

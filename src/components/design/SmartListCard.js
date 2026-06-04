@@ -8,6 +8,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "./Icon";
 
+/**
+ * Tüm SmartListCard'ların paylaştığı tek shimmer clock.
+ * Module-level — modül import edildiğinde başlar ve hep aynı fazda tutar.
+ * Her kart bu değeri okur, hepsi tam senkron kayar.
+ */
+const SHARED_SHIMMER = new Animated.Value(0);
+let SHARED_LOOP_STARTED = false;
+function startSharedShimmerLoop() {
+  if (SHARED_LOOP_STARTED) return;
+  SHARED_LOOP_STARTED = true;
+  Animated.loop(
+    Animated.sequence([
+      Animated.timing(SHARED_SHIMMER, {
+        toValue: 1,
+        duration: 2200,
+        easing: Easing.inOut(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(SHARED_SHIMMER, { toValue: 0, duration: 0, useNativeDriver: true }),
+    ])
+  ).start();
+}
+
 export default function SmartListCard({
   emoji,
   iconPath,
@@ -19,25 +42,16 @@ export default function SmartListCard({
   onPress,
 }) {
   const { c } = useTheme();
-  const shimmer = useRef(new Animated.Value(0)).current;
   const pulseScale = useRef(new Animated.Value(1)).current;
   const pressScale = useRef(new Animated.Value(1)).current;
   const fillColor = accent || c.accent;
 
+  // Shared shimmer — bu modüldeki tek clock, hepsi aynı anda kayar
   useEffect(() => {
-    const shimmerLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(shimmer, {
-          toValue: 1,
-          duration: 2200,
-          easing: Easing.inOut(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(shimmer, { toValue: 0, duration: 0, useNativeDriver: true }),
-      ])
-    );
-    shimmerLoop.start();
+    startSharedShimmerLoop();
+  }, []);
 
+  useEffect(() => {
     let pulseLoop;
     if (pulse) {
       pulseLoop = Animated.loop(
@@ -58,14 +72,12 @@ export default function SmartListCard({
       );
       pulseLoop.start();
     }
-
     return () => {
-      shimmerLoop.stop();
       pulseLoop?.stop();
     };
-  }, [shimmer, pulseScale, pulse]);
+  }, [pulseScale, pulse]);
 
-  const translateX = shimmer.interpolate({
+  const translateX = SHARED_SHIMMER.interpolate({
     inputRange: [0, 1],
     outputRange: [-200, 320],
   });

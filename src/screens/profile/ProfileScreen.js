@@ -6,13 +6,13 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
+import { useProfile } from "../../contexts/ProfileContext";
 import { getStudyStats } from "../../supabase/progress";
-import { getProfile } from "../../supabase/profile";
 import Icon, { ICONS } from "../../components/design/Icon";
 import useUserLevel from "../../hooks/useUserLevel";
 
@@ -28,8 +28,8 @@ export default function ProfileScreen() {
   const { c, preference } = useTheme();
   const navigation = useNavigation();
   const { user, signOut, getUserEmail, isGuestUser, deleteAccount } = useAuth();
+  const { profile } = useProfile();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
-  const [profile, setProfile] = useState({ display_name: null, avatar_url: null });
   const [statsError, setStatsError] = useState(false);
 
   const appearanceLabel = () => {
@@ -56,17 +56,8 @@ export default function ProfileScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Profil bilgilerini her ekran odaklandığında yenile (EditProfile'dan dönüşte güncel kalır)
-  useFocusEffect(
-    useCallback(() => {
-      if (isGuestUser() || !user?.id) return;
-      getProfile(user.id).then((res) => {
-        if (res.success && res.data) {
-          setProfile(res.data);
-        }
-      });
-    }, [user?.id, isGuestUser])
-  );
+  // Profil verisi artık ProfileContext'ten — EditProfile optimistic patch yapınca
+  // anında burada güncellenir, useFocusEffect gerekmez.
 
   const displayName = () => {
     if (profile.display_name) return profile.display_name;
@@ -150,19 +141,22 @@ export default function ProfileScreen() {
               style={({ pressed }) => [
                 s.levelChip,
                 {
-                  backgroundColor: userLevel.color + "1F",
-                  borderColor: userLevel.color + "55",
+                  backgroundColor: userLevel.color + "14",
+                  borderColor: userLevel.color + "44",
                   transform: [{ scale: pressed ? 0.97 : 1 }],
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 6,
                 },
               ]}
               accessibilityLabel="Yol haritam"
             >
-              <Icon d={userLevel.icon} size={14} stroke={userLevel.color} sw={1.8} />
-              <Text style={[s.levelTxt, { color: userLevel.color }]}>
-                LV {userLevel.lv} · {userLevel.title.toUpperCase()}
+              <View style={[s.levelIconWrap, { backgroundColor: userLevel.color + "22" }]}>
+                <Icon d={userLevel.icon} size={14} stroke={userLevel.color} fill={userLevel.color + "33"} sw={1.7} />
+              </View>
+              <Text style={[s.levelTitle, { color: userLevel.color, fontFamily: c.fontBodyBold }]}>
+                {userLevel.title}
+              </Text>
+              <View style={[s.levelDot, { backgroundColor: userLevel.color + "66" }]} />
+              <Text style={[s.levelSub, { color: userLevel.color, fontFamily: c.fontBody }]}>
+                Seviye {userLevel.lv}
               </Text>
             </Pressable>
           </View>
@@ -383,14 +377,38 @@ function makeStyles(c) {
     avatarTxt: { fontFamily: c.fontNum, fontSize: 30, color: "#FFFFFF" },
     name: { fontFamily: c.fontBodyBold, fontSize: 22, color: c.textPrimary, marginTop: 14 },
     levelChip: {
-      marginTop: 8,
-      paddingHorizontal: 12,
+      marginTop: 10,
+      paddingLeft: 6,
+      paddingRight: 14,
       paddingVertical: 5,
       borderRadius: 999,
-      backgroundColor: c.accentGlow,
       borderWidth: 1,
-      borderColor: c.borderAccent,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
     },
+    levelIconWrap: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    levelTitle: {
+      fontSize: 13,
+      letterSpacing: 0.3,
+    },
+    levelDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 1.5,
+    },
+    levelSub: {
+      fontSize: 11,
+      letterSpacing: 0.2,
+      opacity: 0.85,
+    },
+    // legacy (henüz başka yerden referans varsa)
     levelTxt: {
       fontFamily: c.fontNum,
       fontSize: 11,
