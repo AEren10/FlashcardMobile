@@ -28,6 +28,7 @@ import DonutChart from "./DonutChart";
 import StaggerEnter from "./StaggerEnter";
 import LottieSuccess from "./LottieSuccess";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
+import PerfectScoreOverlay from "../celebration/PerfectScoreOverlay";
 
 const { width: W } = Dimensions.get("window");
 
@@ -66,9 +67,14 @@ export default function StudyResultScreen({
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
-          {/* Hero */}
-          <View style={s.hero}>
-            <View style={{ position: "relative" }}>
+          {/* %80+ skorda büyük "Mükemmel/Harika" overlay; düşükse klasik DonutChart hero */}
+          {ratio >= 0.8 ? (
+            <>
+              <PerfectScoreOverlay ratio={ratio} total={total} correct={correct} />
+              <Text style={[s.sub, { marginTop: 4 }]}>{subtitleFor(ratio)}</Text>
+            </>
+          ) : (
+            <View style={s.hero}>
               <DonutChart
                 percent={pct}
                 size={150}
@@ -76,15 +82,10 @@ export default function StudyResultScreen({
                 color={pct >= 70 ? c.success : pct >= 40 ? c.warning : c.error}
                 label={`${correct}/${total}`}
               />
-              {isExcellent && (
-                <View style={{ position: "absolute", top: -10, right: -10 }}>
-                  <LottieSuccess size={56} />
-                </View>
-              )}
+              <Text style={s.title}>{titleFor(ratio)}</Text>
+              <Text style={s.sub}>{subtitleFor(ratio)}</Text>
             </View>
-            <Text style={s.title}>{titleFor(ratio)}</Text>
-            <Text style={s.sub}>{subtitleFor(ratio)}</Text>
-          </View>
+          )}
 
           {/* Quick stats */}
           <View style={s.statsRow}>

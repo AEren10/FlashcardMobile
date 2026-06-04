@@ -29,6 +29,11 @@ import SmartListCard from "../../components/design/SmartListCard";
 import PressableScale from "../../components/design/PressableScale";
 import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
+import { pickGreeting } from "../../lib/greetings";
+import useMilestoneWatcher from "../../hooks/useMilestoneWatcher";
+import MilestoneModal from "../../components/celebration/MilestoneModal";
+import useBadgeWatcher from "../../hooks/useBadgeWatcher";
+import AchievementModal from "../../components/design/AchievementModal";
 import HomeSearchBar from "./components/HomeSearchBar";
 import LevelMiniCard from "./components/LevelMiniCard";
 import RandomReviewModal from "../../components/design/RandomReviewModal";
@@ -45,13 +50,7 @@ import {
 
 const DAILY_TOTAL = 10;
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "İyi geceler";
-  if (h < 12) return "Günaydın";
-  if (h < 18) return "İyi günler";
-  return "İyi akşamlar";
-}
+// greeting() artık pickGreeting() ile değişti (saat + streak-aware havuz, lib/greetings.js)
 
 
 export default function HomeScreen({ navigation }) {
@@ -116,6 +115,30 @@ export default function HomeScreen({ navigation }) {
   const userName = (getUserEmail() || "").split("@")[0] || "Hoşgeldin";
   const streak = stats.streakDays || 0;
   const dailyDone = Math.min(stats.totalWords || 0, DAILY_TOTAL);
+  const greetingPair = useMemo(
+    () => pickGreeting({ name: userName, streak }),
+    [userName, streak]
+  );
+
+  // Milestone watcher — ilk-X anları
+  const milestoneStats = useMemo(
+    () => ({
+      totalWords: stats.totalWords || 0,
+      streakDays: stats.streakDays || 0,
+      listsCompleted: stats.listsCompleted || 0,
+      perfectQuizCount: stats.perfectQuizCount || 0,
+      favoriteWordsCount: favoriteWordIds.length || 0,
+    }),
+    [stats.totalWords, stats.streakDays, stats.listsCompleted, stats.perfectQuizCount, favoriteWordIds.length]
+  );
+  const { current: currentMilestone, dismiss: dismissMilestone } =
+    useMilestoneWatcher(milestoneStats);
+
+  // Streak/Words rozet watcher — yeni rozet kazanılınca AchievementModal
+  const { newBadge, dismiss: dismissBadge } = useBadgeWatcher({
+    streakDays: stats.streakDays || 0,
+    totalWords: stats.totalWords || 0,
+  });
 
   const startChallenge = () => {
     if (lists.length) {
@@ -252,7 +275,8 @@ export default function HomeScreen({ navigation }) {
             </View>
           ) : (
             <HeroDashboard
-              greeting={greeting()}
+              greeting={greetingPair.headline}
+              greetingSub={greetingPair.subline}
               userName={userName}
               streak={streak}
               dailyDone={dailyDone}
@@ -502,6 +526,20 @@ export default function HomeScreen({ navigation }) {
         visible={randomReviewOpen}
         onClose={() => setRandomReviewOpen(false)}
         navigation={navigation}
+      />
+
+      {/* Milestone celebration — ilk-X anları */}
+      <MilestoneModal
+        milestone={currentMilestone}
+        visible={!!currentMilestone}
+        onDismiss={dismissMilestone}
+      />
+
+      {/* Streak/Words rozet — yeni rozet kazanılınca */}
+      <AchievementModal
+        visible={!!newBadge}
+        badge={newBadge}
+        onClose={dismissBadge}
       />
     </View>
   );

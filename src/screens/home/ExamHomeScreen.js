@@ -33,6 +33,7 @@ import RandomReviewModal from "../../components/design/RandomReviewModal";
 import ModeSegment from "../../components/design/ModeSegment";
 import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
+import { pickGreeting } from "../../lib/greetings";
 import { SkeletonStatRow } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import usePublicLists from "../../hooks/usePublicLists";
@@ -40,13 +41,7 @@ import { EXAM_ORDER, EXAMS, matchExam } from "../../lib/examMeta";
 
 const MODE_KEY = "@fc:homeMode";
 
-function greeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "İyi geceler";
-  if (h < 12) return "Günaydın";
-  if (h < 18) return "İyi günler";
-  return "İyi akşamlar";
-}
+// greeting() artık pickGreeting() ile değişti (lib/greetings.js)
 
 export default function ExamHomeScreen({ navigation }) {
   const { c } = useTheme();
@@ -129,6 +124,11 @@ export default function ExamHomeScreen({ navigation }) {
     return email.split("@")[0];
   }, [getUserEmail]);
 
+  const greetingPair = useMemo(
+    () => pickGreeting({ name: userName, streak: stats?.streakDays || 0 }),
+    [userName, stats?.streakDays]
+  );
+
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
@@ -145,7 +145,8 @@ export default function ExamHomeScreen({ navigation }) {
             </View>
           ) : (
             <HeroDashboard
-              greeting={greeting()}
+              greeting={greetingPair.headline}
+              greetingSub={greetingPair.subline}
               userName={userName}
               streak={stats.streakDays}
               dailyDone={Math.min(10, stats.totalWords % 10)}

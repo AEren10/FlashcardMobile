@@ -16,6 +16,7 @@ const { width: W } = Dimensions.get("window");
 
 function HeroDashboard({
   greeting,
+  greetingSub,
   userName,
   streak = 0,
   dailyDone = 0,
@@ -44,11 +45,22 @@ function HeroDashboard({
 
       {/* Greeting */}
       <Text style={[s.greet, { color: c.textSec, fontFamily: c.fontBody }]}>
-        {greeting}
+        {greeting},
       </Text>
       <Text style={[s.name, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>
         {userName}
       </Text>
+      {!!greetingSub && (
+        <Text
+          style={[
+            s.greetSub,
+            { color: c.accent, fontFamily: c.fontBodySemi },
+          ]}
+          numberOfLines={2}
+        >
+          {greetingSub}
+        </Text>
+      )}
 
       {/* Dashboard row: streak (sol) + daily radial (sağ-ortada) */}
       <View style={s.row}>
@@ -463,6 +475,14 @@ function makeStyles(c) {
       fontSize: 38,
       lineHeight: 42,
       marginTop: 2,
+    },
+    greetSub: {
+      fontSize: 13,
+      lineHeight: 18,
+      marginTop: 8,
+      letterSpacing: 0.2,
+      fontStyle: "italic",
+      opacity: 0.92,
     },
     row: {
       flexDirection: "row",

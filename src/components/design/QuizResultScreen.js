@@ -30,6 +30,7 @@ import PremiumButton from "./PremiumButton";
 import StaggerEnter from "./StaggerEnter";
 import LottieSuccess from "./LottieSuccess";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
+import PerfectScoreOverlay from "../celebration/PerfectScoreOverlay";
 
 const { width: W } = Dimensions.get("window");
 
@@ -107,6 +108,9 @@ export default function QuizResultScreen({
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 30 }}>
+          {/* Perfect/Excellent — büyük başlık + glow + konfeti */}
+          <PerfectScoreOverlay ratio={ratio} total={total} correct={correct} />
+
           {/* Hero */}
           <View style={s.hero}>
             <Animated.View

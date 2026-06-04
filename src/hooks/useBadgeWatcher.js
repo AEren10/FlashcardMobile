@@ -46,6 +46,8 @@ export default function useBadgeWatcher({ streakDays, totalWords, enabled = true
       const top = candidates[candidates.length - 1];
       setNewBadge({
         emoji: top.emoji,
+        icon: top.icon,
+        color: top.color,
         label: top.label,
         description: top.description || `${top.threshold}+ eşiği aşıldı, harikasın!`,
         _seenKey: top._seenKey,

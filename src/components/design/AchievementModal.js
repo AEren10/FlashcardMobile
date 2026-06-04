@@ -21,16 +21,18 @@ import {
   Dimensions,
 } from "react-native";
 import * as Haptics from "expo-haptics";
-import ConfettiCannon from "react-native-confetti-cannon";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
 import PremiumButton from "./PremiumButton";
 import Icon from "./Icon";
+import WarmConfetti from "../celebration/WarmConfetti";
 
 const { width: W } = Dimensions.get("window");
 
 export default function AchievementModal({ visible, badge, onClose }) {
   const { c } = useTheme();
+  // Badge'in kendi rengi varsa onu kullan, yoksa accent fallback
+  const tint = badge?.color || c.accent;
   const backdrop = useRef(new Animated.Value(0)).current;
   const badgeScale = useRef(new Animated.Value(0)).current;
   const badgeY = useRef(new Animated.Value(60)).current;
@@ -132,37 +134,36 @@ export default function AchievementModal({ visible, badge, onClose }) {
 
   return (
     <Modal transparent visible={visible} animationType="none" onRequestClose={onClose}>
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFill,
-          { backgroundColor: "rgba(0,0,0,0.78)", opacity: backdrop },
-        ]}
-      />
+      {/* Backdrop gradient — koyu + tint glow */}
+      <Animated.View style={[StyleSheet.absoluteFill, { opacity: backdrop }]}>
+        <LinearGradient
+          colors={[
+            "rgba(0,0,0,0.88)",
+            tint + "33",
+            "rgba(0,0,0,0.92)",
+          ]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
 
       <View style={s.center}>
-        <ConfettiCannon
-          count={120}
-          origin={{ x: W / 2, y: -10 }}
-          autoStart
-          fadeOut
-          explosionSpeed={350}
-          fallSpeed={2400}
-          colors={[c.accent, c.cobalt, c.warning, c.success]}
-        />
+        <WarmConfetti count={80} origin="top" />
 
-        {/* Radial waves */}
-        <Animated.View style={[s.wave, { backgroundColor: c.accentGlow }, waveStyle(wave1)]} />
-        <Animated.View style={[s.wave, { backgroundColor: c.accentGlow }, waveStyle(wave2)]} />
-        <Animated.View style={[s.wave, { backgroundColor: c.accentGlow }, waveStyle(wave3)]} />
+        {/* Radial waves — badge'in kendi renginde */}
+        <Animated.View style={[s.wave, { backgroundColor: tint + "55" }, waveStyle(wave1)]} />
+        <Animated.View style={[s.wave, { backgroundColor: tint + "55" }, waveStyle(wave2)]} />
+        <Animated.View style={[s.wave, { backgroundColor: tint + "55" }, waveStyle(wave3)]} />
 
         {/* Badge */}
         <Animated.View
           style={[
             s.badgeBox,
             {
-              backgroundColor: c.accentGlow,
-              borderColor: c.borderAccent,
-              shadowColor: c.accent,
+              backgroundColor: tint + "1A",
+              borderColor: tint + "AA",
+              shadowColor: tint,
               transform: [{ scale: badgeScale }, { translateY: badgeY }],
             },
           ]}
@@ -175,7 +176,7 @@ export default function AchievementModal({ visible, badge, onClose }) {
             pointerEvents="none"
           />
           {badge?.icon ? (
-            <Icon d={badge.icon} size={56} stroke={c.accent} fill={c.accentGlow} sw={1.8} />
+            <Icon d={badge.icon} size={56} stroke={tint} fill={tint + "44"} sw={1.8} />
           ) : (
             <Text style={s.badgeEmoji}>{badge?.emoji || "🏆"}</Text>
           )}
@@ -183,7 +184,7 @@ export default function AchievementModal({ visible, badge, onClose }) {
 
         {/* Text */}
         <Animated.View style={{ opacity: textOp, alignItems: "center", marginTop: 28 }}>
-          <Text style={[s.label, { color: c.accent, fontFamily: c.fontBodyBold }]}>
+          <Text style={[s.label, { color: tint, fontFamily: c.fontBodyBold }]}>
             YENİ ROZET
           </Text>
           <Text style={[s.title, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>
