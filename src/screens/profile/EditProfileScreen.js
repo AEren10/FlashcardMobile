@@ -37,6 +37,7 @@ export default function EditProfileScreen({ navigation }) {
 
   const [displayName, setDisplayName] = useState("");
   const [avatarUri, setAvatarUri] = useState(null);
+  const [avatarAsset, setAvatarAsset] = useState(null); // {uri, base64, mimeType}
   const [originalAvatar, setOriginalAvatar] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -63,10 +64,18 @@ export default function EditProfileScreen({ navigation }) {
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
+      base64: true, // KRİTİK: fetch().blob() RN'de 0-byte gönderiyordu, base64 ile bypass
     });
     if (!res.canceled && res.assets?.[0]?.uri) {
       Haptics.selectionAsync();
-      setAvatarUri(res.assets[0].uri);
+      const a = res.assets[0];
+      setAvatarUri(a.uri);
+      setAvatarAsset({
+        uri: a.uri,
+        base64: a.base64,
+        mimeType: a.mimeType || a.type,
+        fileName: a.fileName,
+      });
     }
   };
 
@@ -82,9 +91,17 @@ export default function EditProfileScreen({ navigation }) {
 
     (async () => {
       let avatarUrl = originalAvatar;
-      if (avatarUri) {
-        const up = await uploadAvatar(userId, avatarUri);
-        if (up.success && up.url) avatarUrl = up.url;
+      if (avatarAsset) {
+        const up = await uploadAvatar(userId, avatarAsset);
+        if (up.success && up.url) {
+          avatarUrl = up.url;
+        } else {
+          toast.show({
+            message: "Avatar yüklenemedi — " + (up.error || "tekrar dene"),
+            type: "error",
+            duration: 4000,
+          });
+        }
       }
       const res = await updateProfile(userId, {
         display_name: displayName.trim(),

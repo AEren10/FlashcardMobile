@@ -63,23 +63,59 @@ export async function updateProfile(userId, patch) {
 }
 
 /**
- * Avatar dosyasını upload edip public URL'ini döner.
- * @param {string} userId
- * @param {string} localUri — ImagePicker.assets[0].uri
+ * base64 string → Uint8Array (atob + char.codeAt yöntemi).
+ * React Native'de Buffer/TextEncoder garantili değil, manuel decode en sağlamı.
  */
-export async function uploadAvatar(userId, localUri) {
-  if (!userId || !localUri) return { success: false, error: "missing args" };
+function base64ToUint8Array(base64) {
+  // atob React Native'de built-in (Hermes + JSC)
+  const bin = global.atob ? global.atob(base64) : Buffer.from(base64, "base64").toString("binary");
+  const len = bin.length;
+  const arr = new Uint8Array(len);
+  for (let i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+
+/**
+ * Avatar dosyasını upload edip public URL'ini döner.
+ *
+ * @param {string} userId
+ * @param {object|string} asset — ImagePicker assets[0] objesi { uri, base64, mimeType, fileName }
+ *                                veya geriye dönük: sadece uri string'i (eski çağrı şekli)
+ */
+export async function uploadAvatar(userId, asset) {
+  if (!userId || !asset) return { success: false, error: "missing args" };
   try {
-    const fileExt = (localUri.split(".").pop() || "jpg").toLowerCase();
+    const localUri = typeof asset === "string" ? asset : asset.uri;
+    const base64 = typeof asset === "object" ? asset.base64 : null;
+    if (!localUri) return { success: false, error: "no uri" };
+
+    const fileExt = (localUri.split(".").pop() || "jpg").toLowerCase().split("?")[0];
     const fileName = `${userId}/avatar.${fileExt}`;
-    const response = await fetch(localUri);
-    const blob = await response.blob();
+    const contentType =
+      (typeof asset === "object" && (asset.mimeType || asset.type)) ||
+      (fileExt === "png" ? "image/png" : "image/jpeg");
+
+    // En güvenli yol: base64 → Uint8Array
+    // (fetch().blob() React Native'de bazen 0-byte gönderiyor)
+    if (!base64) {
+      return {
+        success: false,
+        error: "base64 missing — pickAvatar'da `base64: true` olduğundan emin ol",
+      };
+    }
+    const bytes = base64ToUint8Array(base64);
+
     const { error: upErr } = await supabase.storage
       .from("avatars")
-      .upload(fileName, blob, { upsert: true, contentType: blob.type });
+      .upload(fileName, bytes, { upsert: true, contentType });
     if (upErr) return { success: false, error: upErr.message };
+
+    // Cache-busting query ile public URL — eski cached avatar'ı bypass et
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(fileName);
-    return { success: true, url: urlData?.publicUrl || null };
+    const cacheBustedUrl = urlData?.publicUrl
+      ? `${urlData.publicUrl}?t=${Date.now()}`
+      : null;
+    return { success: true, url: cacheBustedUrl };
   } catch (e) {
     return { success: false, error: e?.message || "upload failed" };
   }
