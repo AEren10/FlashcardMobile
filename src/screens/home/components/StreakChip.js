@@ -91,7 +91,13 @@ export default function StreakChip({ streak = 0, onPress }) {
           s.wrap,
           {
             backgroundColor: c.bgElevated,
-            borderColor: active ? c.warning + "44" : c.border,
+            borderColor: active ? c.warning + "88" : c.warning + "33",
+            borderWidth: active ? 2 : 1.5,
+            shadowColor: c.warning,
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: active ? 0.45 : 0.15,
+            shadowRadius: 14,
+            elevation: active ? 4 : 1,
           },
         ]}
       >
@@ -106,7 +112,7 @@ export default function StreakChip({ streak = 0, onPress }) {
           />
         )}
         <LinearGradient
-          colors={active ? [c.warning + "12", "transparent"] : ["transparent", "transparent"]}
+          colors={active ? [c.warning + "26", c.warning + "08"] : [c.warning + "0A", "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 1 }}
           style={StyleSheet.absoluteFill}

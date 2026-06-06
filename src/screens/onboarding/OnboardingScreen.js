@@ -48,6 +48,12 @@ const SLIDES = [
     title: "Seriyi Koru",
     body: "Her gün biraz çalış, serini büyüt. Küçük adımlar, kalıcı ilerleme.",
   },
+  {
+    key: "demo",
+    kind: "demo",
+    title: "Hadi dene",
+    body: "Karta dokun, çevir, anlamını gör. İşte bu kadar basit.",
+  },
 ];
 
 const ONBOARDING_KEY = "@fc:onboardingSeen";
@@ -58,6 +64,94 @@ export async function hasSeenOnboarding() {
   } catch {
     return false;
   }
+}
+
+/**
+ * DemoFlashcard — mini interactive kart, onboarding son slide'ı.
+ * Stüdyo card stilinde küçük, tek tap ile çevriliyor.
+ * "ephemeral / kısa süreli" — Türk öğrencisi tanımıyor olabilir → AHA momenti.
+ */
+function DemoFlashcard({ c }) {
+  const [flipped, setFlipped] = React.useState(false);
+  const rot = React.useRef(new Animated.Value(0)).current;
+
+  const flip = () => {
+    Animated.timing(rot, {
+      toValue: flipped ? 0 : 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+    setFlipped(!flipped);
+  };
+
+  const frontStyle = {
+    transform: [{ perspective: 1000 }, { rotateY: rot.interpolate({ inputRange: [0, 1], outputRange: ["0deg", "180deg"] }) }],
+    backfaceVisibility: "hidden",
+  };
+  const backStyle = {
+    transform: [{ perspective: 1000 }, { rotateY: rot.interpolate({ inputRange: [0, 1], outputRange: ["180deg", "360deg"] }) }],
+    backfaceVisibility: "hidden",
+  };
+
+  return (
+    <Pressable
+      onPress={flip}
+      style={{ width: 240, height: 280, alignSelf: "center" }}
+      accessibilityLabel="Demo kartı çevir"
+    >
+      <Animated.View
+        style={[{
+          position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: c.bgElevated,
+          borderColor: c.accent + "66",
+          borderWidth: 1.5,
+          borderRadius: 22,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+          shadowColor: c.accent,
+          shadowOpacity: 0.5,
+          shadowRadius: 24,
+          shadowOffset: { width: 0, height: 0 },
+          elevation: 8,
+        }, frontStyle]}
+      >
+        <Text style={{ fontFamily: c.fontDisplay, fontSize: 38, color: c.textPrimary, fontStyle: "italic" }}>
+          ephemeral
+        </Text>
+        <Text style={{ fontFamily: c.fontBody, fontSize: 12, color: c.textSec, marginTop: 6 }}>
+          sıfat
+        </Text>
+        <Text style={{ position: "absolute", bottom: 18, fontFamily: c.fontBody, fontSize: 11, color: c.textMuted, opacity: 0.65 }}>
+          Dokunup çevir →
+        </Text>
+      </Animated.View>
+      <Animated.View
+        style={[{
+          position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: c.bgElevated,
+          borderColor: c.cobalt + "66",
+          borderWidth: 1.5,
+          borderRadius: 22,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+          shadowColor: c.cobalt,
+          shadowOpacity: 0.5,
+          shadowRadius: 24,
+          shadowOffset: { width: 0, height: 0 },
+          elevation: 8,
+        }, backStyle]}
+      >
+        <Text style={{ fontFamily: c.fontDisplay, fontSize: 30, color: c.textPrimary }}>
+          kısa süreli
+        </Text>
+        <Text style={{ fontFamily: c.fontDisplay, fontSize: 12, color: c.textSec, marginTop: 8, fontStyle: "italic", textAlign: "center" }}>
+          "Their happiness was ephemeral."
+        </Text>
+      </Animated.View>
+    </Pressable>
+  );
 }
 
 export async function markOnboardingSeen() {
@@ -73,29 +167,10 @@ export default function OnboardingScreen({ onFinish }) {
   const scrollX = useRef(new Animated.Value(0)).current;
 
   const finishWithReminders = () => {
-    // 2 sabit bildirim (09:00 + 20:00) — akıllı tekrar sistemi bildirim olmadan çalışmaz.
-    Alert.alert(
-      "Bildirim İzni",
-      "Sana sabah 09:00 ve akşam 20:00'da nazikçe hatırlatacağız. Akıllı tekrar sistemi bildirim ister.",
-      [
-        {
-          text: "Daha sonra",
-          style: "cancel",
-          onPress: () => {
-            markOnboardingSeen();
-            onFinish();
-          },
-        },
-        {
-          text: "İzin Ver",
-          onPress: async () => {
-            await activateRemindersWithPrompt().catch(() => {});
-            markOnboardingSeen();
-            onFinish();
-          },
-        },
-      ]
-    );
+    // Permission'ı 1. başarılı session sonrası StudyDoneState'te isteyeceğiz.
+    // Burada Alert açmadan direkt onboarding'i kapat — kullanıcı önce değeri görmeli.
+    markOnboardingSeen();
+    onFinish();
   };
 
   const handleNext = () => {
@@ -139,7 +214,9 @@ export default function OnboardingScreen({ onFinish }) {
     return (
       <View style={[styles.slide, { width }]}>
         <Animated.View style={{ opacity, transform: [{ scale }] }}>
-          {lottieSrc ? (
+          {item.kind === "demo" ? (
+            <DemoFlashcard c={c} />
+          ) : lottieSrc ? (
             <LottieView
               source={lottieSrc}
               autoPlay

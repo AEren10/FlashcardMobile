@@ -101,11 +101,12 @@ export default function AchievementsScreen({ navigation }) {
                     const isUnlocked = unlocked.has(ach.key);
                     const tier = TIER_COLORS[ach.tier];
                     return (
-                      <StaggerEnter key={ach.key} index={Math.min(idx, 6)} delay={55}>
+                      <StaggerEnter key={ach.key} index={Math.min(idx, 6)} delay={55} style={{ width: "48.5%" }}>
                       <View
                         style={[
                           s.card,
                           {
+                            width: "100%",
                             backgroundColor: c.bgElevated,
                             borderColor: isUnlocked ? tier.color : c.border,
                             opacity: isUnlocked ? 1 : 0.55,

@@ -96,6 +96,7 @@ import FlashcardDetailScreen from "../screens/flashcard/FlashcardDetailScreen";
 import StudyScreen from "../screens/study/StudyScreen";
 import QuizScreen from "../screens/study/QuizScreen";
 import StreakScreen from "../screens/streak/StreakScreen";
+import WeeklyRecapScreen from "../screens/recap/WeeklyRecapScreen";
 import HardWordsScreen from "../screens/hard/HardWordsScreen";
 import RoadmapScreen from "../screens/roadmap/RoadmapScreen";
 
@@ -314,6 +315,11 @@ function ProfileStackNavigator() {
         name="Streak"
         component={StreakScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="WeeklyRecap"
+        component={WeeklyRecapScreen}
+        options={{ presentation: "modal", animation: "slide_from_bottom" }}
       />
       <ProfileStack.Screen
         name="Roadmap"

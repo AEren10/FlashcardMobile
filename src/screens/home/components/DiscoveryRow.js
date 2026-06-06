@@ -47,7 +47,14 @@ export default function DiscoveryRow({
             hitSlop={10}
             style={({ pressed }) => [
               s.seeAll,
-              { borderColor: tint + "55", backgroundColor: tint + "11" },
+              {
+                borderColor: tint + "88",
+                backgroundColor: tint + "1F",
+                shadowColor: tint,
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 0 },
+              },
               pressed && { opacity: 0.6 },
             ]}
           >

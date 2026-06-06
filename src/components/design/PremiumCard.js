@@ -56,7 +56,7 @@ export default function PremiumCard({
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Radial accent glow */}
+      {/* Radial accent glow — alpha bump (eski opacity:0.7 + 33 → tek katmanlı 55) */}
       <View
         style={[
           s.radialGlow,
@@ -64,7 +64,7 @@ export default function PremiumCard({
             width: glowSize,
             height: glowSize,
             borderRadius: glowSize / 2,
-            backgroundColor: (glowColor || c.accent) + "33", // 20% alpha
+            backgroundColor: (glowColor || c.accent) + "55", // 33% alpha — net halo
             ...glowPos,
           },
         ]}
@@ -98,6 +98,6 @@ const s = StyleSheet.create({
   },
   radialGlow: {
     position: "absolute",
-    opacity: 0.7,
+    // opacity: 0.7 kaldırıldı — alpha tek noktada (renkte) tutulur, halo daha net
   },
 });

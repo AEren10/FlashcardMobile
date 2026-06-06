@@ -229,15 +229,39 @@ export default function ProfileScreen() {
                     style={[
                       s.miniBadgeBox,
                       {
-                        backgroundColor: b.on ? b.color + "22" : c.bgSurface,
-                        borderColor: b.on ? b.color + "55" : c.border,
-                        opacity: b.on ? 1 : 0.4,
+                        // Aktif: vurgulu renkli + glow shadow
+                        // İnaktif: solid bg ama border renkli (tamamen soluk değil)
+                        backgroundColor: b.on ? b.color + "33" : b.color + "0F",
+                        borderColor: b.on ? b.color + "AA" : b.color + "33",
+                        borderWidth: b.on ? 2 : 1,
+                        shadowColor: b.color,
+                        shadowOffset: { width: 0, height: 0 },
+                        shadowOpacity: b.on ? 0.45 : 0,
+                        shadowRadius: 12,
+                        elevation: b.on ? 4 : 0,
+                        opacity: b.on ? 1 : 0.55,
                       },
                     ]}
                   >
-                    <Icon d={b.icon} size={22} stroke={b.on ? b.color : c.textMuted} fill={b.on ? b.color + "33" : "none"} sw={1.6} />
+                    <Icon
+                      d={b.icon}
+                      size={22}
+                      stroke={b.on ? b.color : b.color + "AA"}
+                      fill={b.on ? b.color + "44" : "none"}
+                      sw={1.8}
+                    />
                   </View>
-                  <Text style={[s.miniBadgeLbl, b.on && { color: b.color, fontFamily: c.fontBodyBold }]}>{b.l}</Text>
+                  <Text
+                    style={[
+                      s.miniBadgeLbl,
+                      {
+                        color: b.on ? b.color : b.color + "AA",
+                        fontFamily: b.on ? c.fontBodyBold : c.fontBodySemi,
+                      },
+                    ]}
+                  >
+                    {b.l}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -245,6 +269,15 @@ export default function ProfileScreen() {
 
           {/* Quick actions — renkli icon'larla */}
           <View style={s.list}>
+            <Row
+              iconPath={ICONS.sparkle}
+              iconColor="#D4AE5E"
+              label="Haftalık Özet"
+              detail="Son 7 günün · paylaşılabilir"
+              onPress={() => navigation.navigate("WeeklyRecap")}
+              c={c}
+              s={s}
+            />
             <Row
               iconPath={ICONS.target}
               iconColor="#8B5CF6"

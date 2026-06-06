@@ -75,8 +75,8 @@ export default function FlashcardCardArea({
           style={({ pressed }) => [
             s.chev,
             {
-              backgroundColor: c.accent + "18",
-              borderColor: c.accent + "55",
+              backgroundColor: c.accent + "38",
+              borderColor: c.accent + "CC",
               shadowColor: c.accent,
               opacity: isFirst ? 0.3 : 1,
               transform: [{ scale: pressed ? 0.94 : 1 }],
@@ -84,46 +84,27 @@ export default function FlashcardCardArea({
           ]}
           accessibilityLabel="Önceki kelime"
         >
-          <Icon d="M15 6l-6 6 6 6" size={22} stroke={c.accent} sw={2.6} />
+          <Icon d="M15 6l-6 6 6 6" size={24} stroke={c.accent} sw={3} />
         </Pressable>
 
-        {isLast ? (
-          <Pressable
-            onPress={goNext}
-            hitSlop={14}
-            style={({ pressed }) => [
-              s.completeCta,
-              {
-                backgroundColor: c.accent,
-                shadowColor: c.accent,
-                transform: [{ scale: pressed ? 0.97 : 1 }],
-              },
-            ]}
-            accessibilityLabel="Çalışmaya geç"
-          >
-            <Text style={[s.completeTxt, { color: c.textOnAccent, fontFamily: c.fontBodyBold }]}>
-              Çalışmaya Geç
-            </Text>
-            <Icon d={ICONS.arrow} size={17} stroke={c.textOnAccent} sw={2.4} />
-          </Pressable>
-        ) : (
-          <Pressable
-            onPress={goNext}
-            hitSlop={14}
-            style={({ pressed }) => [
-              s.chev,
-              {
-                backgroundColor: c.accent + "18",
-                borderColor: c.accent + "55",
-                shadowColor: c.accent,
-                transform: [{ scale: pressed ? 0.94 : 1 }],
-              },
-            ]}
-            accessibilityLabel="Sonraki kelime"
-          >
-            <Icon d="M9 6l6 6-6 6" size={22} stroke={c.accent} sw={2.6} />
-          </Pressable>
-        )}
+        <Pressable
+          onPress={goNext}
+          disabled={isLast}
+          hitSlop={14}
+          style={({ pressed }) => [
+            s.chev,
+            {
+              backgroundColor: c.accent + "38",
+              borderColor: c.accent + "CC",
+              shadowColor: c.accent,
+              opacity: isLast ? 0.3 : 1,
+              transform: [{ scale: pressed ? 0.94 : 1 }],
+            },
+          ]}
+          accessibilityLabel="Sonraki kelime"
+        >
+          <Icon d="M9 6l6 6-6 6" size={24} stroke={c.accent} sw={3} />
+        </Pressable>
       </View>
     </>
   );
@@ -160,13 +141,13 @@ const s = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    borderWidth: 1.5,
+    borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.35,
-    shadowRadius: 14,
-    elevation: 3,
+    shadowOpacity: 0.55,
+    shadowRadius: 18,
+    elevation: 5,
   },
   completeCta: {
     flexDirection: "row",

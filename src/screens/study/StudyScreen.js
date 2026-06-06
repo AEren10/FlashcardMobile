@@ -24,9 +24,8 @@ import FlipCard from "../../components/design/FlipCard";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
 import ProgressBar from "../../components/design/ProgressBar";
-import StudyResultScreen from "../../components/design/StudyResultScreen";
-import MistakesListModal from "../../components/design/MistakesListModal";
-import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
+import StudyLoadingState from "./components/StudyLoadingState";
+import StudyDoneState from "./components/StudyDoneState";
 import { useTheme } from "../../contexts/ThemeContext";
 import useStudyEngine from "../../hooks/useStudyEngine";
 import useStudySwipe from "../../hooks/useStudySwipe";
@@ -90,6 +89,10 @@ export default function StudyScreen({ route, navigation }) {
     return unsub;
   }, [navigation, engine.done, engine.loading, engine.index, engine.words, feedback]);
 
+  // Cleanup guard — unmount sonrası setState'i engelle (memory leak fix)
+  const unmountedRef = useRef(false);
+  useEffect(() => () => { unmountedRef.current = true; }, []);
+
   const handleAnswer = (know) => {
     if (feedback || !engine.current) return;
     setFeedback(know ? "know" : "dont");
@@ -104,6 +107,7 @@ export default function StudyScreen({ route, navigation }) {
     // Hem doğru hem yanlış için aynı süre — tik/çarpı tam görünür
     const delay = know ? 620 : 700;
     setTimeout(() => {
+      if (unmountedRef.current) return; // unmount edildi → state update yapma
       if (result.isLast) {
         engine.finishSeason(know, know ? null : result.wordId);
       } else {
@@ -115,11 +119,11 @@ export default function StudyScreen({ route, navigation }) {
     }, delay);
   };
 
-  if (engine.loading) return <LoadingState s={s} c={c} />;
+  if (engine.loading) return <StudyLoadingState s={s} />;
 
   if (engine.done) {
     return (
-      <DoneState
+      <StudyDoneState
         engine={engine}
         navigation={navigation}
         listId={listId}
@@ -202,65 +206,50 @@ export default function StudyScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Aksiyon + bilgilendirme tek satır — chip'ler hem tıklanabilir hem swipe rehberi */}
-        <View style={s.swipeGuide}>
-          <Pressable
-            onPress={() => handleAnswer(false)}
-            disabled={!!feedback}
-            style={({ pressed }) => [
+        {/* Swipe rehberi — sadece bilgilendirme (tıklanamaz), SVG oklarla görsel ipucu */}
+        <View style={s.swipeGuide} pointerEvents="none">
+          <View
+            style={[
               s.guideItem,
               {
-                backgroundColor: c.error + "16",
+                backgroundColor: c.error + "1A",
                 borderColor: c.error + "44",
-                shadowColor: c.error,
-                opacity: feedback ? 0.45 : 1,
-                transform: [{ scale: pressed ? 0.96 : 1 }],
               },
             ]}
-            accessibilityLabel="Bilmiyorum"
           >
-            <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.6} />
-            <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodyBold }]}>Bilmiyorum</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              if (feedback) return;
-              Haptics.selectionAsync();
-              setFlipped((f) => !f);
-            }}
-            disabled={!!feedback}
-            style={({ pressed }) => [
+            <Icon d="M15 6l-6 6 6 6" size={16} stroke={c.error} sw={2.4} />
+            <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodySemi }]}>
+              Sola kaydır
+            </Text>
+          </View>
+          <View
+            style={[
               s.guideItem,
               {
                 backgroundColor: c.bgSurface,
                 borderColor: c.border,
-                opacity: feedback ? 0.45 : 1,
-                transform: [{ scale: pressed ? 0.96 : 1 }],
               },
             ]}
-            accessibilityLabel="Çevir"
           >
-            <Icon d={ICONS.refresh} size={18} stroke={c.textSec} sw={2.2} />
-            <Text style={[s.guideTxt, { color: c.textSec, fontFamily: c.fontBodyBold }]}>Çevir</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => handleAnswer(true)}
-            disabled={!!feedback}
-            style={({ pressed }) => [
+            <Icon d={ICONS.refresh} size={16} stroke={c.textSec} sw={2} />
+            <Text style={[s.guideTxt, { color: c.textSec, fontFamily: c.fontBodySemi }]}>
+              Dokun: çevir
+            </Text>
+          </View>
+          <View
+            style={[
               s.guideItem,
               {
-                backgroundColor: c.success + "16",
+                backgroundColor: c.success + "1A",
                 borderColor: c.success + "44",
-                shadowColor: c.success,
-                opacity: feedback ? 0.45 : 1,
-                transform: [{ scale: pressed ? 0.96 : 1 }],
               },
             ]}
-            accessibilityLabel="Biliyorum"
           >
-            <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodyBold }]}>Biliyorum</Text>
-            <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.6} />
-          </Pressable>
+            <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodySemi }]}>
+              Sağa kaydır
+            </Text>
+            <Icon d="M9 6l6 6-6 6" size={16} stroke={c.success} sw={2.4} />
+          </View>
         </View>
 
         {showConfetti && (
@@ -394,80 +383,6 @@ function ScreenFlash({ type }) {
         opacity,
       }}
     />
-  );
-}
-
-function LoadingState({ s, c }) {
-  return (
-    <View style={s.root}>
-      <SafeAreaView style={{ flex: 1, padding: 20, gap: 18 }} edges={["top"]}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Skeleton width={40} height={40} radius={12} />
-          <Skeleton width={50} height={20} radius={6} />
-        </View>
-        <Skeleton width="100%" height={6} radius={3} />
-        <View style={{ flex: 1, justifyContent: "center" }}>
-          <SkeletonFlipCard />
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 8 }}>
-          <Skeleton width={110} height={20} radius={6} />
-          <Skeleton width={110} height={20} radius={6} />
-        </View>
-      </SafeAreaView>
-    </View>
-  );
-}
-
-function DoneState({ engine, navigation, listId }) {
-  // O(1) lookup — n^2 yerine
-  const wordsById = useMemo(
-    () => new Map(engine.words.map((w) => [w.id, w])),
-    [engine.words]
-  );
-  const correctWords = useMemo(
-    () => engine.correctIds.map((id) => wordsById.get(id)).filter(Boolean),
-    [engine.correctIds, wordsById]
-  );
-  const wrongWordsList = useMemo(
-    () =>
-      engine.wrongIds
-        .map((id) => wordsById.get(id))
-        .filter(Boolean)
-        .map((w) => ({ ...w, list_id: listId })),
-    [engine.wrongIds, wordsById, listId]
-  );
-
-  const goToMistakesList = () => {
-    engine.setShowMistakesModal(false);
-    if (engine.mistakesListId) {
-      navigation.replace("Study", {
-        listId: engine.mistakesListId,
-        listTitle: "Bilemediğin Kelimeler",
-      });
-    } else {
-      navigation.goBack();
-    }
-  };
-
-  return (
-    <>
-      <StudyResultScreen
-        total={engine.words.length}
-        correct={engine.correct}
-        durationSec={engine.finalDuration}
-        correctWords={correctWords}
-        wrongWords={wrongWordsList}
-        mistakesAdded={engine.mistakesAdded}
-        onRetryMistakes={engine.mistakesAdded > 0 ? goToMistakesList : undefined}
-        onFinish={() => navigation.goBack()}
-      />
-      <MistakesListModal
-        visible={engine.showMistakesModal}
-        addedCount={engine.mistakesAdded}
-        onStudy={goToMistakesList}
-        onLater={() => engine.setShowMistakesModal(false)}
-      />
-    </>
   );
 }
 

@@ -29,6 +29,7 @@ import SmartListCard from "../../components/design/SmartListCard";
 import PressableScale from "../../components/design/PressableScale";
 import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
+import ContinueCard from "./components/ContinueCard";
 import { pickGreeting } from "../../lib/greetings";
 import useMilestoneWatcher from "../../hooks/useMilestoneWatcher";
 import MilestoneModal from "../../components/celebration/MilestoneModal";
@@ -587,43 +588,6 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
-const ContinueCard = React.memo(function ContinueCard({ title, count, pct, level, c, onPress }) {
-  return (
-    <PressableScale onPress={onPress} style={{ width: 182 }} scaleDown={0.96}>
-      <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 10 }}>
-        <CategoryCover difficulty={level} height={100} />
-      </View>
-      <Text
-        numberOfLines={1}
-        style={{ fontFamily: c.fontBodySemi, fontSize: 14, color: c.textPrimary }}
-      >
-        {title}
-      </Text>
-      <Text style={{ marginTop: 2, fontSize: 12, color: c.textSec, fontFamily: c.fontBody }}>
-        {count} kelime · %{pct}
-      </Text>
-      <View
-        style={{
-          marginTop: 8,
-          height: 5,
-          backgroundColor: c.bgSurface,
-          borderRadius: 99,
-          overflow: "hidden",
-        }}
-      >
-        <View
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            backgroundColor: c.accent,
-            borderRadius: 99,
-          }}
-        />
-      </View>
-    </PressableScale>
-  );
-});
-
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
@@ -645,14 +609,14 @@ function makeStyles(c) {
       marginTop: 16,
       borderRadius: 20,
       padding: 22,
-      borderWidth: 1,
-      borderColor: c.borderAccent,
+      borderWidth: 1.5,
+      borderColor: c.accent + "66",
       overflow: "hidden",
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.4,
+      shadowOpacity: 0.55,
       shadowRadius: 40,
-      elevation: 6,
+      elevation: 8,
     },
     challengeGlow: {
       position: "absolute",

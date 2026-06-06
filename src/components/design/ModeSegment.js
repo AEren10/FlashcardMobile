@@ -26,11 +26,12 @@ const OPTIONS = [
 export default function ModeSegment({ mode = "normal", onChange, examCount }) {
   const { c, isDark } = useTheme();
   const indicator = useRef(new Animated.Value(mode === "exam" ? 1 : 0)).current;
+  const [wrapW, setWrapW] = React.useState(0);
 
   useEffect(() => {
     Animated.spring(indicator, {
       toValue: mode === "exam" ? 1 : 0,
-      useNativeDriver: false,
+      useNativeDriver: true,
       tension: 70,
       friction: 9,
     }).start();
@@ -42,9 +43,11 @@ export default function ModeSegment({ mode = "normal", onChange, examCount }) {
     onChange?.(key);
   };
 
-  const indicatorLeft = indicator.interpolate({
+  // Native driver için translateX kullan (eski "1%" → "50%" left animasyonu yerine)
+  const halfW = wrapW > 0 ? wrapW / 2 : 0;
+  const translateX = indicator.interpolate({
     inputRange: [0, 1],
-    outputRange: ["1%", "50%"],
+    outputRange: [0, halfW],
   });
 
   return (
@@ -53,14 +56,15 @@ export default function ModeSegment({ mode = "normal", onChange, examCount }) {
         s.wrap,
         { backgroundColor: c.bgSurface, borderColor: c.border },
       ]}
+      onLayout={(e) => setWrapW(e.nativeEvent.layout.width)}
     >
       <Animated.View
         style={[
           s.indicator,
           {
-            left: indicatorLeft,
             backgroundColor: c.accent,
             shadowColor: c.accent,
+            transform: [{ translateX }],
           },
         ]}
       />

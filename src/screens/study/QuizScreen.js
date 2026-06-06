@@ -32,7 +32,7 @@ import EmptyState from "../../components/EmptyState";
 import QuizResultScreen from "../../components/design/QuizResultScreen";
 import MistakesListModal from "../../components/design/MistakesListModal";
 import QuizModeModal from "../../components/design/QuizModeModal";
-import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
+import QuizLoadingState from "./components/QuizLoadingState";
 import {
   addToMistakesList,
   bumpMistakesStreak,
@@ -129,7 +129,7 @@ export default function QuizScreen({ route, navigation }) {
       toValue: 0,
       duration: TIME_LIMIT * 1000,
       easing: Easing.linear,
-      useNativeDriver: false,
+      useNativeDriver: true,
     });
     anim.start(({ finished }) => {
       if (finished && !picked) {
@@ -152,8 +152,15 @@ export default function QuizScreen({ route, navigation }) {
     return shuffle([current.meaning, ...distractors]);
   }, [current, words]);
 
+  // Unmount + race guard'lar
+  const unmountedRef = useRef(false);
+  const pickingRef = useRef(false);
+  useEffect(() => () => { unmountedRef.current = true; }, []);
+
   const pick = async (opt, i) => {
-    if (picked) return;
+    // Double-tap race fix: setState async, ref senkron — ref ile lock
+    if (pickingRef.current || picked) return;
+    pickingRef.current = true;
     const isCorrect = opt === current.meaning;
     setPicked({ opt, i, isCorrect });
     Haptics.notificationAsync(
@@ -176,6 +183,7 @@ export default function QuizScreen({ route, navigation }) {
 
     const wait = isCorrect ? 650 : 1250;
     setTimeout(async () => {
+      if (unmountedRef.current) return; // unmount → state update yapma
       if (index + 1 >= words.length) {
         const finalCorrect = isCorrect ? correct + 1 : correct;
         const duration = Math.round((Date.now() - startedAt.current) / 1000);
@@ -204,6 +212,7 @@ export default function QuizScreen({ route, navigation }) {
         setPicked(null);
         setIndex((ix) => ix + 1);
       }
+      pickingRef.current = false; // Lock'u serbest bırak, sonraki tap kabul edilir
     }, wait);
   };
 
@@ -240,28 +249,7 @@ export default function QuizScreen({ route, navigation }) {
   }
 
   if (loading) {
-    return (
-      <View style={s.root}>
-        <SafeAreaView style={{ flex: 1, padding: 20, gap: 18 }}>
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-            <Skeleton width={36} height={36} radius={12} />
-            <View style={{ flex: 1 }}>
-              <Skeleton width="100%" height={6} radius={3} />
-            </View>
-            <Skeleton width={40} height={16} radius={6} />
-          </View>
-          <View style={{ alignItems: "center", marginTop: 30, gap: 18 }}>
-            <Skeleton width={150} height={26} radius={999} />
-            <Skeleton width="60%" height={52} radius={10} />
-          </View>
-          <View style={{ flex: 1, justifyContent: "center", flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} width="47%" height={72} radius={16} />
-            ))}
-          </View>
-        </SafeAreaView>
-      </View>
-    );
+    return <QuizLoadingState s={s} />;
   }
 
   if (fetchError) {
@@ -364,12 +352,12 @@ export default function QuizScreen({ route, navigation }) {
                 <Animated.View
                   style={{
                     height: "100%",
-                    width: timerAnim.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"] }),
-                    backgroundColor: timerAnim.interpolate({
-                      inputRange: [0, 0.3, 1],
-                      outputRange: [c.error, c.warning, c.cobalt],
-                    }),
+                    width: "100%",
+                    backgroundColor: c.cobalt,
                     borderRadius: 99,
+                    // ScaleX native driver — smooth 60fps, soldan kısalır
+                    transform: [{ translateX: 0 }, { scaleX: timerAnim }],
+                    transformOrigin: "left",
                   }}
                 />
               </View>

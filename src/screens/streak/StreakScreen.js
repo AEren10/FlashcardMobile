@@ -187,16 +187,24 @@ export default function StreakScreen({ navigation }) {
 
 function StatTile({ value, label, trend, accent, c, s }) {
   return (
-    <View style={[s.tile, { borderTopColor: accent, borderTopWidth: 2 }]}>
+    <View style={[
+      s.tile,
+      {
+        borderTopColor: accent,
+        borderTopWidth: 3,
+        borderColor: accent + "44",
+        shadowColor: accent,
+      },
+    ]}>
       <View
         style={[
           s.tileHalo,
           {
-            backgroundColor: accent + "33",
+            backgroundColor: accent + "55",
           },
         ]}
       />
-      <Text style={s.tileVal}>{value}</Text>
+      <Text style={[s.tileVal, { color: accent }]}>{value}</Text>
       <Text style={s.tileLbl}>{label}</Text>
       <View style={[s.trendChip, { backgroundColor: c.successDim }]}>
         <Text style={[s.trendTxt, { color: c.success }]}>↑ {trend}</Text>
@@ -347,12 +355,16 @@ function makeStyles(c) {
       flex: 1,
       backgroundColor: c.bgElevated,
       borderRadius: 16,
-      borderWidth: 1,
+      borderWidth: 1.5,
       borderColor: c.border,
       padding: 16,
       paddingTop: 14,
       alignItems: "center",
       overflow: "hidden",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.25,
+      shadowRadius: 12,
+      elevation: 3,
     },
     tileHalo: {
       position: "absolute",
@@ -360,7 +372,7 @@ function makeStyles(c) {
       width: 90,
       height: 46,
       borderRadius: 99,
-      opacity: 0.6,
+      opacity: 0.9,
     },
     tileVal: { fontFamily: c.fontNum, fontSize: 28, color: c.textPrimary },
     tileLbl: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec, marginTop: 2 },

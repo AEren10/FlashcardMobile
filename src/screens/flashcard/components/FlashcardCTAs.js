@@ -84,10 +84,12 @@ function CtaButton({
         style={[
           s.cta,
           {
-            borderColor: disabled ? c.border : accent + (bold ? "FF" : "55"),
+            borderColor: disabled ? c.border : accent + (bold ? "FF" : "AA"),
             backgroundColor: outline ? "transparent" : "transparent",
             opacity: disabled ? 0.55 : 1,
-            shadowColor: bold ? accent : "transparent",
+            shadowColor: bold ? accent : accent + "88",
+            // Outline butonun da hafif glow olsun
+            shadowOpacity: bold ? 0.5 : 0.25,
           },
         ]}
       >
@@ -99,11 +101,12 @@ function CtaButton({
             style={StyleSheet.absoluteFill}
           />
         ) : (
+          // Outline buton: accent renkli daha vurgulu soft tint dolgu
           <View
             pointerEvents="none"
             style={[
               StyleSheet.absoluteFill,
-              { backgroundColor: c.bgSurface },
+              { backgroundColor: accent + "26" },
             ]}
           />
         )}

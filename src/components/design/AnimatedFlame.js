@@ -7,8 +7,17 @@ import flameAnim from "../../assets/lottie/flame.json";
 
 export default function AnimatedFlame({ size = 64, streak = 0 }) {
   const { c } = useTheme();
+  // Streak'e göre alev rengi — başlangıçta turuncu, 7+ amber, 30+ red, 100+ purple
+  const isLegend = streak >= 100;
   const isHot = streak >= 30;
-  const ringColor = isHot ? c.error : c.warning;
+  const isFlame = streak >= 7;
+  const ringColor = isLegend
+    ? "#A855F7"
+    : isHot
+      ? c.error
+      : isFlame
+        ? c.warning
+        : c.accent; // 0-6 gün accent gold
 
   const ring1 = useRef(new Animated.Value(0)).current;
   const ring2 = useRef(new Animated.Value(0)).current;
@@ -48,15 +57,36 @@ export default function AnimatedFlame({ size = 64, streak = 0 }) {
     width: size * 0.85,
     height: size * 0.85,
     borderRadius: size,
-    borderWidth: 1.5,
+    borderWidth: 2.5,
     borderColor: ringColor,
     position: "absolute",
-    opacity: val.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 0.55, 0] }),
+    // Daha vurgulu — 0.55 → 0.85, kalın border
+    opacity: val.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 0.85, 0] }),
     transform: [{ scale: val.interpolate({ inputRange: [0, 1], outputRange: [0.7, 2.4] }) }],
+    // Glow shadow — alevin ısısı hissedilsin
+    shadowColor: ringColor,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 12,
   });
 
   return (
     <View style={[s.wrap, { width: size + 40, height: size + 40 }]}>
+      {/* Sıcak halo arka plan — sürekli yumuşak glow */}
+      <View
+        pointerEvents="none"
+        style={{
+          position: "absolute",
+          width: size * 1.6,
+          height: size * 1.6,
+          borderRadius: size,
+          backgroundColor: ringColor + "26",
+          shadowColor: ringColor,
+          shadowOffset: { width: 0, height: 0 },
+          shadowOpacity: 0.6,
+          shadowRadius: 22,
+        }}
+      />
       <Animated.View pointerEvents="none" style={ringStyle(ring1)} />
       <Animated.View pointerEvents="none" style={ringStyle(ring2)} />
       <Animated.View pointerEvents="none" style={ringStyle(ring3)} />

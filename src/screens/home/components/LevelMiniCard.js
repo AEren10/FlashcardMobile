@@ -17,11 +17,12 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
       toValue: level.progress,
       duration: 1200,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   }, [level.progress, fill]);
 
-  const fillWidth = fill.interpolate({
+  // Native scaleX progress — eski width interpolation yerine
+  const fillWidth = fill.interpolate({ // legacy unused (saklı)
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
   });
@@ -67,7 +68,12 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
           </View>
           <View style={[s.track, { backgroundColor: c.bgBase }]}>
             <Animated.View
-              style={[s.fill, { width: fillWidth, backgroundColor: c.accent }]}
+              style={[s.fill, {
+                width: "100%",
+                backgroundColor: c.accent,
+                transform: [{ scaleX: fill }],
+                transformOrigin: "left",
+              }]}
             />
           </View>
         </View>

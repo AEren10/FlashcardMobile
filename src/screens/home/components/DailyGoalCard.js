@@ -31,7 +31,7 @@ export default function DailyGoalCard({ done = 0, total = 10, onPress }) {
       toValue: ratio,
       duration: 1400,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
   }, [ratio, fillAnim]);
 
@@ -71,10 +71,8 @@ export default function DailyGoalCard({ done = 0, total = 10, onPress }) {
     return () => shimmerLoop.stop();
   }, [completed, shimmer, pulse]);
 
-  const fillWidth = fillAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
-  });
+  // ScaleX native driver — soldan büyüyen progress bar (60fps)
+  const fillScaleX = fillAnim;
   const shimmerX = shimmer.interpolate({
     inputRange: [0, 1],
     outputRange: [-100, 320],
@@ -124,7 +122,12 @@ export default function DailyGoalCard({ done = 0, total = 10, onPress }) {
           <Animated.View
             style={[
               s.fill,
-              { width: fillWidth, backgroundColor: tint },
+              {
+                width: "100%",
+                backgroundColor: tint,
+                transform: [{ scaleX: fillScaleX }],
+                transformOrigin: "left",
+              },
             ]}
           >
             {!completed && (
