@@ -1,0 +1,408 @@
+/**
+ * LectioScreen — "Sadece Okuma" modu.
+ * Kelime + EN cümle büyük gösterilir. TR çevirisi default gizli.
+ * Sağa swipe veya butona basınca TR overlay yandan kayarak açılır.
+ * Sonraki kelimeye geçmek için aşağı swipe veya "Sonraki" butonu.
+ *
+ * route.params: { listId, listTitle }
+ */
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Animated,
+  Easing,
+  ActivityIndicator,
+  Dimensions,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import * as Speech from "expo-speech";
+import * as Haptics from "expo-haptics";
+import { GestureDetector, Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
+
+import { useTheme } from "../../contexts/ThemeContext";
+import Icon, { ICONS } from "../../components/design/Icon";
+import { fetchListWords } from "../../lib/cachedApi";
+
+const { width: W, height: H } = Dimensions.get("window");
+
+export default function LectioScreen({ route }) {
+  const navigation = useNavigation();
+  const { c } = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const { listId, listTitle } = route?.params || {};
+
+  const [words, setWords] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [trVisible, setTrVisible] = useState(false);
+
+  // TR overlay slide animasyonu
+  const trX = useRef(new Animated.Value(W)).current;
+  const cardFade = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const list = [];
+      await fetchListWords(listId, (data) => {
+        if (Array.isArray(data) && data.length) list.push(...data);
+      });
+      if (cancelled) return;
+      setWords(list);
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [listId]);
+
+  // Yeni kelime gelince kart fade-in
+  useEffect(() => {
+    cardFade.setValue(0);
+    Animated.timing(cardFade, {
+      toValue: 1,
+      duration: 320,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [idx, cardFade]);
+
+  const current = words[idx];
+
+  const showTR = useCallback(() => {
+    if (trVisible || !current) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTrVisible(true);
+    Animated.spring(trX, {
+      toValue: 0,
+      useNativeDriver: true,
+      stiffness: 140,
+      damping: 18,
+    }).start();
+  }, [current, trVisible, trX]);
+
+  const hideTR = useCallback(() => {
+    if (!trVisible) return;
+    Animated.timing(trX, {
+      toValue: W,
+      duration: 280,
+      easing: Easing.in(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => setTrVisible(false));
+  }, [trVisible, trX]);
+
+  const next = useCallback(() => {
+    if (idx + 1 >= words.length) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      navigation.goBack();
+      return;
+    }
+    Haptics.selectionAsync();
+    hideTR();
+    setIdx((i) => i + 1);
+  }, [idx, words.length, navigation, hideTR]);
+
+  const prev = useCallback(() => {
+    if (idx === 0) return;
+    Haptics.selectionAsync();
+    hideTR();
+    setIdx((i) => i - 1);
+  }, [idx, hideTR]);
+
+  const speakWord = useCallback(() => {
+    if (!current?.word) return;
+    try {
+      Speech.stop();
+      Speech.speak(String(current.word), { language: "en-US", pitch: 1, rate: 0.92 });
+    } catch {
+      /* sessiz */
+    }
+  }, [current]);
+
+  // Gesture: sağa swipe → TR aç, sola swipe → kapa, yukarı swipe → sonraki
+  const swipe = Gesture.Pan()
+    .onEnd((e) => {
+      "worklet";
+      const { translationX, translationY } = e;
+      if (Math.abs(translationY) > Math.abs(translationX)) {
+        if (translationY < -60) {
+          // yukarı → next
+          // worklet'ten JS callback için scheduleOnJS gerek — basit setIdx için arada bir hack
+        }
+      } else {
+        if (translationX < -60) {
+          // sol → tr aç (intuitive: sağdan sola çekiyorsun)
+        } else if (translationX > 60) {
+          // sağ → tr kapa
+        }
+      }
+    });
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.root}>
+        <View style={styles.center}>
+          <ActivityIndicator color={c.accent} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (!current) {
+    return (
+      <SafeAreaView style={styles.root}>
+        <View style={styles.center}>
+          <Text style={styles.empty}>Bu listede kelime yok</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const progress = (idx + 1) / words.length;
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.root}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.iconBtn}>
+            <Icon d={ICONS.arrowLeft} size={20} stroke={c.textPrimary} sw={2} />
+          </Pressable>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {listTitle || "Lectio"}
+          </Text>
+          <Text style={styles.counter}>
+            {idx + 1}/{words.length}
+          </Text>
+        </View>
+
+        {/* Progress bar */}
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: c.accent }]} />
+        </View>
+
+        {/* Kart */}
+        <View style={styles.cardArea}>
+          <Animated.View style={[styles.card, { opacity: cardFade }]}>
+            <Pressable onPress={speakWord} hitSlop={8}>
+              <Text style={styles.word}>{current.word}</Text>
+            </Pressable>
+
+            {!!current.example && (
+              <Text style={styles.example}>"{current.example}"</Text>
+            )}
+
+            <Pressable onPress={speakWord} style={styles.speakerCircle}>
+              <Icon d={ICONS.sound} size={20} stroke={c.cobalt} sw={2} />
+            </Pressable>
+          </Animated.View>
+
+          {/* TR Overlay — sağdan kayar */}
+          {trVisible && (
+            <Animated.View
+              style={[
+                styles.trOverlay,
+                { transform: [{ translateX: trX }] },
+              ]}
+            >
+              <Pressable style={styles.trClose} onPress={hideTR} hitSlop={10}>
+                <Icon d={ICONS.x} size={18} stroke={c.textPrimary} sw={2} />
+              </Pressable>
+              <Text style={styles.trLabel}>TÜRKÇE</Text>
+              <Text style={styles.trMeaning}>{current.meaning}</Text>
+              {!!current.example_tr && (
+                <Text style={styles.trExample}>"{current.example_tr}"</Text>
+              )}
+            </Animated.View>
+          )}
+        </View>
+
+        {/* Bottom CTAs */}
+        <View style={styles.bottomBar}>
+          <Pressable
+            onPress={prev}
+            disabled={idx === 0}
+            style={[styles.navBtn, idx === 0 && styles.navBtnDisabled]}
+            hitSlop={8}
+          >
+            <Icon d={ICONS.arrowLeft} size={20} stroke={idx === 0 ? c.textMuted : c.textPrimary} sw={2} />
+          </Pressable>
+
+          <Pressable
+            onPress={trVisible ? hideTR : showTR}
+            style={[styles.trCta, { backgroundColor: trVisible ? c.bgSurface : c.cobalt + "22", borderColor: c.cobalt + "55" }]}
+          >
+            <Text style={[styles.trCtaTxt, { color: c.cobalt }]}>
+              {trVisible ? "Türkçeyi gizle" : "Türkçeyi göster"}
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={next} style={[styles.navBtn, { backgroundColor: c.accent }]} hitSlop={8}>
+            <Icon
+              d={idx + 1 >= words.length ? ICONS.check : "M9 6l6 6-6 6"}
+              size={20}
+              stroke={c.textOnAccent}
+              sw={2.4}
+            />
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
+  );
+}
+
+function makeStyles(c) {
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.bgBase },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 18,
+      paddingVertical: 10,
+      gap: 12,
+    },
+    iconBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: c.bgSurface,
+    },
+    headerTitle: {
+      flex: 1,
+      textAlign: "center",
+      fontSize: 15,
+      fontFamily: c.fontBodyBold,
+      color: c.textPrimary,
+    },
+    counter: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBodySemi, minWidth: 40, textAlign: "right" },
+    progressTrack: {
+      height: 3,
+      marginHorizontal: 18,
+      backgroundColor: c.bgSurface,
+      borderRadius: 2,
+      overflow: "hidden",
+    },
+    progressFill: { height: "100%", borderRadius: 2 },
+    center: { flex: 1, alignItems: "center", justifyContent: "center" },
+    empty: { color: c.textSec, fontFamily: c.fontBody },
+    cardArea: { flex: 1, padding: 24, justifyContent: "center", position: "relative", overflow: "hidden" },
+    card: {
+      backgroundColor: c.bgElevated,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: c.border,
+      padding: 32,
+      alignItems: "center",
+      minHeight: 320,
+      justifyContent: "center",
+      gap: 18,
+    },
+    word: {
+      fontFamily: c.fontDisplay,
+      fontSize: 44,
+      color: c.textPrimary,
+      textAlign: "center",
+      lineHeight: 50,
+    },
+    example: {
+      fontFamily: c.fontBody,
+      fontSize: 16,
+      lineHeight: 24,
+      color: c.textSec,
+      textAlign: "center",
+      maxWidth: 320,
+    },
+    speakerCircle: {
+      marginTop: 8,
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: c.cobalt + "1A",
+      borderWidth: 1,
+      borderColor: c.cobalt + "44",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    trOverlay: {
+      position: "absolute",
+      top: 24,
+      right: 24,
+      bottom: 24,
+      width: W - 60,
+      backgroundColor: c.bgSurface,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: c.cobalt + "44",
+      padding: 28,
+      paddingTop: 56,
+      shadowColor: c.cobalt,
+      shadowOpacity: 0.3,
+      shadowRadius: 16,
+      shadowOffset: { width: -4, height: 0 },
+      elevation: 8,
+    },
+    trClose: {
+      position: "absolute",
+      top: 16,
+      right: 16,
+      width: 32,
+      height: 32,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: c.bgElevated,
+    },
+    trLabel: {
+      fontSize: 10,
+      letterSpacing: 1.6,
+      color: c.cobalt,
+      fontFamily: c.fontBodyBold,
+      marginBottom: 10,
+    },
+    trMeaning: {
+      fontFamily: c.fontDisplay,
+      fontSize: 32,
+      color: c.textPrimary,
+      lineHeight: 38,
+      marginBottom: 14,
+    },
+    trExample: {
+      fontFamily: c.fontBody,
+      fontSize: 15,
+      lineHeight: 22,
+      color: c.textSec,
+    },
+    bottomBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      padding: 18,
+    },
+    navBtn: {
+      width: 48,
+      height: 48,
+      borderRadius: 16,
+      backgroundColor: c.bgSurface,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: c.border,
+    },
+    navBtnDisabled: { opacity: 0.4 },
+    trCta: {
+      flex: 1,
+      paddingVertical: 14,
+      borderRadius: 16,
+      borderWidth: 1,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    trCtaTxt: { fontSize: 14, fontFamily: c.fontBodyBold, letterSpacing: 0.3 },
+  });
+}

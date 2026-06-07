@@ -60,7 +60,12 @@ const linking = {
             },
           },
           Favorites: { screens: { FavoritesMain: "favorites" } },
-          Profile: { screens: { ProfileMain: "profile" } },
+          Profile: {
+            screens: {
+              ProfileMain: "profile",
+              PublicProfile: "u/:userId",
+            },
+          },
         },
       },
       Auth: {
@@ -96,6 +101,7 @@ import PublicProfileScreen from "../screens/profile/PublicProfileScreen";
 import FlashcardDetailScreen from "../screens/flashcard/FlashcardDetailScreen";
 import StudyScreen from "../screens/study/StudyScreen";
 import QuizScreen from "../screens/study/QuizScreen";
+import LectioScreen from "../screens/study/LectioScreen";
 import StreakScreen from "../screens/streak/StreakScreen";
 import WeeklyRecapScreen from "../screens/recap/WeeklyRecapScreen";
 import HardWordsScreen from "../screens/hard/HardWordsScreen";
@@ -215,6 +221,11 @@ function HomeStackNavigator() {
       <HomeStack.Screen
         name="Quiz"
         component={QuizScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
+        name="Lectio"
+        component={LectioScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <HomeStack.Screen

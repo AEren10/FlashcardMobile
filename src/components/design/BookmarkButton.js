@@ -8,6 +8,8 @@ import * as Haptics from "expo-haptics";
 import { useDispatch, useSelector } from "react-redux";
 
 import { useTheme } from "../../contexts/ThemeContext";
+import { useAuth } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/ToastContext";
 import {
   toggleFavoriteWord,
   selectIsWordFavorite,
@@ -20,6 +22,8 @@ const BOOKMARK = "M6 4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18l-6-3.5L6 22V4Z";
 export default function BookmarkButton({ wordId, listId, size = 38 }) {
   const { c } = useTheme();
   const dispatch = useDispatch();
+  const { isAuthenticated, isGuestUser } = useAuth();
+  const toast = useToast();
   const isFavorite = useSelector((s) =>
     wordId ? selectIsWordFavorite(s, wordId) : false
   );
@@ -53,6 +57,12 @@ export default function BookmarkButton({ wordId, listId, size = 38 }) {
 
   const handlePress = (e) => {
     e.stopPropagation?.();
+    // Audit #4 — Guest mode: sessiz fail yerine açık feedback
+    if (!isAuthenticated() || isGuestUser()) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      toast?.show?.("Favori için üye olman gerek", { type: "warning" });
+      return;
+    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     Animated.sequence([
       Animated.spring(scale, { toValue: 1.25, useNativeDriver: true, speed: 30, bounciness: 14 }),

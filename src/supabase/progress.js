@@ -171,17 +171,41 @@ export async function getStudyStats() {
   const rows = data ?? [];
   const totalWords = rows.reduce((s, r) => s + (r.total_words ?? 0), 0);
 
-  const days = new Set(rows.map((r) => new Date(r.started_at).toDateString()));
-  let streak = 0;
-  const day = new Date();
-  if (!days.has(day.toDateString())) {
-    day.setDate(day.getDate() - 1);
+  // Streak server-side RPC — timezone-aware (audit #10 fix)
+  // Fallback: RPC başarısız olursa client-side hesap
+  let streakDays = 0;
+  try {
+    const { data: rpcData, error: rpcErr } = await supabase.rpc("get_streak_days");
+    if (!rpcErr && typeof rpcData === "number") {
+      streakDays = rpcData;
+    } else {
+      // Fallback — eski client-side hesap
+      const days = new Set(rows.map((r) => new Date(r.started_at).toDateString()));
+      const day = new Date();
+      if (!days.has(day.toDateString())) day.setDate(day.getDate() - 1);
+      while (days.has(day.toDateString())) {
+        streakDays += 1;
+        day.setDate(day.getDate() - 1);
+      }
+    }
+  } catch {
+    /* fallback already 0 */
   }
-  while (days.has(day.toDateString())) {
-    streak += 1;
-    day.setDate(day.getDate() - 1);
+
+  return { totalSessions: rows.length, totalWords, streakDays };
+}
+
+/**
+ * Kullanıcının cihaz timezone'unu sunucuya yaz (login sonrası bir kere).
+ * IANA TZ string. Audit #10 — server-side streak doğru çalışsın diye.
+ */
+export async function syncMyTimezone() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    await supabase.rpc("update_my_timezone", { p_tz: tz });
+  } catch {
+    /* sessiz fail — kritik değil */
   }
-  return { totalSessions: rows.length, totalWords, streakDays: streak };
 }
 
 /**

@@ -21,18 +21,27 @@ import Icon, { ICONS } from "../../components/design/Icon";
 import CategoryCover from "../../components/design/CategoryCover";
 import PressableScale from "../../components/design/PressableScale";
 import { getPublicProfile, getPublicListsByUser } from "../../supabase/publicProfile";
+import { toggleFollow, amIFollowing } from "../../supabase/social";
+import { useAuth } from "../../contexts/AuthContext";
+import * as Haptics from "expo-haptics";
 
 export default function PublicProfileScreen({ route }) {
   const navigation = useNavigation();
   const { c } = useTheme();
   const styles = useMemo(() => makeStyles(c), [c]);
+  const { user, isAuthenticated, isGuestUser } = useAuth();
   const userId = route?.params?.userId;
   const fallbackName = route?.params?.displayName;
+  const isOwnProfile = user?.id === userId;
+  const canFollow = isAuthenticated() && !isGuestUser() && !isOwnProfile;
 
   const [profile, setProfile] = useState(null);
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [following, setFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followBusy, setFollowBusy] = useState(false);
 
   useEffect(() => {
     if (!userId) {
@@ -42,20 +51,44 @@ export default function PublicProfileScreen({ route }) {
     }
     let cancelled = false;
     (async () => {
-      const [p, ls] = await Promise.all([
+      const [p, ls, isFollowing] = await Promise.all([
         getPublicProfile(userId),
         getPublicListsByUser(userId, 50),
+        canFollow ? amIFollowing(userId) : Promise.resolve(false),
       ]);
       if (cancelled) return;
-      if (p.success && p.data) setProfile(p.data);
-      else setError(p.error || "Profil yüklenemedi");
+      if (p.success && p.data) {
+        setProfile(p.data);
+        setFollowerCount(p.data.follower_count ?? 0);
+      } else setError(p.error || "Profil yüklenemedi");
       if (ls.success) setLists(ls.data);
+      setFollowing(!!isFollowing);
       setLoading(false);
     })();
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, canFollow]);
+
+  const onFollowToggle = useCallback(async () => {
+    if (!canFollow || followBusy) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Optimistic
+    const wasFollowing = following;
+    setFollowing(!wasFollowing);
+    setFollowerCount((n) => n + (wasFollowing ? -1 : 1));
+    setFollowBusy(true);
+    const res = await toggleFollow(userId);
+    setFollowBusy(false);
+    if (!res.success) {
+      // Rollback
+      setFollowing(wasFollowing);
+      setFollowerCount((n) => n + (wasFollowing ? 1 : -1));
+    } else {
+      // Sync server count
+      setFollowerCount(res.followerCount);
+    }
+  }, [canFollow, followBusy, following, userId]);
 
   const openList = useCallback(
     (item) => {
@@ -132,6 +165,30 @@ export default function PublicProfileScreen({ route }) {
               {formatJoined(profile.joined_at)} tarihinden beri
             </Text>
           )}
+
+          {/* Follower count + Follow CTA */}
+          <View style={styles.followRow}>
+            <Text style={styles.followCount}>
+              <Text style={styles.followCountNum}>{followerCount}</Text>{" "}
+              <Text style={styles.followCountLbl}>takipçi</Text>
+            </Text>
+            {canFollow && (
+              <Pressable
+                onPress={onFollowToggle}
+                disabled={followBusy}
+                style={({ pressed }) => [
+                  styles.followBtn,
+                  following ? styles.followBtnActive : styles.followBtnIdle,
+                  { opacity: pressed ? 0.7 : 1 },
+                ]}
+                accessibilityLabel={following ? "Takipten çık" : "Takip et"}
+              >
+                <Text style={[styles.followBtnTxt, following ? styles.followBtnTxtActive : styles.followBtnTxtIdle]}>
+                  {following ? "Takip ediliyor" : "Takip et"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
         </View>
 
         {/* Stats — 3 mini card */}
@@ -273,6 +330,26 @@ function makeStyles(c) {
       color: c.textMuted,
       fontFamily: c.fontBody,
     },
+    followRow: {
+      marginTop: 14,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 14,
+    },
+    followCount: { color: c.textSec, fontFamily: c.fontBody, fontSize: 13 },
+    followCountNum: { color: c.textPrimary, fontFamily: c.fontBodyBold },
+    followCountLbl: { color: c.textMuted },
+    followBtn: {
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    followBtnIdle: { backgroundColor: c.accent, borderColor: c.accent },
+    followBtnActive: { backgroundColor: c.bgSurface, borderColor: c.border },
+    followBtnTxt: { fontSize: 13, fontFamily: c.fontBodyBold, letterSpacing: 0.3 },
+    followBtnTxtIdle: { color: c.textOnAccent },
+    followBtnTxtActive: { color: c.textSec },
     statsRow: {
       flexDirection: "row",
       paddingHorizontal: 18,
