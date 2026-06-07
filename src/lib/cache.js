@@ -34,19 +34,37 @@ export async function remove(key) {
   } catch {}
 }
 
+// In-flight promise registry — aynı key için paralel fetch'i tek promise'e collapse et.
+// Race condition (audit #1): SWR'a inflight lock yok → 2 paralel hook = 2 paralel network.
+const _inflight = new Map();
+
 /**
  * Stale-while-revalidate. callback(data, isStale) çağrılır.
  * Önce cache varsa hemen callback(cachedData, true), sonra fresh fetch → callback(fresh, false).
+ * Aynı key için paralel çağrılar: cached ayrı ayrı emit eder ama fetcher tek promise share eder.
  */
 export async function swr(key, fetcher, ttlMs, onData) {
   const cached = await get(key);
   if (cached) onData(cached, true);
+
+  // Halihazırda devam eden fetch var mı? → onu paylaş
+  let p = _inflight.get(key);
+  if (!p) {
+    p = (async () => {
+      try {
+        const fresh = await fetcher();
+        if (fresh != null) await set(key, fresh, ttlMs);
+        return fresh;
+      } finally {
+        _inflight.delete(key);
+      }
+    })();
+    _inflight.set(key, p);
+  }
+
   try {
-    const fresh = await fetcher();
-    if (fresh != null) {
-      await set(key, fresh, ttlMs);
-      onData(fresh, false);
-    }
+    const fresh = await p;
+    if (fresh != null) onData(fresh, false);
     return fresh;
   } catch (e) {
     if (!cached) throw e;

@@ -57,13 +57,35 @@ const slice = createSlice({
         s.loading = false;
         s.error = a.payload;
       })
+      // Optimistic UI — RPC dönmeden state'i hemen güncelle (audit #4)
+      .addCase(toggleFavoriteWord.pending, (s, a) => {
+        const { wordId, isFavorite } = a.meta.arg;
+        if (isFavorite) {
+          s.ids = s.ids.filter((id) => id !== wordId);
+        } else if (!s.ids.includes(wordId)) {
+          s.ids.push(wordId);
+        }
+      })
       .addCase(toggleFavoriteWord.fulfilled, (s, a) => {
         const { wordId, action } = a.payload;
+        // Sync — pending'de yapıldıysa idempotent
         if (action === "add") {
           if (!s.ids.includes(wordId)) s.ids.push(wordId);
         } else {
           s.ids = s.ids.filter((id) => id !== wordId);
         }
+      })
+      // Rollback — RPC fail olursa optimistic değişikliği geri al
+      .addCase(toggleFavoriteWord.rejected, (s, a) => {
+        const { wordId, isFavorite } = a.meta.arg;
+        if (isFavorite) {
+          // Silmeye çalıştık fail → geri ekle
+          if (!s.ids.includes(wordId)) s.ids.push(wordId);
+        } else {
+          // Eklemeye çalıştık fail → çıkar
+          s.ids = s.ids.filter((id) => id !== wordId);
+        }
+        s.error = a.payload || "Favori değiştirilemedi";
       });
   },
 });

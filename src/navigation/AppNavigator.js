@@ -92,6 +92,7 @@ import FavoritesScreen from "../screens/favorites/FavoritesScreen";
 import FavoriteWordsScreen from "../screens/favorites/FavoriteWordsScreen";
 import ListExplorerScreen from "../screens/explore/ListExplorerScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
+import PublicProfileScreen from "../screens/profile/PublicProfileScreen";
 import FlashcardDetailScreen from "../screens/flashcard/FlashcardDetailScreen";
 import StudyScreen from "../screens/study/StudyScreen";
 import QuizScreen from "../screens/study/QuizScreen";
@@ -306,6 +307,11 @@ function ProfileStackNavigator() {
   return (
     <ProfileStack.Navigator screenOptions={{ headerShown: false }}>
       <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} />
+      <ProfileStack.Screen
+        name="PublicProfile"
+        component={PublicProfileScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
       <ProfileStack.Screen
         name="EditProfile"
         component={EditProfileScreen}

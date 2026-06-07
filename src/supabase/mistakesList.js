@@ -112,44 +112,26 @@ export const isInMistakesList = async (wordText, meaningText) => {
 };
 
 /**
- * Kelime doğru bilindiğinde çağrılır.
- *   - word_progress.mistakes_streak++
- *   - eğer kelime mistakes listesinde VE streak >= 3 → çıkar + sıfırla
- *   - yanlış cevap için resetMistakesStreak çağırılır.
+ * Kelime doğru bilindiğinde çağrılır — ATOMİC RPC.
+ *   - Audit #5 race condition fix: select+update'i tek transaction'a koy.
+ *   - word_progress.mistakes_streak++ (UPSERT)
+ *   - threshold'a (3) ulaşırsa: mistakes listesinden çıkar + streak=0
  */
 export const bumpMistakesStreak = async (wordId, wordText, meaningText) => {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false };
-
-    // Mevcut streak'i al
-    const { data: prog } = await supabase
-      .from("word_progress")
-      .select("mistakes_streak")
-      .eq("user_id", user.id)
-      .eq("word_id", wordId)
-      .maybeSingle();
-
-    const newStreak = (prog?.mistakes_streak ?? 0) + 1;
-
-    await supabase
-      .from("word_progress")
-      .update({ mistakes_streak: newStreak })
-      .eq("user_id", user.id)
-      .eq("word_id", wordId);
-
-    if (newStreak >= AUTO_REMOVE_AFTER) {
-      const removeRes = await removeFromMistakesList(wordText, meaningText);
-      if (removeRes.success && removeRes.removed) {
-        await supabase
-          .from("word_progress")
-          .update({ mistakes_streak: 0 })
-          .eq("user_id", user.id)
-          .eq("word_id", wordId);
-        return { success: true, removedFromMistakes: true };
-      }
-    }
-    return { success: true, removedFromMistakes: false };
+    const { data, error } = await supabase.rpc("bump_mistakes_streak_atomic", {
+      p_word_id: wordId,
+      p_word_text: wordText,
+      p_meaning_text: meaningText,
+      p_threshold: AUTO_REMOVE_AFTER,
+    });
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    return {
+      success: true,
+      newStreak: row?.new_streak ?? 0,
+      removedFromMistakes: !!row?.removed_from_mistakes,
+    };
   } catch (error) {
     console.error("bumpMistakesStreak:", error.message);
     return { success: false, error: error.message };

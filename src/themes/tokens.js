@@ -50,6 +50,18 @@ const dark = {
   sky: "#7BA3BE",
   skyDim: "rgba(123,163,190,0.14)",
 
+  // Object accent paleti — kart/badge/stat objelerine çeşit
+  lavender: "#B097C4",
+  lavenderDim: "rgba(176,151,196,0.14)",
+  mint: "#84B19B",
+  mintDim: "rgba(132,177,155,0.14)",
+  peach: "#E0A887",
+  peachDim: "rgba(224,168,135,0.14)",
+  rose: "#C88AAB",
+  roseDim: "rgba(200,138,171,0.14)",
+  slate: "#8896A4",
+  slateDim: "rgba(136,150,164,0.14)",
+
   // Text — krem tonlu, biraz daha kontrastlı
   text: "#ECE4D8",
   textPrimary: "#ECE4D8",
@@ -120,6 +132,18 @@ const light = {
   amberDim: "rgba(155,114,48,0.12)",
   sky: "#4A7F9B",
   skyDim: "rgba(74,127,155,0.12)",
+
+  // Object accent paleti — kart/badge/stat objelerine çeşit (light mode varyantları)
+  lavender: "#7E66A1",
+  lavenderDim: "rgba(126,102,161,0.12)",
+  mint: "#4F7E69",
+  mintDim: "rgba(79,126,105,0.12)",
+  peach: "#B8704A",
+  peachDim: "rgba(184,112,74,0.12)",
+  rose: "#9D4E78",
+  roseDim: "rgba(157,78,120,0.12)",
+  slate: "#5C6975",
+  slateDim: "rgba(92,105,117,0.12)",
 
   // Text — mürekkep siyahı, kağıt üstüne yazılmış
   text: "#2C2520",
