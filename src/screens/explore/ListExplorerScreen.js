@@ -203,7 +203,7 @@ const ListItem = React.memo(function ListItem({ item, fav, tint, c, s, onPress }
       ]}
     >
       <View style={s.coverWrap}>
-        <CategoryCover difficulty={item.level} height={90}>
+        <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={90}>
           {fav && (
             <View style={[s.starBadge, { backgroundColor: "rgba(0,0,0,0.32)" }]}>
               <Icon d={ICONS.star} size={14} stroke="#fff" fill="#fff" sw={1.5} />

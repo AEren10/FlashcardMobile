@@ -136,12 +136,20 @@ function WordCard({ item, c, s }) {
         <View style={{ flex: 1 }}>
           <Pressable
             onPress={() => Speech.speak(wordText, { language: "en-US" })}
-            hitSlop={6}
+            hitSlop={10}
           >
             <Text style={s.word}>{wordText}</Text>
           </Pressable>
           <Text style={s.meaning}>{meaningText}</Text>
         </View>
+        <Pressable
+          onPress={() => Speech.speak(wordText, { language: "en-US" })}
+          hitSlop={10}
+          style={({ pressed }) => [s.speakerBtn, { opacity: pressed ? 0.6 : 1 }]}
+          accessibilityLabel="Kelimeyi sesli oku"
+        >
+          <Icon d={ICONS.sound} size={18} stroke={c.cobalt} sw={2} />
+        </Pressable>
         <BookmarkButton wordId={item.word_id} listId={item.list_id} size={36} />
       </View>
       {!!exampleText && (
@@ -195,7 +203,17 @@ function makeStyles(c) {
       padding: 16,
       gap: 8,
     },
-    cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+    cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+    speakerBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      backgroundColor: c.cobalt + "18",
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 1,
+      borderColor: c.cobalt + "44",
+    },
     word: { fontFamily: c.fontDisplay, fontSize: 26, lineHeight: 30, color: c.textPrimary },
     meaning: { fontFamily: c.fontBody, fontSize: 14, color: c.textSec, marginTop: 2 },
     example: {

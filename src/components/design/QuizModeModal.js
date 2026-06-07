@@ -26,9 +26,9 @@ export default function QuizModeModal({ visible, onPick, onClose }) {
     }
   }, [visible, fade, scale]);
 
-  const pick = (timed) => {
+  const pick = (timed, mode = "classic") => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    onPick(timed);
+    onPick({ timed, mode });
   };
 
   if (!visible) return null;
@@ -102,6 +102,37 @@ export default function QuizModeModal({ visible, onPick, onClose }) {
               <View style={[s.badge, { backgroundColor: c.warningDim }]}>
                 <Text style={[s.badgeTxt, { color: c.warning, fontFamily: c.fontBodyBold }]}>
                   10sn
+                </Text>
+              </View>
+            </View>
+          </Pressable>
+
+          {/* Boşluk Doldurma — cümleden eksik kelime tahmin */}
+          <Pressable
+            onPress={() => pick(false, "blank")}
+            style={({ pressed }) => [
+              s.mode,
+              {
+                marginTop: 10,
+                borderColor: c.cobalt + "55",
+                backgroundColor: c.bgSurface,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+              },
+            ]}
+          >
+            <View style={s.modeRow}>
+              <Text style={s.modeEmoji}>🧠</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={[s.modeTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
+                  Boşluk Doldurma
+                </Text>
+                <Text style={[s.modeDesc, { color: c.textSec, fontFamily: c.fontBody }]}>
+                  Cümledeki boşluğu tamamla
+                </Text>
+              </View>
+              <View style={[s.badge, { backgroundColor: c.cobalt + "22" }]}>
+                <Text style={[s.badgeTxt, { color: c.cobalt, fontFamily: c.fontBodyBold }]}>
+                  Yeni
                 </Text>
               </View>
             </View>

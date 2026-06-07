@@ -364,7 +364,7 @@ export default function MyListsScreen() {
 function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
   return (
     <Pressable onPress={onOpen} onLongPress={onLongPress} delayLongPress={400} style={s.card}>
-      <CategoryCover difficulty={item.level} height={72}>
+      <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={72}>
         {item.is_public && (
           <View style={s.publicBadge}>
             <Text style={s.publicBadgeTxt}>Public</Text>

@@ -191,10 +191,12 @@ const s = StyleSheet.create({
   },
   halo: {
     position: "absolute",
-    top: 0,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    // iconRing 76×76 + paddingTop 12 → iconRing center Y ≈ 50.
+    // Halo'yu sadece iconRing'in arkasına merkezle, tag/title'a değmesin.
+    top: -8,
+    width: 110,
+    height: 110,
+    borderRadius: 55,
   },
   iconRing: {
     width: 76,

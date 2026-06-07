@@ -206,49 +206,28 @@ export default function StudyScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Swipe rehberi — sadece bilgilendirme (tıklanamaz), SVG oklarla görsel ipucu */}
+        {/* Swipe rehberi — containersız, sade SVG ok + text */}
         <View style={s.swipeGuide} pointerEvents="none">
-          <View
-            style={[
-              s.guideItem,
-              {
-                backgroundColor: c.error + "1A",
-                borderColor: c.error + "44",
-              },
-            ]}
-          >
-            <Icon d="M15 6l-6 6 6 6" size={16} stroke={c.error} sw={2.4} />
+          <View style={s.guideSide}>
+            <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.4} />
             <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodySemi }]}>
-              Sola kaydır
+              Bilmiyorum
             </Text>
           </View>
-          <View
-            style={[
-              s.guideItem,
-              {
-                backgroundColor: c.bgSurface,
-                borderColor: c.border,
-              },
-            ]}
-          >
-            <Icon d={ICONS.refresh} size={16} stroke={c.textSec} sw={2} />
-            <Text style={[s.guideTxt, { color: c.textSec, fontFamily: c.fontBodySemi }]}>
-              Dokun: çevir
-            </Text>
+          <View style={s.guideCenter}>
+            {/* Tap-to-flip: parmak + döngü ipucu SVG */}
+            <Icon
+              d="M9 11V6a3 3 0 0 1 6 0v8m-3 0v3m-5-4a5 5 0 0 0 10 0V8"
+              size={20}
+              stroke={c.textMuted}
+              sw={1.8}
+            />
           </View>
-          <View
-            style={[
-              s.guideItem,
-              {
-                backgroundColor: c.success + "1A",
-                borderColor: c.success + "44",
-              },
-            ]}
-          >
+          <View style={s.guideSide}>
             <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodySemi }]}>
-              Sağa kaydır
+              Biliyorum
             </Text>
-            <Icon d="M9 6l6 6-6 6" size={16} stroke={c.success} sw={2.4} />
+            <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.4} />
           </View>
         </View>
 
@@ -482,30 +461,27 @@ function makeStyles(c) {
     arrowTxt: { fontFamily: c.fontBodyBold, fontSize: 15, letterSpacing: 0.3 },
     swipeGuide: {
       flexDirection: "row",
-      gap: 8,
-      paddingHorizontal: 18,
-      paddingBottom: 18,
-      marginTop: 4,
-      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 28,
+      paddingBottom: 22,
+      marginTop: 6,
     },
-    guideItem: {
+    guideSide: {
       flex: 1,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 7,
-      paddingVertical: 13,
-      paddingHorizontal: 8,
-      borderRadius: 14,
-      borderWidth: 1,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.18,
-      shadowRadius: 10,
-      elevation: 2,
+      gap: 8,
+    },
+    guideCenter: {
+      width: 36,
+      alignItems: "center",
+      justifyContent: "center",
+      opacity: 0.55,
     },
     guideTxt: {
-      fontSize: 13,
-      letterSpacing: 0.2,
+      fontSize: 14,
+      letterSpacing: 0.3,
     },
     swipeHint: {
       textAlign: "center",

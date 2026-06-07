@@ -12,13 +12,14 @@ const ContinueCard = React.memo(function ContinueCard({
   count,
   pct,
   level,
+  imageUrl,
   c,
   onPress,
 }) {
   return (
     <PressableScale onPress={onPress} style={{ width: 182 }} scaleDown={0.96}>
       <View style={{ borderRadius: 16, overflow: "hidden", marginBottom: 10 }}>
-        <CategoryCover difficulty={level} height={100} />
+        <CategoryCover difficulty={level} imageUrl={imageUrl} height={100} />
       </View>
       <Text
         numberOfLines={1}

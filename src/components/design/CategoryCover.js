@@ -4,7 +4,7 @@
  * Eski `cat` prop'u backward compat için kalmış.
  */
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { CATS } from "../../themes/categories";
 import { getDifficulty } from "../../themes/difficulty";
@@ -12,6 +12,7 @@ import { getDifficulty } from "../../themes/difficulty";
 export default function CategoryCover({
   difficulty, // tercih edilen: "Beginner" | "Kolay" | "Orta" | "Zor" | "Ekstra" vs.
   cat = "other", // legacy fallback
+  imageUrl, // Liste görseli (varsa) — fotoğraf + alt overlay olarak gösterilir
   height = 72,
   children,
   showLabel = true,
@@ -33,14 +34,32 @@ export default function CategoryCover({
 
   return (
     <View style={[s.wrap, { height }]}>
-      <LinearGradient
-        colors={[a, b, d]}
-        locations={[0, 0.52, 1]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
-      <View style={s.shine} pointerEvents="none" />
+      {imageUrl ? (
+        <>
+          <Image
+            source={{ uri: imageUrl }}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+          />
+          {/* Alt yarı için renkli gradient overlay → chip okunabilirliği + kategori rengi */}
+          <LinearGradient
+            colors={["rgba(0,0,0,0.05)", "rgba(0,0,0,0.35)", d + "CC"]}
+            locations={[0, 0.55, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={StyleSheet.absoluteFill}
+          />
+        </>
+      ) : (
+        <LinearGradient
+          colors={[a, b, d]}
+          locations={[0, 0.52, 1]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={StyleSheet.absoluteFill}
+        />
+      )}
+      {!imageUrl && <View style={s.shine} pointerEvents="none" />}
       {showLabel && (
         <View style={s.chipWrap}>
           <View style={s.chip}>

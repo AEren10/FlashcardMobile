@@ -34,7 +34,7 @@ export default function FlipCard({
   example,
   exampleTr,
   pron,
-  tag = "sıfat",
+  tag,
   wordId,
   listId,
   onFlip: onFlipCb,
@@ -93,9 +93,18 @@ export default function FlipCard({
     onFlipCb?.(next);
   }, [rot, glintFront, glintBack, triggerGlint, onFlipCb, isControlled, onPress, disabled]);
 
-  const speak = useCallback((e) => {
-    e?.stopPropagation?.();
-    Speech.speak(word, { language: "en-US" });
+  const speak = useCallback(() => {
+    if (!word) return;
+    try {
+      Speech.stop();
+      Speech.speak(String(word), {
+        language: "en-US",
+        pitch: 1.0,
+        rate: 0.92,
+      });
+    } catch (err) {
+      // expo-speech bazen engine init'inde hata atar — sessizce yut
+    }
   }, [word]);
 
   const s = useMemo(() => makeStyles(c), [c]);
@@ -140,7 +149,16 @@ export default function FlipCard({
         </View>
         <View style={s.center}>
           <Text style={[s.word, { color: c.text }]}>{word}</Text>
-          <Text style={[s.meta, { color: c.textMuted }]}>{pron ? `${pron} · ` : ""}{tag}</Text>
+          {!!(pron || tag) && (
+            <Text style={[s.meta, { color: c.textMuted }]}>
+              {[pron, tag].filter(Boolean).join(" · ")}
+            </Text>
+          )}
+          {!!example && (
+            <Text style={[s.exampleEn, { color: c.textSec, fontFamily: c.fontBody }]}>
+              "{example}"
+            </Text>
+          )}
         </View>
         {/* Çevirme ipucu — alt köşe */}
         <View style={s.flipHint} pointerEvents="none">
@@ -171,13 +189,10 @@ export default function FlipCard({
         </View>
         <View style={s.center}>
           <Text style={[s.meaningTxt, { color: c.text }]}>{meaning}</Text>
-          {!!example && (
-            <View style={{ alignItems: "center" }}>
-              <Text style={[s.example, { color: c.textSec }]}>"{example}"</Text>
-              {!!exampleTr && (
-                <Text style={[s.exampleTr, { color: c.textMuted }]}>{exampleTr}</Text>
-              )}
-            </View>
+          {!!exampleTr && (
+            <Text style={[s.exampleTr, { color: c.textSec, fontFamily: c.fontBody }]}>
+              {exampleTr}
+            </Text>
           )}
         </View>
         {/* Tekrar ipucu — alt köşe */}
@@ -338,24 +353,25 @@ function makeStyles(c) {
       lineHeight: 50,
       textAlign: "center",
     },
-    example: {
-      fontFamily: c.fontDisplay,
-      fontStyle: "italic",
-      fontSize: 19,
-      lineHeight: 26,
+    // Front kart — kelimenin altındaki EN cümle (Space Grotesk, okunaklı)
+    exampleEn: {
+      fontSize: 15,
+      lineHeight: 22,
       textAlign: "center",
-      maxWidth: 280,
-      paddingHorizontal: 16,
+      maxWidth: 300,
+      paddingHorizontal: 18,
+      marginTop: 18,
+      letterSpacing: 0.1,
     },
+    // Back kart — meaning'in altındaki TR cümle (Space Grotesk)
     exampleTr: {
-      fontFamily: c.fontBody,
-      fontSize: 13,
-      lineHeight: 18,
+      fontSize: 15,
+      lineHeight: 22,
       textAlign: "center",
-      marginTop: 8,
-      maxWidth: 260,
-      paddingHorizontal: 16,
-      opacity: 0.85,
+      marginTop: 18,
+      maxWidth: 300,
+      paddingHorizontal: 18,
+      letterSpacing: 0.1,
     },
     flipHint: {
       position: "absolute",

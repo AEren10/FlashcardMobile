@@ -448,6 +448,7 @@ export default function HomeScreen({ navigation }) {
                     count={item.word_count ?? 0}
                     pct={Math.min(100, (item.study_count ?? 0) * 5)}
                     level={item.level}
+                    imageUrl={item.image_url}
                     c={c}
                     onPress={() => openList(item)}
                   />
@@ -563,23 +564,20 @@ export default function HomeScreen({ navigation }) {
         navigation={navigation}
       />
 
-      {/* Milestone celebration — ilk-X anları */}
+      {/* Overlay sırası — aynı anda sadece 1 modal görünsün.
+          Priority: milestone (en zengin) > achievement > nudge */}
       <MilestoneModal
         milestone={currentMilestone}
         visible={!!currentMilestone}
         onDismiss={dismissMilestone}
       />
-
-      {/* Streak/Words rozet — yeni rozet kazanılınca */}
       <AchievementModal
-        visible={!!newBadge}
+        visible={!currentMilestone && !!newBadge}
         badge={newBadge}
         onClose={dismissBadge}
       />
-
-      {/* Tatlı öneri pop-up'ı — arada bir gelir */}
       <NudgeModal
-        visible={!!nudge}
+        visible={!currentMilestone && !newBadge && !!nudge}
         nudge={nudge}
         onAccept={handleNudgeAccept}
         onDismiss={dismissNudge}

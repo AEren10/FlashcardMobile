@@ -109,7 +109,7 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
       scaleDown={0.96}
     >
       <View style={{ borderRadius: 13, overflow: "hidden" }}>
-        <CategoryCover difficulty={item.level} height={100} />
+        <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={100} />
       </View>
       <View style={{ padding: 12 }}>
         <Text

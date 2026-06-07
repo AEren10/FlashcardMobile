@@ -49,9 +49,13 @@ export default function QuizScreen({ route, navigation }) {
     presetWords,
     presetTitle,
     timed: timedParam,
+    mode: modeParam, // "classic" (default) | "blank" (boşluk doldurma)
   } = route.params ?? {};
+  // Mode state — route'tan gelir veya modal'dan seçilir
+  const [mode, setMode] = useState(modeParam === "blank" ? "blank" : "classic");
+  const isBlank = mode === "blank";
   // Eğer route'tan gelmediyse modal ile sor
-  const [modeChosen, setModeChosen] = useState(timedParam !== undefined);
+  const [modeChosen, setModeChosen] = useState(timedParam !== undefined || modeParam === "blank");
   const [timed, setTimed] = useState(timedParam === true);
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
@@ -142,15 +146,30 @@ export default function QuizScreen({ route, navigation }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index, current?.id, timed]);
 
+  // mode "blank" → boşluk doldurma: doğru cevap = word (kelime)
+  // mode "classic" → doğru cevap = meaning (anlam)
+  const correctAnswer = isBlank ? current?.word : current?.meaning;
+
   const options = useMemo(() => {
     if (!current || words.length < 4) return [];
     const distractors = words
       .filter((w) => w.id !== current.id)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
-      .map((w) => w.meaning);
-    return shuffle([current.meaning, ...distractors]);
-  }, [current, words]);
+      .map((w) => (isBlank ? w.word : w.meaning));
+    return shuffle([isBlank ? current.word : current.meaning, ...distractors]);
+  }, [current, words, isBlank]);
+
+  // Boşluk doldurma için cümle üret: kelimeyi "_____" ile değiştir
+  const blankedSentence = useMemo(() => {
+    if (!isBlank || !current?.example) return null;
+    try {
+      const regex = new RegExp(`\\b${current.word}\\b`, "gi");
+      return current.example.replace(regex, "_____");
+    } catch {
+      return current.example.replace(current.word, "_____");
+    }
+  }, [current, isBlank]);
 
   // Unmount + race guard'lar
   const unmountedRef = useRef(false);
@@ -161,7 +180,7 @@ export default function QuizScreen({ route, navigation }) {
     // Double-tap race fix: setState async, ref senkron — ref ile lock
     if (pickingRef.current || picked) return;
     pickingRef.current = true;
-    const isCorrect = opt === current.meaning;
+    const isCorrect = opt === correctAnswer;
     setPicked({ opt, i, isCorrect });
     Haptics.notificationAsync(
       isCorrect ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error
@@ -238,8 +257,9 @@ export default function QuizScreen({ route, navigation }) {
       <View style={s.root}>
         <QuizModeModal
           visible={!modeChosen}
-          onPick={(isTimed) => {
-            setTimed(isTimed);
+          onPick={({ timed: isTimed, mode: pickedMode }) => {
+            setTimed(!!isTimed);
+            if (pickedMode === "blank") setMode("blank");
             setModeChosen(true);
           }}
           onClose={() => navigation.goBack()}
@@ -371,16 +391,31 @@ export default function QuizScreen({ route, navigation }) {
         {/* Prompt */}
         <View style={s.prompt}>
           <View style={s.chipAccent}>
-            <Text style={s.chipAccentTxt}>Quiz · Çoktan seçmeli</Text>
+            <Text style={s.chipAccentTxt}>
+              {isBlank ? "Boşluk Doldurma" : "Quiz · Çoktan seçmeli"}
+            </Text>
           </View>
-          <Pressable
-            style={s.wordRow}
-            onPress={() => Speech.speak(current.word, { language: "en-US" })}
-            accessibilityLabel="Telaffuzu dinle"
-          >
-            <Text style={s.word}>{current.word}</Text>
-          </Pressable>
-          <Text style={s.sub}>Bu kelimenin anlamı?</Text>
+          {isBlank ? (
+            <>
+              <View style={s.blankSentenceBox}>
+                <Text style={s.blankSentence}>"{blankedSentence}"</Text>
+              </View>
+              <Text style={s.sub}>
+                Boşluğa hangi kelime gelir? · Anlam: <Text style={{ color: c.accent, fontFamily: c.fontBodyBold }}>{current.meaning}</Text>
+              </Text>
+            </>
+          ) : (
+            <>
+              <Pressable
+                style={s.wordRow}
+                onPress={() => Speech.speak(current.word, { language: "en-US" })}
+                accessibilityLabel="Telaffuzu dinle"
+              >
+                <Text style={s.word}>{current.word}</Text>
+              </Pressable>
+              <Text style={s.sub}>Bu kelimenin anlamı?</Text>
+            </>
+          )}
         </View>
 
         {/* 2×2 grid */}
@@ -391,7 +426,7 @@ export default function QuizScreen({ route, navigation }) {
               opt={opt}
               i={i}
               picked={picked}
-              correctAnswer={current.meaning}
+              correctAnswer={correctAnswer}
               onPress={() => pick(opt, i)}
               c={c}
               s={s}
@@ -537,6 +572,28 @@ function makeStyles(c) {
       textAlign: "right",
     },
 
+    blankSentenceBox: {
+      paddingHorizontal: 26,
+      paddingVertical: 22,
+      marginTop: 12,
+      borderRadius: 18,
+      backgroundColor: c.bgElevated,
+      borderWidth: 1.5,
+      borderColor: c.accent + "55",
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      elevation: 4,
+    },
+    blankSentence: {
+      fontFamily: c.fontDisplay,
+      fontSize: 24,
+      lineHeight: 32,
+      color: c.textPrimary,
+      textAlign: "center",
+      fontStyle: "italic",
+    },
     prompt: {
       alignItems: "center",
       paddingHorizontal: 24,

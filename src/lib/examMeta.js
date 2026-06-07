@@ -33,7 +33,7 @@ export const EXAMS = {
   ielts: {
     slug: "ielts",
     name: "IELTS",
-    subtitle: "International English",
+    subtitle: "Uluslararası İngilizce sınavı",
     icon: ICONS.globe,
     stops: ["#7BAEC8", "#5A8FAB", "#3D6A85"],
     accent: "#7BAEC8",

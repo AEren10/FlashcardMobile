@@ -329,20 +329,7 @@ export default function ProfileScreen() {
             />
           </View>
 
-          {/* Account */}
-          <Text style={s.sectionLabel}>HESAP</Text>
-          <View style={s.list}>
-            <Pressable style={[s.row, { borderBottomColor: c.divider }]} onPress={handleLogout}>
-              <Text style={{ fontFamily: c.fontBodySemi, fontSize: 15, color: c.error, flex: 1 }}>
-                Çıkış Yap
-              </Text>
-            </Pressable>
-            <Pressable style={[s.row, { borderBottomWidth: 0 }]} onPress={handleDelete}>
-              <Text style={{ fontFamily: c.fontBody, fontSize: 14, color: c.textMuted, flex: 1 }}>
-                Hesabı Sil
-              </Text>
-            </Pressable>
-          </View>
+          {/* Hesap işlemleri (Çıkış / Sil) → Ayarlar sayfasında */}
 
           <Text style={s.version}>FlashcardMobile v1.0.0</Text>
         </ScrollView>

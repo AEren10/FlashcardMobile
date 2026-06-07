@@ -122,23 +122,42 @@ export default function StudyResultScreen({
             </View>
           )}
 
-          {/* Çalıştığın Kelimeler — tek toplu liste, bildin/bilmedin ayrımsız */}
-          {(wrongWords.length > 0 || correctWords.length > 0) && (
+          {/* Bilmediklerin — kırmızı dot, en üstte (öncelik) */}
+          {wrongWords.length > 0 && (
             <StaggerEnter index={0} delay={200}>
               <View style={s.section}>
                 <View style={s.sectionHead}>
-                  <View style={[s.sectionDot, { backgroundColor: c.cobalt }]} />
-                  <Text style={s.sectionTitle}>Çalıştığın Kelimeler</Text>
-                  <Text style={s.sectionCount}>{wrongWords.length + correctWords.length}</Text>
+                  <View style={[s.sectionDot, { backgroundColor: c.error }]} />
+                  <Text style={s.sectionTitle}>Bilemediklerin</Text>
+                  <Text style={s.sectionCount}>{wrongWords.length}</Text>
                 </View>
                 <View style={{ marginTop: 10, gap: 8 }}>
-                  {[...wrongWords, ...correctWords].slice(0, 30).map((w) => (
+                  {wrongWords.slice(0, 20).map((w) => (
                     <WrongCard key={w.id} word={w} c={c} s={s} />
                   ))}
-                  {wrongWords.length + correctWords.length > 30 && (
-                    <Text style={s.moreTxt}>
-                      +{wrongWords.length + correctWords.length - 30} daha
-                    </Text>
+                  {wrongWords.length > 20 && (
+                    <Text style={s.moreTxt}>+{wrongWords.length - 20} daha</Text>
+                  )}
+                </View>
+              </View>
+            </StaggerEnter>
+          )}
+
+          {/* Bildiklerin — yeşil dot, altta */}
+          {correctWords.length > 0 && (
+            <StaggerEnter index={1} delay={260}>
+              <View style={s.section}>
+                <View style={s.sectionHead}>
+                  <View style={[s.sectionDot, { backgroundColor: c.success }]} />
+                  <Text style={s.sectionTitle}>Bildiklerin</Text>
+                  <Text style={s.sectionCount}>{correctWords.length}</Text>
+                </View>
+                <View style={{ marginTop: 10, gap: 8 }}>
+                  {correctWords.slice(0, 20).map((w) => (
+                    <WrongCard key={w.id} word={w} c={c} s={s} />
+                  ))}
+                  {correctWords.length > 20 && (
+                    <Text style={s.moreTxt}>+{correctWords.length - 20} daha</Text>
                   )}
                 </View>
               </View>

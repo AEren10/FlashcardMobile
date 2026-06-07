@@ -348,7 +348,7 @@ function QuizTab({ lists, c, s, navigation }) {
           style={s.quizCard}
           onPress={() => navigation.navigate("Quiz", { listId: l.id, listTitle: l.title })}
         >
-          <CategoryCover difficulty={l.level} height={70} />
+          <CategoryCover difficulty={l.level} imageUrl={l.image_url} height={70} />
           <View style={{ padding: 14 }}>
             <Text style={s.quizTitle} numberOfLines={1}>
               {l.title}

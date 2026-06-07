@@ -2,7 +2,7 @@
  * CreateListScreen — Premium Dark redesign.
  * Form state → useListEditor, image → useImageUpload.
  */
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import useListEditor from "../../hooks/useListEditor";
 import { useToast } from "../../contexts/ToastContext";
 import BulkAddModal from "./components/BulkAddModal";
 import { invalidatePublicLists } from "../../hooks/usePublicLists";
+import { makeDebouncedLookup } from "../../lib/wordLookup";
 
 export default function CreateListScreen({ route }) {
   const navigation = useNavigation();
@@ -43,6 +44,52 @@ export default function CreateListScreen({ route }) {
   const wordRefs = useRef([]);
   const meaningRefs = useRef([]);
   const exampleRefs = useRef([]);
+
+  // Otomatik anlam getirme — her satır için ayrı debounce instance
+  const lookupRefs = useRef(new Map());
+  const wordsRef = useRef(editor.words);
+  useEffect(() => {
+    wordsRef.current = editor.words;
+  }, [editor.words]);
+  const [lookingUp, setLookingUp] = useState(() => new Set());
+
+  const onWordChange = (i, v) => {
+    editor.updateWord(i, "word", v);
+
+    if (!lookupRefs.current.has(i)) {
+      lookupRefs.current.set(i, makeDebouncedLookup(250));
+    }
+    const debounced = lookupRefs.current.get(i);
+
+    // UI'a "aranıyor" göster
+    setLookingUp((prev) => {
+      if (!v || v.trim().length < 2) {
+        const next = new Set(prev);
+        next.delete(i);
+        return next;
+      }
+      const next = new Set(prev);
+      next.add(i);
+      return next;
+    });
+
+    debounced(v, (result) => {
+      setLookingUp((prev) => {
+        const next = new Set(prev);
+        next.delete(i);
+        return next;
+      });
+      if (!result) return;
+      const current = wordsRef.current[i];
+      if (!current) return;
+      if (result.meaning && !current.meaning?.trim()) {
+        editor.updateWord(i, "meaning", result.meaning);
+      }
+      if (result.example && !current.example?.trim()) {
+        editor.updateWord(i, "example", result.example);
+      }
+    });
+  };
 
   const focusNext = (index, field) => {
     if (field === "word") {
@@ -252,7 +299,7 @@ export default function CreateListScreen({ route }) {
             </View>
 
             {editor.words.map((w, i) => (
-              <View key={w.id || i} style={styles.wordRow}>
+              <View key={w.id || i} style={[styles.wordRow, lookingUp.has(i) && styles.wordRowLookingUp]}>
                 <View style={styles.wordNum}>
                   <Text style={styles.wordNumText}>{i + 1}</Text>
                 </View>
@@ -260,7 +307,7 @@ export default function CreateListScreen({ route }) {
                   <TextInput
                     ref={(r) => (wordRefs.current[i] = r)}
                     value={w.word}
-                    onChangeText={(v) => editor.updateWord(i, "word", v)}
+                    onChangeText={(v) => onWordChange(i, v)}
                     onSubmitEditing={() => focusNext(i, "word")}
                     placeholder="İngilizce"
                     placeholderTextColor={c.textMuted}
@@ -276,7 +323,7 @@ export default function CreateListScreen({ route }) {
                     value={w.meaning}
                     onChangeText={(v) => editor.updateWord(i, "meaning", v)}
                     onSubmitEditing={() => focusNext(i, "meaning")}
-                    placeholder="Türkçe"
+                    placeholder={lookingUp.has(i) ? "✨ aranıyor…" : "Türkçe"}
                     placeholderTextColor={c.textMuted}
                     style={styles.wordInputTr}
                     selectionColor={c.accent}
@@ -386,7 +433,22 @@ export default function CreateListScreen({ route }) {
               });
             }
           }}
-          onAdd={(text) => editor.bulkAdd(text)}
+          onAdd={(text, mode) => {
+            const added = editor.bulkAdd(text);
+            // EN-only mode → eklenen son N satır için lookup tetikle
+            if (mode === "en-only" && added > 0) {
+              setTimeout(() => {
+                const len = wordsRef.current.length;
+                for (let i = len - added; i < len; i++) {
+                  const row = wordsRef.current[i];
+                  if (row?.word && !row.meaning?.trim()) {
+                    onWordChange(i, row.word);
+                  }
+                }
+              }, 120);
+            }
+            return added;
+          }}
         />
       </View>
     </KeyboardAvoidingView>
@@ -488,27 +550,41 @@ function makeStyles(c) {
   },
   wordRow: {
     backgroundColor: c.bgElevated,
-    borderRadius: 14,
-    padding: 12,
+    borderRadius: 18,
+    padding: 16,
+    paddingLeft: 14,
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
+    alignItems: "flex-start",
+    gap: 14,
     borderWidth: 1,
     borderColor: c.border,
-    marginBottom: 10,
+    marginBottom: 12,
+    // subtle elevation
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+    elevation: 1,
+  },
+  wordRowLookingUp: {
+    borderColor: c.cobalt + "55",
+    backgroundColor: c.bgElevated,
   },
   wordNum: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     backgroundColor: c.accentGlow,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 2,
+    borderWidth: 1,
+    borderColor: c.borderAccent,
   },
-  wordNumText: { fontSize: 13, color: c.accent, fontFamily: c.fontBodyBold },
-  wordInputEn: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi, padding: 0 },
-  wordInputTr: { fontSize: 13, color: c.textSec, fontFamily: c.fontBody, padding: 0 },
-  wordInputEx: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBody, fontStyle: "italic", padding: 0 },
+  wordNumText: { fontSize: 15, color: c.accent, fontFamily: c.fontBodyBold },
+  wordInputEn: { fontSize: 17, color: c.textPrimary, fontFamily: c.fontBodySemi, padding: 0, paddingVertical: 2 },
+  wordInputTr: { fontSize: 14, color: c.textSec, fontFamily: c.fontBody, padding: 0, paddingVertical: 2 },
+  wordInputEx: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBody, fontStyle: "italic", padding: 0, paddingVertical: 2 },
   removeIcon: { fontSize: 14, color: c.textMuted, paddingHorizontal: 6 },
 
   addWordBtn: {

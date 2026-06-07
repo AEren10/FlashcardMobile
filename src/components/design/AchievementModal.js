@@ -31,8 +31,9 @@ const { width: W } = Dimensions.get("window");
 
 export default function AchievementModal({ visible, badge, onClose }) {
   const { c } = useTheme();
-  // Badge'in kendi rengi varsa onu kullan, yoksa accent fallback
-  const tint = badge?.color || c.accent;
+  // Badge'in kendi rengi varsa onu kullan, yoksa cobalt fallback
+  // (milestone'lar sıcak palette kullanıyor — achievement cobalt ile ayrışsın)
+  const tint = badge?.color || c.cobalt;
   const backdrop = useRef(new Animated.Value(0)).current;
   const badgeScale = useRef(new Animated.Value(0)).current;
   const badgeY = useRef(new Animated.Value(60)).current;
