@@ -107,10 +107,27 @@ export default function QuizScreen({ route, navigation }) {
         return;
       }
     }
-    setWords(shuffle(list || []));
+    // Blank mode'da SADECE örnek cümlesi olan kelimeleri al
+    // Yetersizse (4'ten az) → otomatik classic moda düş + UX uyarısı
+    let finalList = list || [];
+    if (mode === "blank") {
+      const withExample = finalList.filter((w) => w.example && w.example.trim());
+      if (withExample.length < 4) {
+        // Fallback: tüm liste ile classic
+        setMode("classic");
+        Alert.alert(
+          "Boşluk Doldurma kullanılamaz",
+          "Bu listedeki kelimelerin yeterli örnek cümlesi yok. Klasik moda geçildi.",
+          [{ text: "Tamam" }]
+        );
+      } else {
+        finalList = withExample;
+      }
+    }
+    setWords(shuffle(finalList));
     setLoading(false);
     sessionRef.current = await startSession({ list_id: listId ?? null, mode: "quiz" });
-  }, [listId, presetWords]);
+  }, [listId, presetWords, mode]);
 
   useEffect(() => {
     let mounted = true;

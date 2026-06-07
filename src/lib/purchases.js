@@ -22,7 +22,18 @@
  * @see https://www.revenuecat.com/docs/getting-started/installation/reactnative
  */
 
-import Purchases, { LOG_LEVEL } from "react-native-purchases";
+// Dynamic import — Expo Go'da native module yok, stub mode'a düş.
+// Bu sayede EAS update preview link PM tarafında Expo Go ile açılır.
+let Purchases = null;
+let LOG_LEVEL = null;
+try {
+  // require ile sar — Expo Go'da modül yoksa try/catch yakalar
+  const rc = require("react-native-purchases");
+  Purchases = rc.default || rc;
+  LOG_LEVEL = rc.LOG_LEVEL;
+} catch {
+  // Native module yok → otomatik STUB mode
+}
 import { Platform } from "react-native";
 
 const ENTITLEMENT_ID = "pro";
@@ -31,22 +42,30 @@ const IOS_KEY = process.env.EXPO_PUBLIC_RC_IOS_KEY;
 const ANDROID_KEY = process.env.EXPO_PUBLIC_RC_ANDROID_KEY;
 
 let _initialized = false;
-let _stub = false; // API key yoksa stub mode
+let _stub = false; // API key yoksa veya native modül yoksa stub mode
 
 export async function initPurchases(userId) {
   if (_initialized) return;
 
+  // Native module yoksa (Expo Go) → stub
+  if (!Purchases) {
+    console.warn("[Purchases] Native module not available (Expo Go?) — STUB mode");
+    _stub = true;
+    _initialized = true;
+    return;
+  }
+
   const apiKey = Platform.OS === "ios" ? IOS_KEY : ANDROID_KEY;
 
   if (!apiKey) {
-    console.warn("[Purchases] No API key — running in STUB mode. Set EXPO_PUBLIC_RC_IOS_KEY / EXPO_PUBLIC_RC_ANDROID_KEY in .env");
+    console.warn("[Purchases] No API key — STUB mode. Set EXPO_PUBLIC_RC_IOS_KEY / EXPO_PUBLIC_RC_ANDROID_KEY in .env");
     _stub = true;
     _initialized = true;
     return;
   }
 
   try {
-    if (__DEV__) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
+    if (__DEV__ && LOG_LEVEL) Purchases.setLogLevel(LOG_LEVEL.DEBUG);
     await Purchases.configure({ apiKey, appUserID: userId || null });
     _initialized = true;
   } catch (err) {
