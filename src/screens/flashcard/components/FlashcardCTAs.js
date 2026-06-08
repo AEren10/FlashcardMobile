@@ -12,8 +12,9 @@ import Icon, { ICONS } from "../../../components/design/Icon";
 const MIN_QUIZ_WORDS = 4;
 
 /**
- * 3 CTA: Çalış (öğren-SRS) / Quiz (test) / Oku (Lectio cümle akışı).
- * Lectio kelime başına `example` gerektirir — yoksa disabled.
+ * 3 CTA — kompakt icon-top tek satır title.
+ * Çalış (primary, bold accent) / Quiz (outline cobalt) / Oku (outline lavender).
+ * Önceki 2-satır subtitle layout 3 buton için sığmıyordu, sadeleştirildi.
  */
 export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, tint, lectioReadyCount = 0 }) {
   const { c } = useTheme();
@@ -22,23 +23,19 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, ti
 
   return (
     <View style={s.row}>
-      <CtaButton
+      <MiniCta
         iconPath={ICONS.lightbulb}
-        title="Çalış"
-        subtitle="Öğren · SRS"
+        label="Çalış"
         accent={tint?.color || c.accent}
         onAccent={c.textOnAccent}
         onPress={onStudy}
         c={c}
-        bold
+        primary
       />
-      <CtaButton
+      <MiniCta
         iconPath={ICONS.grid}
-        title="Quiz"
-        subtitle={quizDisabled ? `${MIN_QUIZ_WORDS}+ gerek` : "Test et"}
+        label="Quiz"
         accent={c.cobalt}
-        onAccent={c.text}
-        outline
         onPress={() => {
           if (quizDisabled) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -49,13 +46,10 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, ti
         c={c}
         disabled={quizDisabled}
       />
-      <CtaButton
+      <MiniCta
         iconPath={ICONS.books}
-        title="Oku"
-        subtitle={lectioDisabled ? "Cümle yok" : "Lectio"}
+        label="Oku"
         accent={c.lavender || c.cobalt}
-        onAccent={c.text}
-        outline
         onPress={() => {
           if (lectioDisabled) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
@@ -67,6 +61,65 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, ti
         disabled={lectioDisabled}
       />
     </View>
+  );
+}
+
+function MiniCta({ iconPath, label, accent, onAccent, onPress, c, primary = false, disabled = false }) {
+  const scale = useRef(new Animated.Value(1)).current;
+  const press = (v) =>
+    Animated.spring(scale, { toValue: v, useNativeDriver: true, speed: 50, bounciness: 8 }).start();
+
+  return (
+    <Animated.View style={{ flex: 1, transform: [{ scale }] }}>
+      <Pressable
+        onPress={() => {
+          if (disabled) return;
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          onPress?.();
+        }}
+        onPressIn={() => !disabled && press(0.96)}
+        onPressOut={() => press(1)}
+        accessibilityLabel={label}
+        style={[
+          s.miniCta,
+          {
+            borderColor: disabled ? c.border : accent + "AA",
+            backgroundColor: primary ? accent : "transparent",
+            opacity: disabled ? 0.55 : 1,
+            shadowColor: accent,
+            shadowOpacity: primary ? 0.4 : 0.18,
+            shadowOffset: { width: 0, height: primary ? 6 : 3 },
+            shadowRadius: primary ? 14 : 8,
+            elevation: primary ? 5 : 2,
+          },
+        ]}
+      >
+        {!primary && (
+          <View
+            pointerEvents="none"
+            style={[StyleSheet.absoluteFill, { backgroundColor: accent + "1A" }]}
+          />
+        )}
+        <Icon
+          d={iconPath}
+          size={20}
+          stroke={primary ? onAccent : accent}
+          fill={primary ? onAccent + "33" : "none"}
+          sw={1.8}
+        />
+        <Text
+          style={{
+            fontSize: 13,
+            fontFamily: c.fontBodyBold,
+            color: primary ? onAccent : c.textPrimary,
+            letterSpacing: 0.2,
+            marginTop: 6,
+          }}
+        >
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -197,6 +250,17 @@ function hexAlpha(hex, alpha) {
 
 const s = StyleSheet.create({
   row: { flexDirection: "row", gap: 10, paddingHorizontal: 22, marginTop: 14 },
+  miniCta: {
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    borderRadius: 16,
+    borderWidth: 1,
+    overflow: "hidden",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 70,
+  },
+  // Legacy (eski 2-satır layout, fallback için)
   cta: {
     flexDirection: "row",
     alignItems: "center",
