@@ -20,7 +20,11 @@ import {
   Easing,
   Dimensions,
   Alert,
+  Pressable,
+  Share,
 } from "react-native";
+import * as Haptics from "expo-haptics";
+import { track, EVENTS } from "../../lib/track";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import ConfettiCannon from "react-native-confetti-cannon";
@@ -58,6 +62,20 @@ export default function QuizResultScreen({
       wrongWords.map((w) => addFavoriteWord(w.id, listId || w.list_id))
     );
     Alert.alert("Eklendi", `${wrongWords.length} kelime favorilerine eklendi.`);
+  };
+
+  const handleShare = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const accuracyPct = total ? Math.round((correct / total) * 100) : 0;
+    const emoji = accuracyPct >= 80 ? "🏆" : accuracyPct >= 50 ? "✨" : "💪";
+    const deepLink = listId
+      ? `https://flashcardmobile.app/list/${listId}`
+      : "https://flashcardmobile.app";
+    const msg = `${emoji} FlashcardMobile'da quiz bitirdim: ${correct}/${total} doğru (%${accuracyPct})!\n\nSen kaç bilirsin? ${deepLink}`;
+    try {
+      await Share.share({ message: msg, url: deepLink });
+      track(EVENTS.SHARE_INITIATED, { source: "quiz_result", correct, total, accuracy: accuracyPct });
+    } catch {}
   };
   const ratio = total ? correct / total : 0;
   const accuracyPct = Math.round(ratio * 100);
@@ -148,6 +166,42 @@ export default function QuizResultScreen({
             <Text style={s.title}>{title}</Text>
             <Text style={s.subtitle}>{subtitle}</Text>
           </View>
+
+          {/* Share kartı — viral kanal, accuracy yüksekse vurgulu */}
+          <Pressable
+            onPress={handleShare}
+            style={({ pressed }) => [
+              s.shareCard,
+              {
+                backgroundColor: isExcellent ? c.accent + "1F" : c.bgElevated,
+                borderColor: isExcellent ? c.accent + "88" : c.border,
+                shadowColor: isExcellent ? c.accent : "transparent",
+                shadowOpacity: isExcellent ? 0.35 : 0,
+                shadowRadius: 14,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: isExcellent ? 5 : 0,
+                transform: [{ scale: pressed ? 0.98 : 1 }],
+              },
+            ]}
+          >
+            <Icon
+              d={ICONS.share || ICONS.arrow}
+              size={20}
+              stroke={isExcellent ? c.accent : c.textSec}
+              sw={1.8}
+            />
+            <View style={{ flex: 1 }}>
+              <Text style={[s.shareTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
+                {isExcellent ? "Bu skoru göster 🎉" : "Arkadaşlarına meydan oku"}
+              </Text>
+              <Text style={[s.shareSub, { color: c.textSec, fontFamily: c.fontBody }]}>
+                {isExcellent
+                  ? `%${accuracyPct} başarıyı paylaş — kim daha iyi?`
+                  : "Bu listeyi arkadaşına gönder, beraber çalışın"}
+              </Text>
+            </View>
+            <Icon d={ICONS.arrow} size={16} stroke={c.textMuted} sw={2} />
+          </Pressable>
 
           {/* Mistakes saved info */}
           {mistakesAdded > 0 && (
@@ -482,5 +536,17 @@ function makeStyles(c) {
       color: c.textSec,
       lineHeight: 18,
     },
+
+    shareCard: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      padding: 14,
+      marginTop: 14,
+    },
+    shareTitle: { fontSize: 14, marginBottom: 2 },
+    shareSub: { fontSize: 12, lineHeight: 16 },
   });
 }

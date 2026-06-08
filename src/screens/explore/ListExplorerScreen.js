@@ -20,6 +20,8 @@ import { useTheme } from "../../contexts/ThemeContext";
 import usePublicLists from "../../hooks/usePublicLists";
 import { selectFavoriteListIds } from "../../store/favoritesSlice";
 import CategoryCover from "../../components/design/CategoryCover";
+import PressableScale from "../../components/design/PressableScale";
+import { getCategoryAccent } from "../../lib/categoryMeta";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
 import StaggerEnter from "../../components/design/StaggerEnter";
@@ -194,16 +196,24 @@ export default function ListExplorerScreen({ route, navigation }) {
 }
 
 const ListItem = React.memo(function ListItem({ item, fav, tint, c, s, onPress }) {
+  const catAccent = getCategoryAccent(item.category) || tint;
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
-      style={({ pressed }) => [
+      style={[
         s.card,
-        { borderColor: c.border, transform: [{ scale: pressed ? 0.98 : 1 }] },
+        {
+          borderColor: catAccent + "44",
+          shadowColor: catAccent,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.16,
+          shadowRadius: 8,
+          elevation: 2,
+        },
       ]}
     >
       <View style={s.coverWrap}>
-        <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={90}>
+        <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={90}>
           {fav && (
             <View style={[s.starBadge, { backgroundColor: "rgba(0,0,0,0.32)" }]}>
               <Icon d={ICONS.star} size={14} stroke="#fff" fill="#fff" sw={1.5} />
@@ -221,14 +231,14 @@ const ListItem = React.memo(function ListItem({ item, fav, tint, c, s, onPress }
           {(item.study_count ?? 0) > 0 && (
             <>
               <View style={[s.metaDot, { backgroundColor: c.textMuted }]} />
-              <Icon d={ICONS.flame} size={11} stroke={tint} fill={tint} sw={1.5} />
-              <Text style={[s.metaTxt, { color: tint }]}>{item.study_count}</Text>
+              <Icon d={ICONS.flame} size={11} stroke={catAccent} fill={catAccent} sw={1.5} />
+              <Text style={[s.metaTxt, { color: catAccent }]}>{item.study_count}</Text>
             </>
           )}
         </View>
       </View>
       <Icon d={ICONS.arrow} size={18} stroke={c.textMuted} sw={1.8} />
-    </Pressable>
+    </PressableScale>
   );
 });
 

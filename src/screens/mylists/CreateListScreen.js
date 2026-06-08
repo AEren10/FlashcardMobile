@@ -39,6 +39,7 @@ export default function CreateListScreen({ route }) {
   const editor = useListEditor(listId);
   const img = useImageUpload();
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false); // double-tap için sync lock
   const [bulkOpen, setBulkOpen] = useState(false);
   // Her satırdaki 3 input için ref — onSubmitEditing'de next field'a focus
   const wordRefs = useRef([]);
@@ -118,8 +119,10 @@ export default function CreateListScreen({ route }) {
   };
 
   const onSave = async () => {
+    if (savingRef.current) return; // double-tap koruması (sync)
     const err = editor.validate();
     if (err) return Alert.alert("Eksik bilgi", err);
+    savingRef.current = true;
     setSaving(true);
     try {
       let finalUrl = editor.existingImageUrl;
@@ -172,6 +175,7 @@ export default function CreateListScreen({ route }) {
       Alert.alert("Hata", e.message);
     } finally {
       setSaving(false);
+      savingRef.current = false;
     }
   };
 
@@ -470,7 +474,18 @@ function makeStyles(c) {
   backBtn: { flexDirection: "row", alignItems: "center", gap: 6, minWidth: 70 },
   backText: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi },
   title: { fontSize: 18, color: c.textPrimary, fontFamily: c.fontBodyBold },
-  saveBtn: { borderRadius: 12, paddingVertical: 8, paddingHorizontal: 18, minWidth: 70, alignItems: "center" },
+  saveBtn: {
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    minWidth: 70,
+    alignItems: "center",
+    shadowColor: c.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 10,
+    elevation: 5,
+  },
   saveText: { fontSize: 14, fontFamily: c.fontBodyBold },
 
   card: {
@@ -522,7 +537,7 @@ function makeStyles(c) {
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: "rgba(180,255,79,0.08)",
+    borderColor: c.borderAccent,
     marginBottom: 4,
   },
   tipText: { flex: 1, fontSize: 12, color: c.textPrimary, fontFamily: c.fontBody, lineHeight: 18 },
@@ -540,7 +555,7 @@ function makeStyles(c) {
     borderRadius: 999,
     backgroundColor: c.accentGlow,
     borderWidth: 1,
-    borderColor: "rgba(180,255,79,0.25)",
+    borderColor: c.borderAccent,
   },
   bulkBtnTxt: {
     fontSize: 11,
@@ -593,7 +608,7 @@ function makeStyles(c) {
     borderRadius: 14,
     borderWidth: 2,
     borderStyle: "dashed",
-    borderColor: "rgba(180,255,79,0.2)",
+    borderColor: c.borderAccent,
     backgroundColor: c.accentGlow,
     alignItems: "center",
   },

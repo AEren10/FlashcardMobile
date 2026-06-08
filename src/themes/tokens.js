@@ -150,7 +150,7 @@ const light = {
   textPrimary: "#2C2520",
   textSec: "#6B5E52",
   textSecondary: "#6B5E52",
-  textMuted: "#A09688",
+  textMuted: "#7A6E60", // Light mode WCAG AA fix (önce #A09688 → 2.4:1 kontrast yetersizdi)
   textOnAccent: "#FFFDF7",
 
   border: "rgba(80,65,40,0.10)",

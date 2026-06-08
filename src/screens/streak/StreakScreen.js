@@ -3,19 +3,22 @@
  * Hero flame (animated float) + 3 stat tiles with trends + 35-day grid + badges.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
+import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "../../contexts/ToastContext";
 import { getStudyStats, getDailyActivity } from "../../supabase/progress";
 import { STREAK_BADGES, WORDS_BADGES, getStreakBadge } from "../../lib/badges";
-import Icon from "../../components/design/Icon";
+import Icon, { ICONS } from "../../components/design/Icon";
 import AnimatedFlame from "../../components/design/AnimatedFlame";
 import AchievementModal from "../../components/design/AchievementModal";
 import Last30BarChart from "../../components/design/Last30BarChart";
 import Last7DaysDots from "../../components/design/Last7DaysDots";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
+import { getFreezeStatus, consumeStreakFreeze } from "../../supabase/streakFreeze";
 
 export default function StreakScreen({ navigation }) {
   const { c } = useTheme();
@@ -23,6 +26,8 @@ export default function StreakScreen({ navigation }) {
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
   const [days, setDays] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [freeze, setFreeze] = useState({ canUse: false, nextResetAt: null });
+  const toast = useToast();
 
   const { newBadge, dismiss } = useBadgeWatcher({
     streakDays: stats.streakDays,
@@ -31,16 +36,57 @@ export default function StreakScreen({ navigation }) {
 
   const load = useCallback(async () => {
     try {
-      const [statsRes, daysRes] = await Promise.allSettled([
+      const [statsRes, daysRes, freezeRes] = await Promise.allSettled([
         getStudyStats(),
         getDailyActivity(35),
+        getFreezeStatus(),
       ]);
       if (statsRes.status === "fulfilled" && statsRes.value) setStats(statsRes.value);
       if (daysRes.status === "fulfilled" && Array.isArray(daysRes.value)) setDays(daysRes.value);
+      if (freezeRes.status === "fulfilled" && freezeRes.value?.success) {
+        setFreeze({
+          canUse: freezeRes.value.canUse,
+          nextResetAt: freezeRes.value.nextResetAt,
+        });
+      }
     } finally {
       setRefreshing(false);
     }
   }, []);
+
+  const onFreezePress = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!freeze.canUse) {
+      const days = freeze.nextResetAt
+        ? Math.ceil((new Date(freeze.nextResetAt) - new Date()) / 86400000)
+        : 7;
+      toast?.show?.({
+        message: `Donuk Kalkan ${days} gün sonra yenilenir`,
+        type: "info",
+      });
+      return;
+    }
+    Alert.alert(
+      "Donuk Kalkan",
+      "Bugün çalışmasan bile serini koruyacak. Bu hakkın haftada bir yenileniyor.",
+      [
+        { text: "Vazgeç", style: "cancel" },
+        {
+          text: "Kullan",
+          onPress: async () => {
+            const r = await consumeStreakFreeze();
+            if (r.success) {
+              setFreeze({ canUse: false, nextResetAt: r.nextResetAt });
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              toast?.show?.({ message: "❄️ Serin korunuyor", type: "success" });
+            } else {
+              toast?.show?.({ message: "Kullanılamadı: " + (r.message || r.error), type: "error" });
+            }
+          },
+        },
+      ]
+    );
+  }, [freeze, toast]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -112,6 +158,43 @@ export default function StreakScreen({ navigation }) {
               </Text>
             )}
           </View>
+
+          {/* Donuk Kalkan — haftada 1 hak, seriyi koru */}
+          <Pressable
+            onPress={onFreezePress}
+            style={({ pressed }) => [
+              s.freezeChip,
+              {
+                borderColor: freeze.canUse ? c.cobalt + "AA" : c.border,
+                backgroundColor: freeze.canUse ? c.cobalt + "1A" : c.bgElevated,
+                opacity: freeze.canUse ? 1 : 0.55,
+                transform: [{ scale: pressed ? 0.97 : 1 }],
+                shadowColor: freeze.canUse ? c.cobalt : "transparent",
+                shadowOpacity: freeze.canUse ? 0.35 : 0,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: freeze.canUse ? 4 : 0,
+              },
+            ]}
+            accessibilityLabel="Donuk Kalkan"
+          >
+            <Text style={{ fontSize: 18 }}>❄️</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={[s.freezeTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
+                {freeze.canUse ? "Donuk Kalkan hazır" : "Donuk Kalkan kullanıldı"}
+              </Text>
+              <Text style={[s.freezeSub, { color: c.textSec, fontFamily: c.fontBody }]}>
+                {freeze.canUse
+                  ? "Bugün çalışmasan bile serini koruyabilirsin"
+                  : freeze.nextResetAt
+                    ? `${Math.max(1, Math.ceil((new Date(freeze.nextResetAt) - new Date()) / 86400000))} gün sonra yenilenir`
+                    : "Haftada 1 hak"}
+              </Text>
+            </View>
+            {freeze.canUse && (
+              <Text style={{ color: c.cobalt, fontSize: 13, fontFamily: c.fontBodyBold }}>Kullan</Text>
+            )}
+          </Pressable>
 
           {/* Bu hafta — 7 gün yuvarlaklar */}
           <View style={{ marginTop: 8 }}>
@@ -351,6 +434,18 @@ function makeStyles(c) {
     heroNext: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted, marginTop: 10 },
 
     tileRow: { flexDirection: "row", gap: 12, marginTop: 10 },
+    freezeChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderRadius: 14,
+      borderWidth: 1,
+      marginTop: 12,
+    },
+    freezeTitle: { fontSize: 14 },
+    freezeSub: { fontSize: 11, marginTop: 2, lineHeight: 14 },
     tile: {
       flex: 1,
       backgroundColor: c.bgElevated,

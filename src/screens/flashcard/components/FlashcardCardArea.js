@@ -14,6 +14,7 @@ export default function FlashcardCardArea({
   currentIndex,
   setCurrentIndex,
   onComplete,
+  onKnowCurrent,
   listId,
 }) {
   const { c } = useTheme();
@@ -66,7 +67,7 @@ export default function FlashcardCardArea({
         />
       </View>
 
-      {/* Chevron gezinme — belirgin accent tonu */}
+      {/* Chevron gezinme + ortada "Biliyorum" mini-SRS chip */}
       <View style={s.navRow}>
         <Pressable
           onPress={goPrev}
@@ -86,6 +87,33 @@ export default function FlashcardCardArea({
         >
           <Icon d="M15 6l-6 6 6 6" size={24} stroke={c.accent} sw={3} />
         </Pressable>
+
+        {/* Mini-SRS: kelimeyi GRADE.GRADUATE et — 21 gün sonra döner */}
+        {onKnowCurrent && (
+          <Pressable
+            onPress={() => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              onKnowCurrent(current);
+              // Sonraki karta otomatik geç (son kart değilse)
+              if (!isLast) setCurrentIndex(currentIndex + 1);
+            }}
+            hitSlop={10}
+            style={({ pressed }) => [
+              s.knowChip,
+              {
+                backgroundColor: c.success + "26",
+                borderColor: c.success + "AA",
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              },
+            ]}
+            accessibilityLabel="Bu kelimeyi biliyorum"
+          >
+            <Icon d={ICONS.check} size={14} stroke={c.success} sw={2.4} />
+            <Text style={{ fontSize: 12, color: c.success, fontFamily: c.fontBodyBold, letterSpacing: 0.3 }}>
+              Biliyorum
+            </Text>
+          </Pressable>
+        )}
 
         <Pressable
           onPress={goNext}
@@ -148,6 +176,15 @@ const s = StyleSheet.create({
     shadowOpacity: 0.55,
     shadowRadius: 18,
     elevation: 5,
+  },
+  knowChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1.5,
   },
   completeCta: {
     flexDirection: "row",

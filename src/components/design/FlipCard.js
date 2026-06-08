@@ -148,7 +148,14 @@ export default function FlipCard({
           <View style={{ width: 86 }} />
         </View>
         <View style={s.center}>
-          <Text style={[s.word, { color: c.text }]}>{word}</Text>
+          <Text
+            style={[s.word, { color: c.text }]}
+            adjustsFontSizeToFit
+            numberOfLines={2}
+            minimumFontScale={0.55}
+          >
+            {word}
+          </Text>
           {!!(pron || tag) && (
             <Text style={[s.meta, { color: c.textMuted }]}>
               {[pron, tag].filter(Boolean).join(" · ")}
@@ -188,7 +195,14 @@ export default function FlipCard({
           <View style={{ width: 38 }} />
         </View>
         <View style={s.center}>
-          <Text style={[s.meaningTxt, { color: c.text }]}>{meaning}</Text>
+          <Text
+            style={[s.meaningTxt, { color: c.text }]}
+            adjustsFontSizeToFit
+            numberOfLines={2}
+            minimumFontScale={0.55}
+          >
+            {meaning}
+          </Text>
           {!!exampleTr && (
             <Text style={[s.exampleTr, { color: c.textSec, fontFamily: c.fontBody }]}>
               {exampleTr}
@@ -383,7 +397,7 @@ function makeStyles(c) {
     flipHintTxt: {
       fontSize: 11.5,
       letterSpacing: 0.5,
-      opacity: 0.55,
+      // opacity kaldırıldı — textMuted zaten silik renk, ekstra opacity light mode'da okunmuyordu
     },
     hint: {
       fontFamily: c.fontBody,

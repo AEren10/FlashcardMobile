@@ -20,6 +20,12 @@ import { Alert } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
 import { activateRemindersWithPrompt } from "../../lib/notifications";
+import { track, EVENTS } from "../../lib/track";
+import GoalSlide from "./components/GoalSlide";
+import LevelSlide from "./components/LevelSlide";
+import TasteDeck from "./components/TasteDeck";
+import { useAuth } from "../../contexts/AuthContext";
+import { updateProfile } from "../../supabase/profile";
 
 const LOTTIE_SOURCES = {
   network: require("../../assets/lottie/network.json"),
@@ -49,6 +55,18 @@ const SLIDES = [
     body: "Her gün biraz çalış, serini büyüt. Küçük adımlar, kalıcı ilerleme.",
   },
   {
+    key: "goal",
+    kind: "goal",
+    title: "Hedefin ne?",
+    body: "",
+  },
+  {
+    key: "level",
+    kind: "level",
+    title: "Seviyen?",
+    body: "",
+  },
+  {
     key: "demo",
     kind: "demo",
     title: "Hadi dene",
@@ -57,6 +75,8 @@ const SLIDES = [
 ];
 
 const ONBOARDING_KEY = "@fc:onboardingSeen";
+const GOAL_KEY = "@fc:onboarding:goal";
+const LEVEL_KEY = "@fc:onboarding:level";
 
 export async function hasSeenOnboarding() {
   try {
@@ -160,15 +180,54 @@ export async function markOnboardingSeen() {
   } catch {}
 }
 
+/**
+ * Onboarding'de seçilen goal+level — auth context'inde / HomeScreen'de sync için.
+ * Kullanım: signup sonrası bu değerleri profiles tablosuna yaz.
+ */
+export async function getOnboardingGoalLevel() {
+  try {
+    const [goal, level] = await Promise.all([
+      AsyncStorage.getItem(GOAL_KEY),
+      AsyncStorage.getItem(LEVEL_KEY),
+    ]);
+    return { goal, level };
+  } catch {
+    return { goal: null, level: null };
+  }
+}
+
 export default function OnboardingScreen({ onFinish }) {
   const { c } = useTheme();
+  const { user } = useAuth() || {};
   const flatRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  const finishWithReminders = () => {
+  const persistGoalLevel = async () => {
+    try {
+      if (selectedGoal) await AsyncStorage.setItem(GOAL_KEY, selectedGoal);
+      if (selectedLevel) await AsyncStorage.setItem(LEVEL_KEY, selectedLevel);
+      // Auth varsa profil tablosuna direkt yaz; yoksa AsyncStorage'ta beklesin, sonra sync
+      if (user?.id && (selectedGoal || selectedLevel)) {
+        await updateProfile(user.id, {
+          ...(selectedGoal ? { goal: selectedGoal } : {}),
+          ...(selectedLevel ? { level: selectedLevel } : {}),
+        }).catch(() => {});
+      }
+    } catch {}
+  };
+
+  const finishWithReminders = async () => {
     // Permission'ı 1. başarılı session sonrası StudyDoneState'te isteyeceğiz.
     // Burada Alert açmadan direkt onboarding'i kapat — kullanıcı önce değeri görmeli.
+    await persistGoalLevel();
+    track(EVENTS.ONBOARDING_COMPLETE, {
+      totalSteps: SLIDES.length,
+      goal: selectedGoal,
+      level: selectedLevel,
+    });
     markOnboardingSeen();
     onFinish();
   };
@@ -176,7 +235,9 @@ export default function OnboardingScreen({ onFinish }) {
   const handleNext = () => {
     Haptics.selectionAsync();
     if (activeIndex < SLIDES.length - 1) {
-      flatRef.current?.scrollToIndex({ index: activeIndex + 1, animated: true });
+      const next = activeIndex + 1;
+      track(EVENTS.ONBOARDING_STEP, { step: next, key: SLIDES[next]?.key });
+      flatRef.current?.scrollToIndex({ index: next, animated: true });
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       finishWithReminders();
@@ -185,6 +246,7 @@ export default function OnboardingScreen({ onFinish }) {
 
   const handleSkip = () => {
     Haptics.selectionAsync();
+    track(EVENTS.ONBOARDING_COMPLETE, { skipped: true, atStep: activeIndex });
     markOnboardingSeen();
     onFinish();
   };
@@ -211,12 +273,39 @@ export default function OnboardingScreen({ onFinish }) {
 
     const lottieSrc = LOTTIE_SOURCES[item.kind];
 
+    // Goal + Level slide'ları kendi layout'una sahip — title/body kullanmaz
+    if (item.kind === "goal") {
+      return (
+        <View style={[styles.slide, { width, justifyContent: "center" }]}>
+          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+            <GoalSlide c={c} selected={selectedGoal} onSelect={setSelectedGoal} />
+          </Animated.View>
+        </View>
+      );
+    }
+    if (item.kind === "level") {
+      return (
+        <View style={[styles.slide, { width, justifyContent: "center" }]}>
+          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+            <LevelSlide c={c} selected={selectedLevel} onSelect={setSelectedLevel} />
+          </Animated.View>
+        </View>
+      );
+    }
+    if (item.kind === "demo") {
+      return (
+        <View style={[styles.slide, { width, justifyContent: "center" }]}>
+          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+            <TasteDeck c={c} onComplete={finishWithReminders} />
+          </Animated.View>
+        </View>
+      );
+    }
+
     return (
       <View style={[styles.slide, { width }]}>
         <Animated.View style={{ opacity, transform: [{ scale }] }}>
-          {item.kind === "demo" ? (
-            <DemoFlashcard c={c} />
-          ) : lottieSrc ? (
+          {lottieSrc ? (
             <LottieView
               source={lottieSrc}
               autoPlay

@@ -13,7 +13,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import * as Haptics from "expo-haptics";
 
 import { getListWords } from "../supabase/database";
+import { getStudyWords } from "../supabase/studyWords";
 import { startSession } from "../supabase/progress";
+import { track, EVENTS } from "../lib/track";
 import { safeRecordReview, safeFinishSession } from "../lib/offlineQueue";
 import { GRADE } from "../lib/srs";
 import { shuffle } from "../utils/shuffle";
@@ -24,12 +26,14 @@ import {
   resetMistakesStreak,
 } from "../supabase/mistakesList";
 import { useAchievements } from "../contexts/AchievementsContext";
+import { useToast } from "../contexts/ToastContext";
 
 const MISTAKES_MODAL_THRESHOLD = 5;
 const CONFETTI_STREAK = 5;
 
 export default function useStudyEngine({ listId, presetWords, presetMode }) {
   const { trigger: triggerAchievement } = useAchievements();
+  const toast = useToast();
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [index, setIndex] = useState(0);
@@ -52,10 +56,18 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     let mounted = true;
     (async () => {
       let list;
-      if (presetWords?.length) list = presetWords;
-      else {
-        const res = await getListWords(listId);
+      if (presetWords?.length) {
+        list = presetWords;
+      } else if (listId) {
+        // StudyModeModal'dan gelen mode'a göre filtreli kelimeler
+        // presetMode: "smart" | "all" | "new" | "mistakes" — yoksa "all"
+        const studyMode = ["smart", "new", "mistakes"].includes(presetMode)
+          ? presetMode
+          : "all";
+        const res = await getStudyWords(listId, studyMode);
         list = res.data ?? [];
+      } else {
+        list = [];
       }
       if (!mounted) return;
       setWords(shuffle(list));
@@ -63,6 +75,11 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
       sessionRef.current = await startSession({
         list_id: listId ?? null,
         mode: presetMode ?? "srs",
+      });
+      track(EVENTS.STUDY_START, {
+        mode: presetMode ?? "srs",
+        listId: listId ?? null,
+        count: list.length,
       });
     })();
     return () => {
@@ -78,11 +95,20 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
       setDone(true);
       const duration = Math.round((Date.now() - startedAt.current) / 1000);
       setFinalDuration(duration);
+      const finalCorrect = lastWasCorrect ? correct + 1 : correct;
       safeFinishSession(sessionRef.current?.id, {
         total_words: words.length,
-        correct: lastWasCorrect ? correct + 1 : correct,
+        correct: finalCorrect,
         duration_sec: duration,
       }).catch(() => {});
+      track(EVENTS.QUIZ_FINISH, {
+        mode: presetMode ?? "srs",
+        listId: listId ?? null,
+        total: words.length,
+        correct: finalCorrect,
+        duration_sec: duration,
+        accuracy: words.length ? Math.round((finalCorrect / words.length) * 100) : 0,
+      });
       maybeRequestReview();
 
       const allWrongIds = lastWordWrong ? [...wrongIds, lastWordWrong] : wrongIds;
@@ -92,12 +118,17 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
       if (res.success && res.addedCount > 0) {
         setMistakesAdded(res.addedCount);
         setMistakesListId(res.listId);
+        toast?.show?.({
+          message: `${res.addedCount} kelime Hatalar listene eklendi`,
+          type: "info",
+          duration: 3500,
+        });
         if (res.addedCount >= MISTAKES_MODAL_THRESHOLD) {
           setTimeout(() => setShowMistakesModal(true), 600);
         }
       }
     },
-    [words.length, correct, wrongIds]
+    [words.length, correct, wrongIds, toast]
   );
 
   // Cevap işle (know/dont)
@@ -141,6 +172,46 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
   const advance = useCallback(() => {
     setIndex((i) => i + 1);
   }, []);
+
+  /**
+   * Detaylı puanlama — SRS GRADE.AGAIN/HARD/GOOD/EASY (4 buton UI).
+   * AGAIN = bilemedi (wrong), HARD/GOOD/EASY = bildi (correct).
+   */
+  const answerGrade = useCallback(
+    (grade) => {
+      if (!current) return null;
+      const isCorrect = grade !== GRADE.AGAIN;
+
+      Haptics.notificationAsync(
+        isCorrect
+          ? Haptics.NotificationFeedbackType.Success
+          : Haptics.NotificationFeedbackType.Warning
+      );
+
+      const nextStreak = isCorrect ? streak + 1 : 0;
+      setStreak(nextStreak);
+      if (isCorrect && nextStreak >= CONFETTI_STREAK) {
+        setConfettiKey((k) => k + 1);
+      }
+
+      if (isCorrect) {
+        setCorrect((c) => c + 1);
+        setCorrectIds((arr) => [...arr, current.id]);
+      } else {
+        setWrongIds((arr) => [...arr, current.id]);
+      }
+
+      safeRecordReview(current.id, grade).catch(() => {});
+      if (isCorrect) {
+        bumpMistakesStreak(current.id, current.word, current.meaning).catch(() => {});
+      } else {
+        resetMistakesStreak(current.id).catch(() => {});
+      }
+
+      return { isLast: index + 1 >= words.length, know: isCorrect, wordId: current.id };
+    },
+    [current, streak, index, words.length]
+  );
 
   // "Bu kelimeyi biliyorum" — SRS graduate, 21 gün sonra döner
   const graduateCurrent = useCallback(() => {
@@ -208,6 +279,7 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
     showMistakesModal,
     setShowMistakesModal,
     answer,
+    answerGrade,
     advance,
     finishSeason,
     restart,

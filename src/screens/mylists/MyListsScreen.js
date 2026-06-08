@@ -34,6 +34,8 @@ import {
 } from "../../store/favoriteWordsSlice";
 import Segmented from "../../components/design/Segmented";
 import CategoryCover from "../../components/design/CategoryCover";
+import PressableScale from "../../components/design/PressableScale";
+import { getCategoryAccent } from "../../lib/categoryMeta";
 import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import AnimatedFAB from "../../components/design/AnimatedFAB";
@@ -204,7 +206,8 @@ export default function MyListsScreen() {
   const showSmartPins = tab === "Listelerim" && !loading;
   // Sort + smart pins boş listede gözükmesin — empty CTA üstte kalsın
   const isEmpty = !loading && items.length === 0;
-  const showFilters = !isEmpty;
+  // Loading sırasında chips gizle (skeleton ile karışmasın) + empty'de de gizle
+  const showFilters = !loading && !isEmpty;
   const showPinsActual = showSmartPins && !isEmpty;
 
   return (
@@ -362,9 +365,25 @@ export default function MyListsScreen() {
 }
 
 function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
+  const catAccent = getCategoryAccent(item.category);
   return (
-    <Pressable onPress={onOpen} onLongPress={onLongPress} delayLongPress={400} style={s.card}>
-      <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={72}>
+    <PressableScale
+      onPress={onOpen}
+      onLongPress={onLongPress}
+      delayLongPress={400}
+      style={[
+        s.card,
+        {
+          borderColor: catAccent + "44",
+          shadowColor: catAccent,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.18,
+          shadowRadius: 10,
+          elevation: 3,
+        },
+      ]}
+    >
+      <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={72}>
         {item.is_public && (
           <View style={s.publicBadge}>
             <Text style={s.publicBadgeTxt}>Public</Text>
@@ -384,11 +403,11 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
           {trLevel(item.level)} · {item.word_count ?? "?"} kelime
         </Text>
         <View style={s.cardFooter}>
-          <Icon d={ICONS.flame} size={14} fill={c.warning} stroke={c.warning} sw={1.5} />
+          <Icon d={ICONS.flame} size={14} fill={catAccent} stroke={catAccent} sw={1.5} />
           <Text style={s.socialTxt}>{item.study_count ?? 0} kişi çalışıyor</Text>
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 

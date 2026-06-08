@@ -29,6 +29,8 @@ import StudyDoneState from "./components/StudyDoneState";
 import { useTheme } from "../../contexts/ThemeContext";
 import useStudyEngine from "../../hooks/useStudyEngine";
 import useStudySwipe from "../../hooks/useStudySwipe";
+import { GRADE } from "../../lib/srs";
+import StudyModeModal from "../../components/design/StudyModeModal";
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -38,8 +40,16 @@ export default function StudyScreen({ route, navigation }) {
   const s = useMemo(() => makeStyles(c), [c]);
   const title = presetTitle ?? listTitle ?? "Çalış";
 
-  // Business logic — session + mistakes
-  const engine = useStudyEngine({ listId, presetWords, presetMode });
+  // Mod seçimi — presetWords/presetMode varsa modal sorma
+  const [selectedMode, setSelectedMode] = useState(presetMode ?? null);
+  const [modeChosen, setModeChosen] = useState(!!presetMode || !!presetWords);
+
+  // Business logic — session + mistakes (mode chosen olmadan başlatma)
+  const engine = useStudyEngine({
+    listId: modeChosen ? listId : null,
+    presetWords,
+    presetMode: selectedMode || presetMode,
+  });
 
   // UI-only state
   const [flipped, setFlipped] = useState(false);
@@ -118,6 +128,51 @@ export default function StudyScreen({ route, navigation }) {
       }
     }, delay);
   };
+
+  /**
+   * Detaylı grade puanlama — 4 buton (Again/Hard/Good/Easy).
+   * Card flipped olduğunda görünür. SRS'in tam gücünü kullanır.
+   */
+  const handleAnswerGrade = (grade) => {
+    if (feedback || !engine.current) return;
+    const isCorrect = grade !== GRADE.AGAIN;
+    setFeedback(isCorrect ? "know" : "dont");
+
+    const result = engine.answerGrade?.(grade);
+    if (!result) return;
+
+    swipe.triggerCommit(isCorrect);
+    if (!isCorrect) swipe.triggerShake();
+
+    const delay = isCorrect ? 620 : 700;
+    setTimeout(() => {
+      if (unmountedRef.current) return;
+      if (result.isLast) {
+        engine.finishSeason(isCorrect, isCorrect ? null : result.wordId);
+      } else {
+        engine.advance();
+        swipe.resetCard();
+        setFlipped(false);
+        setFeedback(null);
+      }
+    }, delay);
+  };
+
+  // Mod seçimi henüz yapılmadıysa modal göster — engine başlatılmıyor
+  if (!modeChosen) {
+    return (
+      <View style={s.root}>
+        <StudyModeModal
+          visible
+          onPick={(m) => {
+            setSelectedMode(m);
+            setModeChosen(true);
+          }}
+          onClose={() => navigation.goBack()}
+        />
+      </View>
+    );
+  }
 
   if (engine.loading) return <StudyLoadingState s={s} />;
 
@@ -206,30 +261,38 @@ export default function StudyScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Swipe rehberi — containersız, sade SVG ok + text */}
-        <View style={s.swipeGuide} pointerEvents="none">
-          <View style={s.guideSide}>
-            <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.4} />
-            <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodySemi }]}>
-              Bilmiyorum
-            </Text>
+        {/* Kart çevrildiyse 4-buton detaylı puanlama, değilse swipe rehberi */}
+        {flipped ? (
+          <View style={s.gradeRow}>
+            <GradeBtn label="Yeniden" sub="<1dk" color={c.error} onPress={() => handleAnswerGrade(GRADE.AGAIN)} c={c} />
+            <GradeBtn label="Zor" sub="<10dk" color={c.warning} onPress={() => handleAnswerGrade(GRADE.HARD)} c={c} />
+            <GradeBtn label="İyi" sub="~1gün" color={c.success} onPress={() => handleAnswerGrade(GRADE.GOOD)} c={c} />
+            <GradeBtn label="Kolay" sub="~3gün" color={c.cobalt} onPress={() => handleAnswerGrade(GRADE.EASY)} c={c} />
           </View>
-          <View style={s.guideCenter}>
-            {/* Tap-to-flip: parmak + döngü ipucu SVG */}
-            <Icon
-              d="M9 11V6a3 3 0 0 1 6 0v8m-3 0v3m-5-4a5 5 0 0 0 10 0V8"
-              size={20}
-              stroke={c.textMuted}
-              sw={1.8}
-            />
+        ) : (
+          <View style={s.swipeGuide} pointerEvents="none">
+            <View style={s.guideSide}>
+              <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.4} />
+              <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodySemi }]}>
+                Bilmiyorum
+              </Text>
+            </View>
+            <View style={s.guideCenter}>
+              <Icon
+                d="M9 11V6a3 3 0 0 1 6 0v8m-3 0v3m-5-4a5 5 0 0 0 10 0V8"
+                size={20}
+                stroke={c.textMuted}
+                sw={1.8}
+              />
+            </View>
+            <View style={s.guideSide}>
+              <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodySemi }]}>
+                Biliyorum
+              </Text>
+              <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.4} />
+            </View>
           </View>
-          <View style={s.guideSide}>
-            <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodySemi }]}>
-              Biliyorum
-            </Text>
-            <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.4} />
-          </View>
-        </View>
+        )}
 
         {showConfetti && (
           <ConfettiCannon
@@ -248,6 +311,33 @@ export default function StudyScreen({ route, navigation }) {
 }
 
 /* —————— Sub-components —————— */
+
+function GradeBtn({ label, sub, color, onPress, c }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        flex: 1,
+        paddingVertical: 12,
+        paddingHorizontal: 6,
+        borderRadius: 12,
+        borderWidth: 1.5,
+        alignItems: "center",
+        backgroundColor: pressed ? color + "22" : c.bgElevated,
+        borderColor: color + "88",
+        transform: [{ scale: pressed ? 0.96 : 1 }],
+      })}
+      accessibilityLabel={label}
+    >
+      <Text style={{ fontSize: 13, fontFamily: c.fontBodyBold, color, letterSpacing: 0.2 }}>
+        {label}
+      </Text>
+      <Text style={{ fontSize: 10, fontFamily: c.fontBody, color: c.textMuted, marginTop: 2 }}>
+        {sub}
+      </Text>
+    </Pressable>
+  );
+}
 
 function Header({ c, s, title, streak, onBack }) {
   return (
@@ -483,6 +573,24 @@ function makeStyles(c) {
       fontSize: 14,
       letterSpacing: 0.3,
     },
+    gradeRow: {
+      flexDirection: "row",
+      gap: 6,
+      paddingHorizontal: 14,
+      paddingBottom: 18,
+      marginTop: 6,
+    },
+    gradeBtn: {
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 6,
+      borderRadius: 12,
+      borderWidth: 1.5,
+      alignItems: "center",
+      backgroundColor: c.bgElevated,
+    },
+    gradeLbl: { fontSize: 12, fontFamily: c.fontBodyBold, letterSpacing: 0.2 },
+    gradeSub: { fontSize: 10, fontFamily: c.fontBody, marginTop: 2, opacity: 0.7 },
     swipeHint: {
       textAlign: "center",
       fontSize: 11,

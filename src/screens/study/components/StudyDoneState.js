@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import StudyResultScreen from "../../../components/design/StudyResultScreen";
 import MistakesListModal from "../../../components/design/MistakesListModal";
 import { activateRemindersWithPrompt, getPermissionStatus } from "../../../lib/notifications";
+import { track, EVENTS } from "../../../lib/track";
 
 const PERMISSION_ASKED_KEY = "@fc:notif_permission_asked";
 
@@ -33,14 +34,22 @@ export default function StudyDoneState({ engine, navigation, listId }) {
         await AsyncStorage.setItem(PERMISSION_ASKED_KEY, "1");
         // 1.2sn bekle — celebration ses kesilmesin
         setTimeout(() => {
+          track(EVENTS.PUSH_PROMPT_SHOWN, { trigger: "first_study_done" });
           Alert.alert(
             "Şeritini koruyalım mı?",
             "Sabah ve akşam nazik bir hatırlatmayla şeritini büyütmene yardım edelim.",
             [
-              { text: "Daha sonra", style: "cancel" },
+              {
+                text: "Daha sonra",
+                style: "cancel",
+                onPress: () => track(EVENTS.PUSH_PROMPT_RESULT, { result: "later" }),
+              },
               {
                 text: "Tamam",
-                onPress: () => activateRemindersWithPrompt().catch(() => {}),
+                onPress: async () => {
+                  const r = await activateRemindersWithPrompt().catch(() => ({ success: false }));
+                  track(EVENTS.PUSH_PROMPT_RESULT, { result: r?.success ? "granted" : "denied" });
+                },
               },
             ]
           );

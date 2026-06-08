@@ -11,16 +11,21 @@ import Icon, { ICONS } from "../../../components/design/Icon";
 
 const MIN_QUIZ_WORDS = 4;
 
-export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
+/**
+ * 3 CTA: Çalış (öğren-SRS) / Quiz (test) / Oku (Lectio cümle akışı).
+ * Lectio kelime başına `example` gerektirir — yoksa disabled.
+ */
+export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, tint, lectioReadyCount = 0 }) {
   const { c } = useTheme();
   const quizDisabled = wordCount < MIN_QUIZ_WORDS;
+  const lectioDisabled = lectioReadyCount < 1;
 
   return (
     <View style={s.row}>
       <CtaButton
         iconPath={ICONS.lightbulb}
         title="Çalış"
-        subtitle="SRS · 5 sn"
+        subtitle="Öğren · SRS"
         accent={tint?.color || c.accent}
         onAccent={c.textOnAccent}
         onPress={onStudy}
@@ -30,7 +35,7 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
       <CtaButton
         iconPath={ICONS.grid}
         title="Quiz"
-        subtitle={quizDisabled ? `${MIN_QUIZ_WORDS}+ kelime` : "Çoktan seçmeli"}
+        subtitle={quizDisabled ? `${MIN_QUIZ_WORDS}+ gerek` : "Test et"}
         accent={c.cobalt}
         onAccent={c.text}
         outline
@@ -43,6 +48,23 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, tint }) {
         }}
         c={c}
         disabled={quizDisabled}
+      />
+      <CtaButton
+        iconPath={ICONS.books}
+        title="Oku"
+        subtitle={lectioDisabled ? "Cümle yok" : "Lectio"}
+        accent={c.lavender || c.cobalt}
+        onAccent={c.text}
+        outline
+        onPress={() => {
+          if (lectioDisabled) {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+          } else {
+            onLectio?.();
+          }
+        }}
+        c={c}
+        disabled={lectioDisabled}
       />
     </View>
   );

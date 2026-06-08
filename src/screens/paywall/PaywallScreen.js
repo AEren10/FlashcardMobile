@@ -24,6 +24,7 @@ import { usePremium } from "../../contexts/PremiumContext";
 import { getOfferings, purchase, restore } from "../../lib/purchases";
 import Icon, { ICONS } from "../../components/design/Icon";
 import PressableScale from "../../components/design/PressableScale";
+import { track, EVENTS } from "../../lib/track";
 
 const FEATURES = [
   { icon: ICONS.plus, text: "Sınırsız liste ve kelime" },
@@ -45,13 +46,14 @@ export default function PaywallScreen({ navigation, route }) {
   const [purchasing, setPurchasing] = useState(false);
 
   useEffect(() => {
+    track(EVENTS.PAYWALL_VIEW, { source });
     getOfferings()
       .then((o) => {
         setOfferings(o);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  }, []);
+  }, [source]);
 
   const handlePurchase = async () => {
     if (purchasing) return;
@@ -71,13 +73,18 @@ export default function PaywallScreen({ navigation, route }) {
     setPurchasing(true);
     const r = await purchase(pkg);
     setPurchasing(false);
-    if (r.cancelled) return;
+    if (r.cancelled) {
+      track(EVENTS.PAYWALL_PURCHASE, { source, package: selected, result: "cancelled" });
+      return;
+    }
     if (r.success) {
+      track(EVENTS.PAYWALL_PURCHASE, { source, package: selected, result: "success" });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await refresh();
       Alert.alert("🎉 Pro aktif!", "Tüm özellikler açıldı. Teşekkürler!");
       navigation.goBack();
     } else {
+      track(EVENTS.PAYWALL_PURCHASE, { source, package: selected, result: "failed", error: r.error });
       Alert.alert("Satın alma başarısız", r.error || "Lütfen tekrar dene.");
     }
   };

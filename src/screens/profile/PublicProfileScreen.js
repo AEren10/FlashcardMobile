@@ -3,7 +3,7 @@
  * route.params: { userId, displayName? }
  * Gösterir: avatar + display_name + bio + 3 stat + public listeleri
  */
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   FlatList,
+  Animated,
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -42,6 +44,24 @@ export default function PublicProfileScreen({ route }) {
   const [following, setFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followBusy, setFollowBusy] = useState(false);
+  const followPulse = useRef(new Animated.Value(1)).current;
+
+  const pulseRollback = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(followPulse, {
+        toValue: 1.18,
+        duration: 140,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.spring(followPulse, {
+        toValue: 1,
+        useNativeDriver: true,
+        friction: 4,
+        tension: 80,
+      }),
+    ]).start();
+  }, [followPulse]);
 
   useEffect(() => {
     if (!userId) {
@@ -60,9 +80,13 @@ export default function PublicProfileScreen({ route }) {
       if (p.success && p.data) {
         setProfile(p.data);
         setFollowerCount(p.data.follower_count ?? 0);
-      } else setError(p.error || "Profil yüklenemedi");
-      if (ls.success) setLists(ls.data);
-      setFollowing(!!isFollowing);
+        // Sadece profil başarılıysa lists set et — yoksa semantik confusion
+        if (ls.success) setLists(ls.data);
+        setFollowing(!!isFollowing);
+      } else {
+        setError(p.error || "Profil yüklenemedi");
+        setLists([]); // Profil yoksa lists de boş
+      }
       setLoading(false);
     })();
     return () => {
@@ -81,14 +105,15 @@ export default function PublicProfileScreen({ route }) {
     const res = await toggleFollow(userId);
     setFollowBusy(false);
     if (!res.success) {
-      // Rollback
+      // Rollback + pulse animasyon (kullanıcı dikkat etsin)
       setFollowing(wasFollowing);
       setFollowerCount((n) => n + (wasFollowing ? 1 : -1));
+      pulseRollback();
     } else {
       // Sync server count
       setFollowerCount(res.followerCount);
     }
-  }, [canFollow, followBusy, following, userId]);
+  }, [canFollow, followBusy, following, userId, pulseRollback]);
 
   const openList = useCallback(
     (item) => {
@@ -168,10 +193,10 @@ export default function PublicProfileScreen({ route }) {
 
           {/* Follower count + Follow CTA */}
           <View style={styles.followRow}>
-            <Text style={styles.followCount}>
+            <Animated.Text style={[styles.followCount, { transform: [{ scale: followPulse }] }]}>
               <Text style={styles.followCountNum}>{followerCount}</Text>{" "}
               <Text style={styles.followCountLbl}>takipçi</Text>
-            </Text>
+            </Animated.Text>
             {canFollow && (
               <Pressable
                 onPress={onFollowToggle}

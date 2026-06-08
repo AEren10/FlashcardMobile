@@ -21,6 +21,7 @@ import { useAchievements } from "../../contexts/AchievementsContext";
 import supabaseApiService from "../../services/supabaseApi";
 import { getStudyStats } from "../../supabase/progress";
 import { getMistakesList } from "../../supabase/mistakesList";
+import { getTopLikedLists } from "../../supabase/social";
 import { selectFavoriteWordIds } from "../../store/favoriteWordsSlice";
 import Icon, { ICONS } from "../../components/design/Icon";
 import CategoryCover from "../../components/design/CategoryCover";
@@ -66,6 +67,7 @@ export default function HomeScreen({ navigation }) {
   const [mistakesList, setMistakesList] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [randomReviewOpen, setRandomReviewOpen] = useState(false);
+  const [trendingLists, setTrendingLists] = useState([]);
   const favoriteWordIds = useSelector(selectFavoriteWordIds);
   const { syncStats: syncAchievements } = useAchievements();
   const loading = listsLoading || authLoading;
@@ -117,6 +119,19 @@ export default function HomeScreen({ navigation }) {
     }, [loadUserData])
   );
 
+  // Trending (en çok like alan) listeleri yükle — sosyal proof
+  useEffect(() => {
+    let mounted = true;
+    getTopLikedLists(8)
+      .then((r) => {
+        if (mounted && r.success) setTrendingLists(r.data || []);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const { profile } = useProfile();
   // Önce display_name (EditProfile'da yazdığı isim), yoksa email'den ilk parça
   const userName =
@@ -166,6 +181,14 @@ export default function HomeScreen({ navigation }) {
     knownCount: knownWordsCount,
     ready: !loading && !authLoading,
   });
+
+  // Modal flicker fix: bir modal dismiss olduğunda 320ms bekle, sonraki açılır
+  const [overlayLocked, setOverlayLocked] = useState(false);
+  const lockedDismiss = (fn) => () => {
+    fn?.();
+    setOverlayLocked(true);
+    setTimeout(() => setOverlayLocked(false), 320);
+  };
 
   const handleNudgeAccept = async () => {
     const action = await acceptNudge();
@@ -508,6 +531,21 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
 
+          {/* Trending — en çok beğenilen listeler (sosyal proof) */}
+          {trendingLists.length > 0 && (
+            <DiscoveryRow
+              title="🔥 Trend"
+              subtitle="Topluluğun en çok beğendiği listeler"
+              items={trendingLists}
+              accent={c.rose || c.coral}
+              loading={false}
+              onItemPress={openList}
+              onSeeAll={() =>
+                openExplorer("popular", { title: "Trend", accent: c.rose || c.coral })
+              }
+            />
+          )}
+
           {/* Popüler listeler */}
           <DiscoveryRow
             title="Popüler"
@@ -574,19 +612,19 @@ export default function HomeScreen({ navigation }) {
           Priority: milestone (en zengin) > achievement > nudge */}
       <MilestoneModal
         milestone={currentMilestone}
-        visible={!!currentMilestone}
-        onDismiss={dismissMilestone}
+        visible={!!currentMilestone && !overlayLocked}
+        onDismiss={lockedDismiss(dismissMilestone)}
       />
       <AchievementModal
-        visible={!currentMilestone && !!newBadge}
+        visible={!currentMilestone && !!newBadge && !overlayLocked}
         badge={newBadge}
-        onClose={dismissBadge}
+        onClose={lockedDismiss(dismissBadge)}
       />
       <NudgeModal
-        visible={!currentMilestone && !newBadge && !!nudge}
+        visible={!currentMilestone && !newBadge && !!nudge && !overlayLocked}
         nudge={nudge}
         onAccept={handleNudgeAccept}
-        onDismiss={dismissNudge}
+        onDismiss={lockedDismiss(dismissNudge)}
       />
     </View>
   );
@@ -672,6 +710,11 @@ function makeStyles(c) {
       paddingVertical: 12,
       paddingHorizontal: 24,
       marginTop: 18,
+      shadowColor: c.accent,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.32,
+      shadowRadius: 14,
+      elevation: 6,
     },
     primaryBtnTxt: {
       fontFamily: c.fontBodyBold,

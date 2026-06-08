@@ -27,6 +27,8 @@ import { initSentry, Sentry } from "./src/lib/sentry";
 import { startAutoFlush } from "./src/lib/offlineQueue";
 import { bootstrapReminders } from "./src/lib/notifications";
 import { getConsent, hasResolvedConsent } from "./src/lib/analyticsConsent";
+import { initTracking, track, EVENTS } from "./src/lib/track";
+import { registerExpoPushToken, touchLastActive } from "./src/lib/pushToken";
 // expo-av Audio mode — iOS silent mode'unda TTS susuyordu (bilinen sorun) → bypass
 let _audioConfigured = false;
 async function configureAudioModeOnce() {
@@ -92,13 +94,27 @@ function App() {
         return;
       }
       const allow = await getConsent();
-      if (allow) initSentry();
+      if (allow) {
+        initSentry();
+        await initTracking();
+        track(EVENTS.APP_OPEN);
+      }
+      // Comeback push altyapısı: her açılışta last_active_at + push token tazele
+      // (consent'ten bağımsız — auth varsa çalışır, yoksa no-op)
+      touchLastActive().catch(() => {});
+      registerExpoPushToken().catch(() => {});
     })();
   }, []);
 
-  const handleConsentResolved = (allow) => {
+  const handleConsentResolved = async (allow) => {
     setConsentVisible(false);
-    if (allow) initSentry();
+    if (allow) {
+      initSentry();
+      await initTracking();
+      track(EVENTS.APP_OPEN);
+    }
+    touchLastActive().catch(() => {});
+    registerExpoPushToken().catch(() => {});
   };
 
   if (!fontsLoaded) {

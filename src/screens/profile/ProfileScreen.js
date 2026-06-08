@@ -12,9 +12,15 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProfile } from "../../contexts/ProfileContext";
+import { useAchievements } from "../../contexts/AchievementsContext";
 import { getStudyStats } from "../../supabase/progress";
+import { getLists } from "../../supabase/database";
 import Icon, { ICONS } from "../../components/design/Icon";
+import StaggerEnter from "../../components/design/StaggerEnter";
+import CategoryCover from "../../components/design/CategoryCover";
 import useUserLevel from "../../hooks/useUserLevel";
+import { getStreakBadge, getWordsBadge } from "../../lib/badges";
+import { getAchievementByKey } from "../../lib/achievements";
 
 function inferLevel(words) {
   if (words < 100) return "A1 BEGINNER";
@@ -29,8 +35,11 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const { user, signOut, getUserEmail, isGuestUser, deleteAccount } = useAuth();
   const { profile } = useProfile();
+  const { unlocked } = useAchievements();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
   const [statsError, setStatsError] = useState(false);
+  const [publicLists, setPublicLists] = useState([]);
+  const [listsLoading, setListsLoading] = useState(true);
 
   const appearanceLabel = () => {
     if (preference === "system") return "Otomatik";
@@ -53,6 +62,29 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     loadStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadPublicLists = useCallback(async () => {
+    if (isGuestUser()) {
+      setListsLoading(false);
+      return;
+    }
+    setListsLoading(true);
+    try {
+      const r = await getLists();
+      const all = r?.data || [];
+      const pub = all.filter((l) => l.is_public === true);
+      setPublicLists(pub);
+    } catch {
+      setPublicLists([]);
+    } finally {
+      setListsLoading(false);
+    }
+  }, [isGuestUser]);
+
+  useEffect(() => {
+    loadPublicLists();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,6 +146,22 @@ export default function ProfileScreen() {
 
   const _legacyLevel = inferLevel(stats.totalWords);
   const userLevel = useUserLevel(stats.totalWords);
+
+  // Rozet hesapları
+  const streakBadge = useMemo(() => getStreakBadge(stats.streakDays), [stats.streakDays]);
+  const wordsBadge = useMemo(() => getWordsBadge(stats.totalWords), [stats.totalWords]);
+
+  // AchievementsContext'ten kilidi açılmış son 3 rozet
+  const recentUnlocks = useMemo(() => {
+    if (!unlocked || unlocked.size === 0) return [];
+    return Array.from(unlocked)
+      .map((k) => getAchievementByKey(k))
+      .filter(Boolean)
+      .slice(-3)
+      .reverse();
+  }, [unlocked]);
+
+  const visibleLists = useMemo(() => publicLists.slice(0, 6), [publicLists]);
 
   return (
     <View style={s.root}>
@@ -267,6 +315,150 @@ export default function ProfileScreen() {
             </View>
           </Pressable>
 
+          {/* SECTION A — Rozetlerim */}
+          <StaggerEnter index={0}>
+            <View style={s.sectionHead}>
+              <Text style={s.sectionTitle}>Rozetlerim</Text>
+              <Pressable
+                onPress={() => navigation.navigate("Achievements")}
+                hitSlop={8}
+                accessibilityLabel="Tüm rozetler"
+              >
+                <Text style={s.sectionLink}>Tümü →</Text>
+              </Pressable>
+            </View>
+            <View style={s.badgeRow}>
+              <BadgeCard
+                title={streakBadge.current?.label || "Kıvılcım"}
+                iconPath={streakBadge.current?.icon || ICONS.sparkle}
+                color={streakBadge.current?.color || c.textMuted}
+                value={`${stats.streakDays} gün üst üste`}
+                hint={
+                  streakBadge.next
+                    ? `${streakBadge.next.threshold - stats.streakDays} güne ${streakBadge.next.label}`
+                    : "Tüm streak rozetleri tamam!"
+                }
+                locked={!streakBadge.current}
+                onPress={() => navigation.navigate("Achievements")}
+                c={c}
+                s={s}
+              />
+              <BadgeCard
+                title={wordsBadge.current?.label || "Filiz"}
+                iconPath={wordsBadge.current?.icon || ICONS.leaf}
+                color={wordsBadge.current?.color || c.textMuted}
+                value={`${stats.totalWords} kelime`}
+                hint={
+                  wordsBadge.next
+                    ? `${wordsBadge.next.threshold - stats.totalWords} kelime'ye ${wordsBadge.next.label}`
+                    : "Tüm kelime rozetleri tamam!"
+                }
+                locked={!wordsBadge.current}
+                onPress={() => navigation.navigate("Achievements")}
+                c={c}
+                s={s}
+              />
+            </View>
+            {recentUnlocks.length > 0 && (
+              <View style={s.recentBadges}>
+                {recentUnlocks.map((a, i) => (
+                  <Pressable
+                    key={a.key}
+                    onPress={() => navigation.navigate("Achievements")}
+                    style={({ pressed }) => [
+                      s.recentBadgePill,
+                      {
+                        borderColor: c.border,
+                        backgroundColor: c.bgElevated,
+                        transform: [{ scale: pressed ? 0.96 : 1 }],
+                      },
+                    ]}
+                  >
+                    <Icon d={a.icon} size={14} stroke={c.accent} sw={1.8} />
+                    <Text style={[s.recentBadgeTxt, { color: c.textPrimary }]}>{a.label}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </StaggerEnter>
+
+          {/* SECTION B — Oluşturduğum Listeler */}
+          <StaggerEnter index={1}>
+            <View style={s.sectionHead}>
+              <Text style={s.sectionTitle}>Oluşturduğum Listeler</Text>
+              {publicLists.length > 6 && (
+                <Pressable
+                  onPress={() => navigation.navigate("MyLists")}
+                  hitSlop={8}
+                  accessibilityLabel="Tüm listeler"
+                >
+                  <Text style={s.sectionLink}>Tümünü gör →</Text>
+                </Pressable>
+              )}
+            </View>
+            {listsLoading ? (
+              <View style={s.listsEmpty}>
+                <Text style={s.listsEmptyTxt}>Yükleniyor…</Text>
+              </View>
+            ) : publicLists.length === 0 ? (
+              <Pressable
+                onPress={() => navigation.navigate("MyLists")}
+                style={({ pressed }) => [
+                  s.listsEmpty,
+                  { transform: [{ scale: pressed ? 0.99 : 1 }] },
+                ]}
+                accessibilityLabel="Liste oluştur"
+              >
+                <Icon d={ICONS.plus} size={20} stroke={c.textMuted} sw={1.8} />
+                <Text style={s.listsEmptyTxt}>Henüz public listen yok</Text>
+                <Text style={s.listsEmptyHint}>Liste oluştur ve paylaş →</Text>
+              </Pressable>
+            ) : (
+              <View style={s.listsGrid}>
+                {visibleLists.map((item, i) => (
+                  <StaggerEnter key={String(item.id)} index={i} delay={50}>
+                    <Pressable
+                      onPress={() =>
+                        navigation.navigate("FlashcardDetail", {
+                          listId: item.id,
+                          listTitle: item.title,
+                          listLevel: item.level,
+                          listIsPublic: item.is_public,
+                        })
+                      }
+                      style={({ pressed }) => [
+                        s.listCard,
+                        { transform: [{ scale: pressed ? 0.98 : 1 }] },
+                      ]}
+                    >
+                      <CategoryCover
+                        difficulty={item.level}
+                        imageUrl={item.image_url}
+                        height={68}
+                        showLabel={false}
+                      />
+                      <View style={s.listCardBody}>
+                        <Text style={s.listCardTitle} numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        <View style={s.listCardMeta}>
+                          <Text style={s.listCardCount}>
+                            {item.word_count ?? 0} kelime
+                          </Text>
+                          {item.level && (
+                            <View style={s.listCardChip}>
+                              <Text style={s.listCardChipTxt}>{item.level}</Text>
+                            </View>
+                          )}
+                        </View>
+                      </View>
+                    </Pressable>
+                  </StaggerEnter>
+                ))}
+              </View>
+            )}
+          </StaggerEnter>
+
           {/* Quick actions — renkli icon'larla */}
           <View style={s.list}>
             <Row
@@ -371,6 +563,39 @@ function Row({ icon, iconPath, iconColor, label, detail, onPress, c, s, last }) 
         </Text>
       )}
       <Icon d={ICONS.arrow} size={16} stroke={c.textMuted} sw={2} />
+    </Pressable>
+  );
+}
+
+function BadgeCard({ title, iconPath, color, value, hint, locked, onPress, c, s }) {
+  const bg = locked ? c.textMuted + "12" : color + "22";
+  const border = locked ? c.border : color + "55";
+  const accent = locked ? c.textMuted : color;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [
+        s.badgeCard,
+        {
+          backgroundColor: bg,
+          borderColor: border,
+          transform: [{ scale: pressed ? 0.98 : 1 }],
+        },
+      ]}
+      accessibilityLabel={title}
+    >
+      <View style={[s.badgeIconBox, { backgroundColor: accent + "33", borderColor: accent + "66" }]}>
+        <Icon d={iconPath} size={24} stroke={accent} fill={accent + "44"} sw={1.8} />
+      </View>
+      <Text style={[s.badgeTitle, { color: accent, fontFamily: c.fontBodyBold }]} numberOfLines={1}>
+        {locked ? "Kilitli" : title}
+      </Text>
+      <Text style={[s.badgeValue, { color: c.textPrimary, fontFamily: c.fontBodySemi }]} numberOfLines={1}>
+        {value}
+      </Text>
+      <Text style={[s.badgeHint, { color: c.textSec, fontFamily: c.fontBody }]} numberOfLines={2}>
+        {hint}
+      </Text>
     </Pressable>
   );
 }
@@ -516,5 +741,32 @@ function makeStyles(c) {
       paddingHorizontal: 32,
     },
     primaryBtnTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: 15 },
+
+    // Sections (Rozetlerim + Listeler)
+    sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 18, marginBottom: 10, paddingHorizontal: 2 },
+    sectionTitle: { fontFamily: c.fontBodyBold, fontSize: 15, color: c.textPrimary, letterSpacing: 0.2 },
+    sectionLink: { fontFamily: c.fontBodySemi, fontSize: 12, color: c.accent },
+    // Badge cards (A)
+    badgeRow: { flexDirection: "row", gap: 12 },
+    badgeCard: { flex: 1, borderRadius: 16, borderWidth: 1, padding: 14, alignItems: "flex-start", minHeight: 140 },
+    badgeIconBox: { width: 42, height: 42, borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 10 },
+    badgeTitle: { fontSize: 14, letterSpacing: 0.2, marginBottom: 4 },
+    badgeValue: { fontSize: 13, marginBottom: 6 },
+    badgeHint: { fontSize: 11, lineHeight: 14 },
+    recentBadges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
+    recentBadgePill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1 },
+    recentBadgeTxt: { fontFamily: c.fontBodySemi, fontSize: 11 },
+    // Lists grid (B)
+    listsEmpty: { borderRadius: 16, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
+    listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: 13, color: c.textSec, marginTop: 4 },
+    listsEmptyHint: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted },
+    listsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+    listCard: { width: "48%", borderRadius: 14, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated, overflow: "hidden" },
+    listCardBody: { padding: 10, gap: 6 },
+    listCardTitle: { fontFamily: c.fontBodyBold, fontSize: 13, color: c.textPrimary },
+    listCardMeta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
+    listCardCount: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec },
+    listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
+    listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: 9.5, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
   });
 }

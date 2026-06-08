@@ -13,6 +13,8 @@ import { useToast } from "../../contexts/ToastContext";
 import EmptyState from "../../components/EmptyState";
 import { useAuth } from "../../contexts/AuthContext";
 import { getListWords } from "../../supabase/database";
+import { safeRecordReview } from "../../lib/offlineQueue";
+import { GRADE } from "../../lib/srs";
 import supabaseApiService from "../../services/supabaseApi";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { toggleFavorite, selectIsFavorite } from "../../store/favoritesSlice";
@@ -49,12 +51,14 @@ export default function FlashcardDetailScreen({ route, navigation }) {
       const res = await getListWords(listId);
       setWords(res.data ?? []);
     } catch {
-      setError("Kelimeler yüklenirken bir hata oluştu.");
+      const msg = "Kelimeler yüklenirken bir hata oluştu.";
+      setError(msg);
       setWords([]);
+      toast?.show?.({ message: msg, type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [listId]);
+  }, [listId, toast]);
 
   useEffect(() => {
     if (paramIsOwner === undefined && isAuthenticated()) {
@@ -263,16 +267,25 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           setCurrentIndex={setCurrentIndex}
           onComplete={handleComplete}
           listId={listId}
+          onKnowCurrent={(w) => {
+            // Mini-SRS: kelimeyi graduate et (21 gün sonra döner)
+            safeRecordReview(w.id, GRADE.GRADUATE).catch(() => {});
+            toast?.show?.({ message: `✓ "${w.word}" biliyorsun olarak işaretlendi`, type: "success" });
+          }}
         />
 
         <FlashcardCTAs
           wordCount={words.length}
+          lectioReadyCount={words.filter((w) => w.example && w.example.trim()).length}
           tint={tint}
           onStudy={() =>
             navigation.navigate("Study", { listId, listTitle: title, listLevel })
           }
           onQuiz={() =>
             navigation.navigate("Quiz", { listId, listTitle: title, listLevel })
+          }
+          onLectio={() =>
+            navigation.navigate("Lectio", { listId, listTitle: title })
           }
         />
       </SafeAreaView>

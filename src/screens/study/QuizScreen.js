@@ -22,6 +22,7 @@ import * as Speech from "expo-speech";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getListWords } from "../../supabase/database";
 import { startSession } from "../../supabase/progress";
+import { track, EVENTS } from "../../lib/track";
 import { safeRecordReview, safeFinishSession } from "../../lib/offlineQueue";
 import { GRADE } from "../../lib/srs";
 import { shuffle } from "../../utils/shuffle";
@@ -38,6 +39,7 @@ import {
   bumpMistakesStreak,
   resetMistakesStreak,
 } from "../../supabase/mistakesList";
+import { useToast } from "../../contexts/ToastContext";
 
 const MISTAKES_MODAL_THRESHOLD = 5;
 const TIME_LIMIT = 10; // saniye
@@ -59,6 +61,7 @@ export default function QuizScreen({ route, navigation }) {
   const [timed, setTimed] = useState(timedParam === true);
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
+  const toast = useToast();
 
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +130,7 @@ export default function QuizScreen({ route, navigation }) {
     setWords(shuffle(finalList));
     setLoading(false);
     sessionRef.current = await startSession({ list_id: listId ?? null, mode: "quiz" });
+    track(EVENTS.STUDY_START, { mode: "quiz", quizMode: mode, listId: listId ?? null, count: finalList.length });
   }, [listId, presetWords, mode]);
 
   useEffect(() => {
@@ -191,7 +195,13 @@ export default function QuizScreen({ route, navigation }) {
   // Unmount + race guard'lar
   const unmountedRef = useRef(false);
   const pickingRef = useRef(false);
-  useEffect(() => () => { unmountedRef.current = true; }, []);
+  const advanceTimerRef = useRef(null);
+  const mistakesTimerRef = useRef(null);
+  useEffect(() => () => {
+    unmountedRef.current = true;
+    if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
+    if (mistakesTimerRef.current) clearTimeout(mistakesTimerRef.current);
+  }, []);
 
   const pick = async (opt, i) => {
     // Double-tap race fix: setState async, ref senkron — ref ile lock
@@ -218,29 +228,51 @@ export default function QuizScreen({ route, navigation }) {
     }
 
     const wait = isCorrect ? 650 : 1250;
-    setTimeout(async () => {
+    advanceTimerRef.current = setTimeout(async () => {
+      advanceTimerRef.current = null;
       if (unmountedRef.current) return; // unmount → state update yapma
       if (index + 1 >= words.length) {
         const finalCorrect = isCorrect ? correct + 1 : correct;
         const duration = Math.round((Date.now() - startedAt.current) / 1000);
+        if (unmountedRef.current) return;
         setFinalDuration(duration);
         await safeFinishSession(sessionRef.current?.id, {
           total_words: words.length,
           correct: finalCorrect,
           duration_sec: duration,
         });
+        if (unmountedRef.current) return;
         setDone(true);
+        track(EVENTS.QUIZ_FINISH, {
+          mode: "quiz",
+          quizMode: mode,
+          listId: listId ?? null,
+          total: words.length,
+          correct: finalCorrect,
+          duration_sec: duration,
+          accuracy: words.length ? Math.round((finalCorrect / words.length) * 100) : 0,
+        });
         maybeRequestReview();
 
         // Yanlışları mistakes listesine push et
         const allWrongIds = isCorrect ? wrongIds : [...wrongIds, current.id];
         if (allWrongIds.length > 0) {
           const res = await addToMistakesList(allWrongIds);
+          if (unmountedRef.current) return;
           if (res.success && res.addedCount > 0) {
             setMistakesAdded(res.addedCount);
             setMistakesListId(res.listId);
+            // Her zaman toast — kullanıcı sessizce eklendiğini bilmesin
+            toast?.show?.({
+              message: `${res.addedCount} kelime Hatalar listene eklendi`,
+              type: "info",
+              duration: 3500,
+            });
             if (res.addedCount >= MISTAKES_MODAL_THRESHOLD) {
-              setTimeout(() => setShowMistakesModal(true), 600);
+              mistakesTimerRef.current = setTimeout(() => {
+                mistakesTimerRef.current = null;
+                if (!unmountedRef.current) setShowMistakesModal(true);
+              }, 600);
             }
           }
         }
