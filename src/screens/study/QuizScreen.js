@@ -182,14 +182,29 @@ export default function QuizScreen({ route, navigation }) {
     return shuffle([isBlank ? current.word : current.meaning, ...distractors]);
   }, [current, words, isBlank]);
 
-  // Boşluk doldurma için cümle üret: kelimeyi "_____" ile değiştir
+  // Boşluk doldurma için cümle üret: kelimeyi "_____" ile değiştir.
+  // Safety: DB'de "theory2" gibi suffix kalmış olabilir → suffix strip + base word fallback
+  // Ayrıca word stemleri (theory/theories, run/running) için kök eşleştirme dene
   const blankedSentence = useMemo(() => {
     if (!isBlank || !current?.example) return null;
+    const raw = current.word || "";
+    const baseWord = raw.replace(/\d+$/, "").trim(); // suffix kaldır
+    if (!baseWord) return current.example;
     try {
-      const regex = new RegExp(`\\b${current.word}\\b`, "gi");
-      return current.example.replace(regex, "_____");
+      // Önce tam kelime, sonra base (suffix'siz). En son stem (ilk 5 harf + \w*) — son çare
+      const escaped = baseWord.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      let regex = new RegExp(`\\b${escaped}\\b`, "gi");
+      let result = current.example.replace(regex, "_____");
+      if (result === current.example && baseWord.length >= 4) {
+        // Eşleşme yok → stem fallback (kelime ilk 4 harf + olası ekler: theory → theor + ies/y)
+        const stem = baseWord.slice(0, Math.max(4, Math.floor(baseWord.length * 0.7)));
+        const stemEscaped = stem.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        regex = new RegExp(`\\b${stemEscaped}\\w*\\b`, "gi");
+        result = current.example.replace(regex, "_____");
+      }
+      return result;
     } catch {
-      return current.example.replace(current.word, "_____");
+      return current.example.replace(baseWord, "_____");
     }
   }, [current, isBlank]);
 

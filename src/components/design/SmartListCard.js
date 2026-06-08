@@ -105,10 +105,17 @@ export default function SmartListCard({
       onPress={onPress}
       onPressIn={onPressIn}
       onPressOut={onPressOut}
-      style={[s.wrap, { borderColor: fillColor + "55" }]}
+      style={[s.wrap, {
+        borderColor: fillColor + "88",
+        shadowColor: fillColor,
+        shadowOpacity: 0.35,
+        shadowRadius: 14,
+        shadowOffset: { width: 0, height: 5 },
+        elevation: 5,
+      }]}
     >
       <LinearGradient
-        colors={[fillColor + "1A", "transparent"]}
+        colors={[fillColor + "33", fillColor + "0F"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}

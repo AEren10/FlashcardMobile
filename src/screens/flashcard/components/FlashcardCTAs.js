@@ -7,6 +7,7 @@ import { View, Text, Pressable, Animated, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useToast } from "../../../contexts/ToastContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
 
 const MIN_QUIZ_WORDS = 4;
@@ -22,6 +23,7 @@ const MIN_BLANK_WORDS = 4;
  */
 export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onBlank, tint, blankReadyCount = 0 }) {
   const { c } = useTheme();
+  const toast = useToast();
   const quizDisabled = wordCount < MIN_QUIZ_WORDS;
   const blankDisabled = blankReadyCount < MIN_BLANK_WORDS;
 
@@ -43,6 +45,10 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onBlank, tin
         onPress={() => {
           if (quizDisabled) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            toast?.show?.({
+              message: `Quiz için en az ${MIN_QUIZ_WORDS} kelime gerek (${wordCount} var)`,
+              type: "info",
+            });
           } else {
             onQuiz?.();
           }
@@ -57,6 +63,10 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onBlank, tin
         onPress={() => {
           if (blankDisabled) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+            toast?.show?.({
+              message: `Boşluk doldurma için en az ${MIN_BLANK_WORDS} cümleli kelime gerek (${blankReadyCount} var)`,
+              type: "info",
+            });
           } else {
             onBlank?.();
           }

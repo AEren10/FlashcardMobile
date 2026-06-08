@@ -8,6 +8,45 @@
  *   const c = tokens(isDark);              // light/dark seçimli
  */
 
+// ─────────────────────────────────────────────
+// FOUNDATION TOKENS — fontSize / spacing / shadow / radius (yeni)
+// Hardcoded değerler legacy olarak duruyor, yeni kod bunları kullanmalı
+// ─────────────────────────────────────────────
+export const fontSize = {
+  xs: 10,    // micro label, badge
+  sm: 12,    // caption, secondary text
+  md: 14,    // body
+  lg: 16,    // emphasized body
+  xl: 20,    // section title
+  "2xl": 26, // hero subhead
+  "3xl": 34, // hero title
+  "4xl": 52, // FlipCard word
+};
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  "2xl": 24,
+  "3xl": 32,
+};
+
+export const elevation = {
+  subtle: { opacity: 0.15, radius: 8, offsetY: 2, level: 2 },
+  card:   { opacity: 0.30, radius: 12, offsetY: 4, level: 4 },
+  modal:  { opacity: 0.45, radius: 18, offsetY: 8, level: 8 },
+  overlay:{ opacity: 0.55, radius: 24, offsetY: 12, level: 12 },
+};
+
+export const letterSpacing = {
+  tight: 0,
+  normal: 0.2,
+  wide: 0.4,
+  extraWide: 1.4, // uppercase only
+};
+
 const dark = {
   // Surfaces — sıcak stüdyo, gece kağıt dokusu hissi
   bg: "#1A1814",

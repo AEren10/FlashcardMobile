@@ -359,17 +359,9 @@ export default function HomeScreen({ navigation }) {
             />
           )}
 
-          {/* Normal / Sınav modu toggle */}
-          <ModeSegment
-            mode="normal"
-            examCount={examCount}
-            onChange={(next) => {
-              if (next === "exam") {
-                AsyncStorage.setItem("@fc:homeMode", "exam").catch(() => {});
-                navigation.replace("ExamHome");
-              }
-            }}
-          />
+          {/* ModeSegment (Normal/Sınav toggle) askıya alındı — kullanıcı tasarım eleştirisinde
+              "üst kalabalık" dedi. Exam modu Profile menüsünden veya ayrı bir entry'den
+              erişilebilir hale getirilebilir. ModeSegment component kalıyor. */}
 
           {/* Challenge hero card */}
           <PressableScale onPress={startChallenge} style={s.challengeCard}>
@@ -409,17 +401,22 @@ export default function HomeScreen({ navigation }) {
             />
           )}
 
-          {/* Daily goal chip — bugünün hedefi (10 kelime), gece 24:00 reset */}
+          {/* Daily goal chip — mint glow (canlı renk, accent overload'dan kaçınma) */}
           {!loading && isAuthenticated() && (
             <View
               style={{
                 marginTop: 14,
                 marginBottom: 4,
-                padding: 14,
-                borderRadius: 14,
-                backgroundColor: daily.completed ? c.success + "1A" : c.bgElevated,
-                borderWidth: 1,
-                borderColor: daily.completed ? c.success + "AA" : c.border,
+                padding: 16,
+                borderRadius: 16,
+                backgroundColor: daily.completed ? c.success + "26" : (c.mint || c.cobalt) + "26",
+                borderWidth: 1.5,
+                borderColor: daily.completed ? c.success + "AA" : (c.mint || c.cobalt) + "AA",
+                shadowColor: daily.completed ? c.success : (c.mint || c.cobalt),
+                shadowOpacity: 0.45,
+                shadowRadius: 16,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 6,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
@@ -433,7 +430,7 @@ export default function HomeScreen({ navigation }) {
                   </Text>
                 </View>
                 <Text style={{
-                  color: daily.completed ? c.success : c.accent,
+                  color: daily.completed ? c.success : (c.mint || c.cobalt),
                   fontFamily: c.fontBodyBold,
                   fontSize: 16,
                 }}>
@@ -445,7 +442,7 @@ export default function HomeScreen({ navigation }) {
                 <View style={{
                   width: `${daily.pct}%`,
                   height: "100%",
-                  backgroundColor: daily.completed ? c.success : c.accent,
+                  backgroundColor: daily.completed ? c.success : (c.mint || c.cobalt),
                   borderRadius: 99,
                 }} />
               </View>
@@ -555,20 +552,8 @@ export default function HomeScreen({ navigation }) {
                 />
               )}
 
-              {favoriteWordIds.length > 0 && (
-                <SmartListCard
-                  iconPath={ICONS.bookmark}
-                  title="Favori Kelimelerim"
-                  subtitle="Kart üstündeki yer iminden eklediklerin."
-                  count={favoriteWordIds.length}
-                  accent={c.success}
-                  onPress={() =>
-                    navigation.getParent()?.navigate("MyLists", {
-                      screen: "FavoriteWords",
-                    })
-                  }
-                />
-              )}
+              {/* Favori Kelimelerim SmartCard askıya alındı — MyLists "Favoriler" sekmesinde
+                  ve sticky bookmark butonlarında zaten erişilebilir. HomeScreen sadelik için çıkarıldı. */}
               {mistakesList && (
                 <SmartListCard
                   iconPath={ICONS.target}
@@ -639,18 +624,8 @@ export default function HomeScreen({ navigation }) {
             />
           ))}
 
-          {/* Yeni eklendi */}
-          <DiscoveryRow
-            title="🆕 Yeni Eklendi"
-            subtitle="Son hazır liste paketleri"
-            items={newestLists}
-            accent={c.cobalt}
-            loading={loading}
-            onItemPress={openList}
-            onSeeAll={() =>
-              openExplorer("newest", { title: "🆕 Yeni Eklendi", accent: c.cobalt })
-            }
-          />
+          {/* "Yeni Eklendi" row askıya alındı — Trend + Popüler zaten yeni'leri kapsıyor.
+              "Tüm yeni" istek olursa Explore'da newest filter zaten var. */}
         </ScrollView>
       </SafeAreaView>
 

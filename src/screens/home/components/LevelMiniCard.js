@@ -33,20 +33,27 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
         Haptics.selectionAsync();
         onPress?.();
       }}
-      style={[s.wrap, { borderColor: c.borderAccent }]}
+      style={[s.wrap, {
+        borderColor: c.cobalt + "66",
+        shadowColor: c.cobalt,
+        shadowOpacity: 0.4,
+        shadowRadius: 18,
+        shadowOffset: { width: 0, height: 6 },
+        elevation: 6,
+      }]}
       scaleDown={0.985}
       accessibilityLabel="Yol haritam"
     >
       <LinearGradient
-        colors={[c.bgElevated, c.bgSurface]}
+        colors={[c.cobalt + "20", c.bgSurface]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
       />
-      {/* Glow blob — challenge card'ın aynısı ama farklı pozisyon/renk */}
-      <View style={[s.glow, { backgroundColor: c.cobaltGlow }]} />
+      {/* Glow blob — cobalt güçlü */}
+      <View style={[s.glow, { backgroundColor: c.cobalt + "44" }]} />
       <LinearGradient
-        colors={["rgba(255,255,255,0.06)", "transparent"]}
+        colors={["rgba(255,255,255,0.10)", "transparent"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 0.4 }}
         style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
@@ -54,30 +61,37 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
       />
 
       <View style={s.row}>
-        <View style={[s.badge, { backgroundColor: c.accentGlow, borderColor: c.borderAccent }]}>
-          <Icon d={ICONS.star} size={18} stroke={c.accent} fill={c.accentGlow} sw={1.6} />
+        <View style={[s.badge, {
+          backgroundColor: c.cobalt + "33",
+          borderColor: c.cobalt + "88",
+          shadowColor: c.cobalt,
+          shadowOpacity: 0.35,
+          shadowRadius: 8,
+          shadowOffset: { width: 0, height: 2 },
+        }]}>
+          <Icon d={ICONS.star} size={18} stroke={c.cobalt} fill={c.cobalt + "55"} sw={1.8} />
         </View>
         <View style={{ flex: 1 }}>
           <View style={s.titleRow}>
-            <Text style={[s.lvChip, { color: c.accent, backgroundColor: c.accentGlow, fontFamily: c.fontBodyBold }]}>
+            <Text style={[s.lvChip, { color: c.cobalt, backgroundColor: c.cobalt + "22", fontFamily: c.fontBodyBold }]}>
               LV {level.lv}
             </Text>
             <Text style={[s.titleTxt, { color: c.textPrimary, fontFamily: c.fontBodySemi }]}>
               {level.title}
             </Text>
           </View>
-          <View style={[s.track, { backgroundColor: c.bgBase }]}>
+          <View style={[s.track, { backgroundColor: c.cobalt + "1A" }]}>
             <Animated.View
               style={[s.fill, {
                 width: "100%",
-                backgroundColor: c.accent,
+                backgroundColor: c.cobalt,
                 transform: [{ scaleX: fill }],
                 transformOrigin: "left",
               }]}
             />
           </View>
         </View>
-        <Icon d={ICONS.arrow} size={14} stroke={c.textMuted} sw={2} />
+        <Icon d={ICONS.arrow} size={14} stroke={c.cobalt} sw={2.2} />
       </View>
 
       {level.lv < level.nextMilestone.lv && (
@@ -91,10 +105,10 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
 
 const s = StyleSheet.create({
   wrap: {
-    marginTop: 16,
+    marginTop: 12,
     borderRadius: 18,
-    borderWidth: 1,
-    padding: 16,
+    borderWidth: 1.5,
+    padding: 14,
     overflow: "hidden",
   },
   glow: {
