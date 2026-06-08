@@ -430,24 +430,13 @@ export default function ProfileScreen() {
                   <StaggerEnter key={String(item.id)} index={i} delay={50}>
                     <Pressable
                       onPress={() =>
-                        // ProfileStack'te FlashcardDetail YOK — parent tab üzerinden MyListsStack'e geç
-                        navigation.getParent()?.navigate("MyLists", {
-                          screen: "FlashcardDetail",
-                          params: {
-                            listId: item.id,
-                            listTitle: item.title,
-                            listLevel: item.level,
-                            listIsPublic: item.is_public,
-                          },
-                        }) ??
-                        navigation.navigate("MyLists", {
-                          screen: "FlashcardDetail",
-                          params: {
-                            listId: item.id,
-                            listTitle: item.title,
-                            listLevel: item.level,
-                            listIsPublic: item.is_public,
-                          },
+                        // ProfileStack'e FlashcardDetail eklendi (AppNavigator) →
+                        // Profile'da kalır, tab değişmez, geri = Profile
+                        navigation.navigate("FlashcardDetail", {
+                          listId: item.id,
+                          listTitle: item.title,
+                          listLevel: item.level,
+                          listIsPublic: item.is_public,
                         })
                       }
                       style={({ pressed }) => [

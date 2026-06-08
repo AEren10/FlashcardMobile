@@ -323,6 +323,28 @@ function ProfileStackNavigator() {
         component={PublicProfileScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
+      {/* "Oluşturduğum Listeler" tıklanınca Profile'da kalıp liste detayı aç —
+          NAVIGATE crash fix (önceden ProfileStack'te FlashcardDetail yoktu) */}
+      <ProfileStack.Screen
+        name="FlashcardDetail"
+        component={FlashcardDetailScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Study"
+        component={StudyScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Quiz"
+        component={QuizScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="Lectio"
+        component={LectioScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
       <ProfileStack.Screen
         name="EditProfile"
         component={EditProfileScreen}
