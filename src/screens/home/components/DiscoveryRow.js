@@ -106,13 +106,15 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
         Haptics.selectionAsync();
         onPress();
       }}
-      style={[s.card, { backgroundColor: c.bgElevated, borderColor: c.border }]}
+      // Bg ve border kaldırıldı — Devam Et card'larıyla tutarlı, beyaz container göze batmasın
+      // CategoryCover + text yeterli (image kart hissi zaten verir)
+      style={s.card}
       scaleDown={0.96}
     >
       <View style={{ borderRadius: 13, overflow: "hidden" }}>
         <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={100} />
       </View>
-      <View style={{ padding: 12 }}>
+      <View style={{ paddingTop: 10, paddingHorizontal: 2 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text
             numberOfLines={1}
@@ -154,8 +156,6 @@ const s = StyleSheet.create({
   },
   card: {
     width: 192,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
+    // borderRadius/borderWidth kaldırıldı — Devam Et tarzı sade, beyaz container yok
   },
 });

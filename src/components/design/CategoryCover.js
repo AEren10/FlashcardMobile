@@ -40,8 +40,10 @@ export default function CategoryCover({
             style={StyleSheet.absoluteFill}
             resizeMode="cover"
           />
+          {/* Image üstünde sade overlay — %CC (80%) çok parlıyordu, %66 (40%) yaptık.
+              Chip okunaklı kalır, image rengi parlamadan baskın olmaz */}
           <LinearGradient
-            colors={["rgba(0,0,0,0.05)", "rgba(0,0,0,0.35)", d + "CC"]}
+            colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.18)", d + "66"]}
             locations={[0, 0.55, 1]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
