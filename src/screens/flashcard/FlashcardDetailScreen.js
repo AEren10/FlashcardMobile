@@ -2,7 +2,7 @@
  * FlashcardDetailScreen — orchestrator.
  * Alt parçalar `./components/` altında.
  */
-import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { View, StyleSheet, Alert, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
@@ -42,19 +42,20 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   const [isOwner, setIsOwner] = useState(paramIsOwner ?? false);
   const [rating, setRating] = useState({ avg: 0, count: 0, userRating: null });
 
-  const fetchWords = useCallback(async () => {
+  // silent: skeleton flash önleme (Quiz/Study'den geri dönerken background refresh)
+  const fetchWords = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       const res = await getListWords(listId);
       setWords(res.data ?? []);
     } catch {
       const msg = "Kelimeler yüklenirken bir hata oluştu.";
       setError(msg);
-      setWords([]);
+      if (!silent) setWords([]);
       toast?.show?.({ message: msg, type: "error" });
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [listId, toast]);
 
@@ -67,9 +68,17 @@ export default function FlashcardDetailScreen({ route, navigation }) {
     }
   }, [listId, paramIsOwner, isAuthenticated]);
 
+  // Focus geldikçe fetch — ama words zaten yüklüyse SILENT refresh (skeleton flash YOK)
+  // Quiz/Study/Boşluk'tan geri dönerken bu beyaz ekran flash'ı önler
+  const hasLoadedRef = useRef(false);
   useFocusEffect(
     useCallback(() => {
-      fetchWords();
+      if (!hasLoadedRef.current) {
+        hasLoadedRef.current = true;
+        fetchWords(false); // ilk mount → skeleton göster
+      } else {
+        fetchWords(true); // geri dönüş → arka planda refresh, UI değişmez
+      }
     }, [fetchWords])
   );
 
