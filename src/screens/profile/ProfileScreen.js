@@ -19,6 +19,7 @@ import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import CategoryCover from "../../components/design/CategoryCover";
 import RatingChip from "../../components/design/RatingChip";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useUserLevel from "../../hooks/useUserLevel";
 import { getStreakBadge, getWordsBadge } from "../../lib/badges";
 import { getAchievementByKey } from "../../lib/achievements";
@@ -34,6 +35,9 @@ function inferLevel(words) {
 export default function ProfileScreen() {
   const { c, preference } = useTheme();
   const navigation = useNavigation();
+  // Tab bar height + 40 buffer → Yol Haritam vs son satır tab bar'a değmesin
+  const tabBarHeight = useBottomTabBarHeight();
+  const bottomPad = tabBarHeight + 40;
   const { user, signOut, getUserEmail, isGuestUser, deleteAccount } = useAuth();
   const { profile } = useProfile();
   const { unlocked } = useAchievements();
@@ -167,7 +171,7 @@ export default function ProfileScreen() {
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 220 }}>
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: bottomPad }}>
           {/* Avatar + name + level */}
           <View style={s.headerBlock}>
             <View style={s.avatarWrap}>

@@ -30,7 +30,9 @@ import { useTheme } from "../../contexts/ThemeContext";
 import useStudyEngine from "../../hooks/useStudyEngine";
 import useStudySwipe from "../../hooks/useStudySwipe";
 import { GRADE } from "../../lib/srs";
-import StudyModeModal from "../../components/design/StudyModeModal";
+// StudyModeModal askıya alındı — kullanıcı isteği: direkt listenin kelimeleri ile başla
+// (Akıllı/Yeni/Hatalar gibi modlar kafa karıştırıyordu). Modal kodu kalıyor, sonra
+// Sprint 2'de filter UI ayrı yere taşınabilir.
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -40,15 +42,15 @@ export default function StudyScreen({ route, navigation }) {
   const s = useMemo(() => makeStyles(c), [c]);
   const title = presetTitle ?? listTitle ?? "Çalış";
 
-  // Mod seçimi — presetWords/presetMode varsa modal sorma
-  const [selectedMode, setSelectedMode] = useState(presetMode ?? null);
-  const [modeChosen, setModeChosen] = useState(!!presetMode || !!presetWords);
+  // Mod seçimi: kullanıcı isteği ile modal kaldırıldı — her zaman direkt başla.
+  // presetMode varsa o kullanılır (mistakes ekranından gelirse vb.), yoksa "all".
+  const selectedMode = presetMode || "all";
 
-  // Business logic — session + mistakes (mode chosen olmadan başlatma)
+  // Business logic — session + mistakes
   const engine = useStudyEngine({
-    listId: modeChosen ? listId : null,
+    listId,
     presetWords,
-    presetMode: selectedMode || presetMode,
+    presetMode: selectedMode,
   });
 
   // UI-only state
@@ -157,22 +159,6 @@ export default function StudyScreen({ route, navigation }) {
       }
     }, delay);
   };
-
-  // Mod seçimi henüz yapılmadıysa modal göster — engine başlatılmıyor
-  if (!modeChosen) {
-    return (
-      <View style={s.root}>
-        <StudyModeModal
-          visible
-          onPick={(m) => {
-            setSelectedMode(m);
-            setModeChosen(true);
-          }}
-          onClose={() => navigation.goBack()}
-        />
-      </View>
-    );
-  }
 
   if (engine.loading) return <StudyLoadingState s={s} />;
 
