@@ -22,7 +22,7 @@ RETURNS TABLE (
   example TEXT,
   example_translation TEXT,
   pron TEXT,
-  position INT,
+  "position" INT,
   due_at TIMESTAMPTZ,
   lapses INT
 )
@@ -38,7 +38,7 @@ BEGIN
     -- SRS due olanlar önce, sonra hiç görmedikleri, son olarak görüldüğünden bu yana en eskiler
     RETURN QUERY
     SELECT
-      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w.position,
+      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w."position",
       wp.due_at, COALESCE(wp.lapses, 0)
     FROM words w
     LEFT JOIN word_progress wp ON wp.word_id = w.id AND wp.user_id = uid
@@ -54,20 +54,20 @@ BEGIN
     -- Hiç çalışılmamış (word_progress kaydı yok)
     RETURN QUERY
     SELECT
-      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w.position,
+      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w."position",
       NULL::TIMESTAMPTZ, 0
     FROM words w
     LEFT JOIN word_progress wp ON wp.word_id = w.id AND wp.user_id = uid
     WHERE w.list_id = p_list_id
       AND wp.id IS NULL
-    ORDER BY w.position ASC
+    ORDER BY w."position" ASC
     LIMIT p_limit;
 
   ELSIF p_mode = 'mistakes' THEN
     -- Bilemediğin kelimeler — lapse'i olanlar (en sık unutulan üstte)
     RETURN QUERY
     SELECT
-      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w.position,
+      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w."position",
       wp.due_at, wp.lapses
     FROM words w
     JOIN word_progress wp ON wp.word_id = w.id AND wp.user_id = uid
@@ -80,12 +80,12 @@ BEGIN
     -- 'all' default — listenin tüm kelimeleri sırayla
     RETURN QUERY
     SELECT
-      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w.position,
+      w.id, w.list_id, w.word, w.meaning, w.example, w.example_translation, w.pron, w."position",
       wp.due_at, COALESCE(wp.lapses, 0)
     FROM words w
     LEFT JOIN word_progress wp ON wp.word_id = w.id AND wp.user_id = uid
     WHERE w.list_id = p_list_id
-    ORDER BY w.position ASC
+    ORDER BY w."position" ASC
     LIMIT p_limit;
   END IF;
 END;

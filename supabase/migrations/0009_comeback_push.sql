@@ -39,9 +39,8 @@ CREATE TABLE IF NOT EXISTS comeback_pushes (
 CREATE INDEX IF NOT EXISTS idx_comeback_user_date
   ON comeback_pushes(user_id, sent_at DESC);
 
--- Aynı gün 2x göndermeyi engellemek için unique constraint
-CREATE UNIQUE INDEX IF NOT EXISTS uq_comeback_user_day
-  ON comeback_pushes(user_id, (date_trunc('day', sent_at)));
+-- NOT: Aynı gün uniqueness için partial index date_trunc() IMMUTABLE değil — kullanılmıyor.
+-- get_comeback_candidates() RPC zaten NOT EXISTS (date_trunc('day', sent_at) = today) ile kontrol ediyor.
 
 ALTER TABLE comeback_pushes ENABLE ROW LEVEL SECURITY;
 -- Sadece service role görür (edge function service key ile çağırır)
