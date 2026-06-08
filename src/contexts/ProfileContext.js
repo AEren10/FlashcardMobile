@@ -9,7 +9,7 @@
  *
  * Bu sayede EditProfile'dan goBack edince ProfileScreen zaten doğru veriye sahip.
  */
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getProfile } from "../supabase/profile";
 import { useAuth } from "./AuthContext";
 
@@ -56,8 +56,14 @@ export function ProfileProvider({ children }) {
     setProfile((p) => ({ ...p, ...patch }));
   }, []);
 
+  // useMemo — consumer re-render leak fix
+  const value = useMemo(
+    () => ({ profile, loading, refresh, patchOptimistic }),
+    [profile, loading, refresh, patchOptimistic]
+  );
+
   return (
-    <ProfileContext.Provider value={{ profile, loading, refresh, patchOptimistic }}>
+    <ProfileContext.Provider value={value}>
       {children}
     </ProfileContext.Provider>
   );

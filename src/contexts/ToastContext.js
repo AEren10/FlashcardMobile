@@ -4,7 +4,7 @@
  * useToast().show({ message, type: 'success' | 'error' | 'info', duration })
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import Animated, {
   useSharedValue,
@@ -59,8 +59,12 @@ export const ToastProvider = ({ children }) => {
     : toast?.type === "error" ? c.error
     : c.cobalt;
 
+  // useMemo — value object literal her render new oluşmasın → tüm consumer'ları
+  // toast state değişiminde re-render etmesin (FlashcardDetail rating beyaz flash fix)
+  const value = useMemo(() => ({ show }), [show]);
+
   return (
-    <ToastContext.Provider value={{ show }}>
+    <ToastContext.Provider value={value}>
       {children}
       {toast && (
         <Animated.View
