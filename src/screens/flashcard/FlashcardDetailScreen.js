@@ -22,6 +22,8 @@ import FlashcardHeader from "./components/FlashcardHeader";
 import FlashcardCardArea from "./components/FlashcardCardArea";
 import FlashcardCTAs from "./components/FlashcardCTAs";
 import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
+import StarRating from "../../components/design/StarRating";
+import { getListRating, rateList } from "../../supabase/ratings";
 
 export default function FlashcardDetailScreen({ route, navigation }) {
   const { listId, listTitle, listLevel, listIsPublic, isOwner: paramIsOwner } = route.params ?? {};
@@ -38,6 +40,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isOwner, setIsOwner] = useState(paramIsOwner ?? false);
+  const [rating, setRating] = useState({ avg: 0, count: 0, userRating: null });
 
   const fetchWords = useCallback(async () => {
     try {
@@ -66,6 +69,40 @@ export default function FlashcardDetailScreen({ route, navigation }) {
     useCallback(() => {
       fetchWords();
     }, [fetchWords])
+  );
+
+  useEffect(() => {
+    if (!listId) return;
+    getListRating(listId).then((r) => {
+      if (r.success) {
+        setRating({ avg: r.avg, count: r.count, userRating: r.userRating });
+      }
+    });
+  }, [listId]);
+
+  const handleRate = useCallback(
+    async (stars) => {
+      if (!isAuthenticated() || isGuestUser()) {
+        toast.show({ message: "Oy vermek için giriş yap", type: "info" });
+        return;
+      }
+      if (isOwner) {
+        toast.show({ message: "Kendi listene oy veremezsin", type: "info" });
+        return;
+      }
+      const prev = rating;
+      setRating((r) => ({ ...r, userRating: stars }));
+      const res = await rateList(listId, stars);
+      if (res.success) {
+        setRating({ avg: res.avg, count: res.count, userRating: stars });
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        toast.show({ message: `${stars} yıldız verildi`, type: "success" });
+      } else {
+        setRating(prev);
+        toast.show({ message: "Oy kaydedilemedi", type: "error" });
+      }
+    },
+    [isAuthenticated, isGuestUser, isOwner, listId, rating, toast]
   );
 
   // Bu ekranda tab bar'ı sakla — Çalış/Quiz butonları görünür kalsın.
@@ -209,6 +246,17 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           }}
         />
 
+        <View style={s.ratingRow}>
+          <StarRating
+            value={rating.userRating ?? rating.avg}
+            onRate={isOwner ? undefined : handleRate}
+            size={20}
+            showMeta
+            avg={rating.avg}
+            count={rating.count}
+          />
+        </View>
+
         <FlashcardCardArea
           words={words}
           currentIndex={currentIndex}
@@ -236,5 +284,11 @@ function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
     center: { alignItems: "center", justifyContent: "center" },
+    ratingRow: {
+      alignItems: "center",
+      paddingHorizontal: 22,
+      paddingTop: 8,
+      paddingBottom: 4,
+    },
   });
 }

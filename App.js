@@ -27,6 +27,24 @@ import { initSentry, Sentry } from "./src/lib/sentry";
 import { startAutoFlush } from "./src/lib/offlineQueue";
 import { bootstrapReminders } from "./src/lib/notifications";
 import { getConsent, hasResolvedConsent } from "./src/lib/analyticsConsent";
+// expo-av Audio mode — iOS silent mode'unda TTS susuyordu (bilinen sorun) → bypass
+let _audioConfigured = false;
+async function configureAudioModeOnce() {
+  if (_audioConfigured) return;
+  _audioConfigured = true;
+  try {
+    const { Audio } = require("expo-av");
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      shouldDuckAndroid: true,
+      interruptionModeAndroid: 1, // DUCK_OTHERS
+    });
+  } catch {
+    /* expo-av yoksa stub */
+  }
+}
+configureAudioModeOnce();
 import ConsentModal from "./src/components/ConsentModal";
 import DynamicStatusBar from "./src/components/design/DynamicStatusBar";
 import OfflineBanner from "./src/components/design/OfflineBanner";

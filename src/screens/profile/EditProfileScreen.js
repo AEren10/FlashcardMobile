@@ -178,8 +178,8 @@ export default function EditProfileScreen({ navigation }) {
               </View>
             </Pressable>
 
-            {/* Display name */}
-            <Text style={s.label}>GÖRÜNEN İSİM</Text>
+            {/* İsim */}
+            <Text style={s.label}>İSİM</Text>
             <TextInput
               value={displayName}
               onChangeText={setDisplayName}

@@ -31,6 +31,7 @@ import DiscoveryRow from "./components/DiscoveryRow";
 import HeroDashboard from "./components/HeroDashboard";
 import ContinueCard from "./components/ContinueCard";
 import { pickGreeting } from "../../lib/greetings";
+import { useProfile } from "../../contexts/ProfileContext";
 import useMilestoneWatcher from "../../hooks/useMilestoneWatcher";
 import MilestoneModal from "../../components/celebration/MilestoneModal";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
@@ -116,7 +117,12 @@ export default function HomeScreen({ navigation }) {
     }, [loadUserData])
   );
 
-  const userName = (getUserEmail() || "").split("@")[0] || "Hoşgeldin";
+  const { profile } = useProfile();
+  // Önce display_name (EditProfile'da yazdığı isim), yoksa email'den ilk parça
+  const userName =
+    profile?.display_name?.trim() ||
+    (getUserEmail() || "").split("@")[0] ||
+    "Hoşgeldin";
   const streak = stats.streakDays || 0;
   const dailyDone = Math.min(stats.totalWords || 0, DAILY_TOTAL);
   const greetingPair = useMemo(
