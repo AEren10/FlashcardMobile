@@ -10,16 +10,20 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
 
 const MIN_QUIZ_WORDS = 4;
+const MIN_BLANK_WORDS = 4;
 
 /**
  * 3 CTA — kompakt icon-top tek satır title.
- * Çalış (primary, bold accent) / Quiz (outline cobalt) / Oku (outline lavender).
- * Önceki 2-satır subtitle layout 3 buton için sığmıyordu, sadeleştirildi.
+ * Çalış (primary, bold accent) / Quiz (outline cobalt) / Boşluk (outline lavender).
+ *
+ * NOT: Lectio (Oku) askıya alındı — kullanıcı isteği ile UI'dan çıkarıldı, kod kalıyor.
+ * Yerine Boşluk Doldurma direkt CTA — Quiz mode="blank" ile başlatır.
+ * blankReadyCount: cümlesi olan kelime sayısı (>=4 ise enable)
  */
-export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, tint, lectioReadyCount = 0 }) {
+export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onBlank, tint, blankReadyCount = 0 }) {
   const { c } = useTheme();
   const quizDisabled = wordCount < MIN_QUIZ_WORDS;
-  const lectioDisabled = lectioReadyCount < 1;
+  const blankDisabled = blankReadyCount < MIN_BLANK_WORDS;
 
   return (
     <View style={s.row}>
@@ -47,18 +51,18 @@ export default function FlashcardCTAs({ wordCount, onStudy, onQuiz, onLectio, ti
         disabled={quizDisabled}
       />
       <MiniCta
-        iconPath={ICONS.books}
-        label="Oku"
+        iconPath={ICONS.brain}
+        label="Boşluk"
         accent={c.lavender || c.cobalt}
         onPress={() => {
-          if (lectioDisabled) {
+          if (blankDisabled) {
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
           } else {
-            onLectio?.();
+            onBlank?.();
           }
         }}
         c={c}
-        disabled={lectioDisabled}
+        disabled={blankDisabled}
       />
     </View>
   );

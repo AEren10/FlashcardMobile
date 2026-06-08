@@ -269,7 +269,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
 
         <FlashcardCTAs
           wordCount={words.length}
-          lectioReadyCount={words.filter((w) => w.example && w.example.trim()).length}
+          blankReadyCount={words.filter((w) => w.example && w.example.trim()).length}
           tint={tint}
           onStudy={() =>
             navigation.navigate("Study", { listId, listTitle: title, listLevel })
@@ -277,8 +277,10 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           onQuiz={() =>
             navigation.navigate("Quiz", { listId, listTitle: title, listLevel })
           }
-          onLectio={() =>
-            navigation.navigate("Lectio", { listId, listTitle: title })
+          onBlank={() =>
+            // Quiz screen mode="blank" param ile direkt boşluk doldurma açar
+            // (modeChosen=true gelir, modal göstermez)
+            navigation.navigate("Quiz", { listId, listTitle: title, listLevel, mode: "blank" })
           }
         />
       </SafeAreaView>
