@@ -213,7 +213,8 @@ export default function LectioScreen({ route }) {
           <View style={[styles.progressFill, { width: `${progress * 100}%`, backgroundColor: c.accent }]} />
         </View>
 
-        {/* Kart */}
+        {/* Kart alanı — EN ve TR aynı boyut+konum, sadece içerik değişir.
+            TR overlay artık card'a absolute fill, sağdan kayar. */}
         <View style={styles.cardArea}>
           <Animated.View style={[styles.card, { opacity: cardFade }]}>
             <Pressable onPress={speakWord} hitSlop={8}>
@@ -224,29 +225,34 @@ export default function LectioScreen({ route }) {
               <Text style={styles.example}>"{current.example}"</Text>
             )}
 
-            <Pressable onPress={speakWord} style={styles.speakerCircle}>
-              <Icon d={ICONS.sound} size={20} stroke={c.cobalt} sw={2} />
+            {/* Dinle butonu — kullanıcı "app beni mi duyuyor?" düşünmesin,
+                "Dinle" labelı net açıklar (TTS, mikrofon değil) */}
+            <Pressable onPress={speakWord} style={styles.speakerCircle} accessibilityLabel="Kelimeyi dinle">
+              <Icon d={ICONS.sound} size={16} stroke={c.cobalt} sw={2.2} />
+              <Text style={styles.speakerLbl}>Dinle</Text>
             </Pressable>
-          </Animated.View>
 
-          {/* TR Overlay — sağdan kayar */}
-          {trVisible && (
-            <Animated.View
-              style={[
-                styles.trOverlay,
-                { transform: [{ translateX: trX }] },
-              ]}
-            >
-              <Pressable style={styles.trClose} onPress={hideTR} hitSlop={10}>
-                <Icon d={ICONS.x} size={18} stroke={c.textPrimary} sw={2} />
-              </Pressable>
-              <Text style={styles.trLabel}>TÜRKÇE</Text>
-              <Text style={styles.trMeaning}>{current.meaning}</Text>
-              {!!current.example_tr && (
-                <Text style={styles.trExample}>"{current.example_tr}"</Text>
-              )}
-            </Animated.View>
-          )}
+            {/* TR Overlay — card'ın TAM içine, sağdan kayar */}
+            {trVisible && (
+              <Animated.View
+                style={[
+                  styles.trOverlay,
+                  { transform: [{ translateX: trX }] },
+                ]}
+              >
+                <Pressable style={styles.trClose} onPress={hideTR} hitSlop={10}>
+                  <Icon d={ICONS.x} size={18} stroke={c.textPrimary} sw={2} />
+                </Pressable>
+                <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                  <Text style={styles.trLabel}>TÜRKÇE</Text>
+                  <Text style={styles.trMeaning}>{current.meaning}</Text>
+                  {!!current.example_tr && (
+                    <Text style={styles.trExample}>"{current.example_tr}"</Text>
+                  )}
+                </View>
+              </Animated.View>
+            )}
+          </Animated.View>
         </View>
 
         {/* Bottom CTAs */}
@@ -323,7 +329,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     progressFill: { height: "100%", borderRadius: 2 },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     empty: { color: c.textSec, fontFamily: c.fontBody },
-    cardArea: { flex: 1, paddingHorizontal: 24, paddingTop: 18, paddingBottom: 24, justifyContent: "flex-start", position: "relative", overflow: "hidden" },
+    cardArea: { flex: 1, paddingHorizontal: 24, paddingVertical: 12, justifyContent: "center", position: "relative", overflow: "hidden" },
     card: {
       backgroundColor: c.bgElevated,
       borderRadius: 24,
@@ -331,9 +337,11 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       borderColor: c.border,
       padding: 32,
       alignItems: "center",
-      minHeight: 320,
+      minHeight: 380,
+      maxHeight: 480,
       justifyContent: "center",
       gap: 18,
+      overflow: "hidden", // TR overlay card içinde kalsın
     },
     word: {
       fontFamily: c.fontDisplay,
@@ -351,33 +359,34 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       maxWidth: 320,
     },
     speakerCircle: {
-      marginTop: 8,
-      width: 44,
-      height: 44,
-      borderRadius: 22,
+      marginTop: 12,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 999,
       backgroundColor: c.cobalt + "1A",
       borderWidth: 1,
-      borderColor: c.cobalt + "44",
-      alignItems: "center",
-      justifyContent: "center",
+      borderColor: c.cobalt + "55",
+    },
+    speakerLbl: {
+      fontFamily: c.fontBodyBold,
+      fontSize: 12,
+      color: c.cobalt,
+      letterSpacing: 0.3,
     },
     trOverlay: {
+      // Card'ın TAM içine — aynı boyut, aynı pozisyon
       position: "absolute",
-      top: 24,
-      right: 24,
-      bottom: 24,
-      width: W - 60,
-      backgroundColor: c.bgSurface,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: c.bgElevated,
       borderRadius: 24,
-      borderWidth: 1,
-      borderColor: c.cobalt + "44",
-      padding: 28,
+      padding: 32,
       paddingTop: 56,
-      shadowColor: c.cobalt,
-      shadowOpacity: 0.3,
-      shadowRadius: 16,
-      shadowOffset: { width: -4, height: 0 },
-      elevation: 8,
     },
     trClose: {
       position: "absolute",
