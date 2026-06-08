@@ -29,6 +29,25 @@ import { bootstrapReminders } from "./src/lib/notifications";
 import { getConsent, hasResolvedConsent } from "./src/lib/analyticsConsent";
 import { initTracking, track, EVENTS } from "./src/lib/track";
 import { registerExpoPushToken, touchLastActive } from "./src/lib/pushToken";
+import * as Updates from "expo-updates";
+
+// EAS Update foreground fetcher — yeni JS bundle varsa background fetch + apply.
+// Default expo-updates 2. açılışta uygular; bu manuel fetcher 1. açılışta apply yapar.
+// __DEV__'de no-op (Expo Go / dev server zaten hot-reload).
+async function checkForUpdatesOnce() {
+  if (__DEV__) return;
+  try {
+    const upd = await Updates.checkForUpdateAsync();
+    if (upd?.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      // Apply: 500ms bekle (analytics + auth init bitmesi için)
+      setTimeout(() => Updates.reloadAsync().catch(() => {}), 500);
+    }
+  } catch {
+    /* network yok veya updates server unreachable — sessiz */
+  }
+}
+checkForUpdatesOnce();
 // expo-av Audio mode — iOS silent mode'unda TTS susuyordu (bilinen sorun) → bypass
 let _audioConfigured = false;
 async function configureAudioModeOnce() {
