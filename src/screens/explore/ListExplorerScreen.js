@@ -21,6 +21,7 @@ import usePublicLists from "../../hooks/usePublicLists";
 import { selectFavoriteListIds } from "../../store/favoritesSlice";
 import CategoryCover from "../../components/design/CategoryCover";
 import PressableScale from "../../components/design/PressableScale";
+import RatingChip from "../../components/design/RatingChip";
 import { getCategoryAccent } from "../../lib/categoryMeta";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
@@ -222,7 +223,10 @@ const ListItem = React.memo(function ListItem({ item, fav, tint, c, s, onPress }
         </CategoryCover>
       </View>
       <View style={{ flex: 1, paddingVertical: 4 }}>
-        <Text style={s.cardTitle} numberOfLines={1}>{item.title}</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text style={[s.cardTitle, { flex: 1 }]} numberOfLines={1}>{item.title}</Text>
+          <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
+        </View>
         {!!item.description && (
           <Text style={s.cardDesc} numberOfLines={1}>{item.description}</Text>
         )}

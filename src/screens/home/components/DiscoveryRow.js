@@ -9,6 +9,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import CategoryCover from "../../../components/design/CategoryCover";
 import StaggerEnter from "../../../components/design/StaggerEnter";
 import PressableScale from "../../../components/design/PressableScale";
+import RatingChip from "../../../components/design/RatingChip";
 import { Skeleton } from "../../../components/design/Skeleton";
 
 export default function DiscoveryRow({
@@ -109,15 +110,18 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
       scaleDown={0.96}
     >
       <View style={{ borderRadius: 13, overflow: "hidden" }}>
-        <CategoryCover difficulty={item.level} imageUrl={item.image_url} height={100} />
+        <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={100} />
       </View>
       <View style={{ padding: 12 }}>
-        <Text
-          numberOfLines={1}
-          style={{ fontFamily: c.fontBodySemi, fontSize: 14, color: c.textPrimary }}
-        >
-          {item.title}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <Text
+            numberOfLines={1}
+            style={{ fontFamily: c.fontBodySemi, fontSize: 14, color: c.textPrimary, flex: 1 }}
+          >
+            {item.title}
+          </Text>
+          <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
+        </View>
         <Text
           style={{ fontFamily: c.fontBody, fontSize: 11.5, color: c.textSec, marginTop: 4 }}
         >

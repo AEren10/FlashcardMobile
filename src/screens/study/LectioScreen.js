@@ -6,7 +6,7 @@
  *
  * route.params: { listId, listTitle }
  */
-import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -22,10 +22,15 @@ import { useNavigation } from "@react-navigation/native";
 import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 import { GestureDetector, Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "../../contexts/ToastContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 import { fetchListWords } from "../../lib/cachedApi";
+
+const LECTIO_HINT_KEY = "@fc:lectio:hintShown";
+const BACK_ARROW = "M19 12H5m6 6-6-6 6-6"; // ICONS.arrowLeft yok — inline path
 
 const { width: W, height: H } = Dimensions.get("window");
 
@@ -33,7 +38,16 @@ export default function LectioScreen({ route }) {
   const navigation = useNavigation();
   const { c } = useTheme();
   const styles = useMemo(() => makeStyles(c), [c]);
+  const toast = useToast();
   const { listId, listTitle } = route?.params || {};
+
+  // TabBar'ı tamamen sakla — okuma deneyimi full-screen olsun
+  useLayoutEffect(() => {
+    const stack = navigation.getParent();
+    const tab = stack?.getParent();
+    tab?.setOptions({ tabBarStyle: { display: "none" } });
+    return () => tab?.setOptions({ tabBarStyle: undefined });
+  }, [navigation]);
 
   const [words, setWords] = useState([]);
   const [idx, setIdx] = useState(0);
@@ -54,11 +68,26 @@ export default function LectioScreen({ route }) {
       if (cancelled) return;
       setWords(list);
       setLoading(false);
+
+      // İlk açılışta TR çevirisi nasıl açılır hint'i — bir kez göster
+      try {
+        const shown = await AsyncStorage.getItem(LECTIO_HINT_KEY);
+        if (!shown) {
+          setTimeout(() => {
+            toast?.show?.({
+              message: "💡 Türkçe çeviri için alttaki butona dokun",
+              type: "info",
+              duration: 4000,
+            });
+          }, 600);
+          AsyncStorage.setItem(LECTIO_HINT_KEY, "1").catch(() => {});
+        }
+      } catch {}
     })();
     return () => {
       cancelled = true;
     };
-  }, [listId]);
+  }, [listId, toast]);
 
   // Yeni kelime gelince kart fade-in
   useEffect(() => {
@@ -170,7 +199,7 @@ export default function LectioScreen({ route }) {
         {/* Header */}
         <View style={styles.header}>
           <Pressable onPress={() => navigation.goBack()} hitSlop={12} style={styles.iconBtn}>
-            <Icon d={ICONS.arrowLeft} size={20} stroke={c.textPrimary} sw={2} />
+            <Icon d={BACK_ARROW} size={20} stroke={c.textPrimary} sw={2.2} />
           </Pressable>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {listTitle || "Lectio"}
@@ -229,7 +258,7 @@ export default function LectioScreen({ route }) {
             style={[styles.navBtn, idx === 0 && styles.navBtnDisabled]}
             hitSlop={8}
           >
-            <Icon d={ICONS.arrowLeft} size={20} stroke={idx === 0 ? c.textMuted : c.textPrimary} sw={2} />
+            <Icon d={BACK_ARROW} size={20} stroke={idx === 0 ? c.textMuted : c.textPrimary} sw={2.2} />
           </Pressable>
 
           <Pressable

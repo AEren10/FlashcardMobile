@@ -35,6 +35,7 @@ import {
 import Segmented from "../../components/design/Segmented";
 import CategoryCover from "../../components/design/CategoryCover";
 import PressableScale from "../../components/design/PressableScale";
+import RatingChip from "../../components/design/RatingChip";
 import { getCategoryAccent } from "../../lib/categoryMeta";
 import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
@@ -396,9 +397,12 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
         )}
       </CategoryCover>
       <View style={{ padding: 16 }}>
-        <Text style={s.cardTitle} numberOfLines={1}>
-          {item.title}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Text style={[s.cardTitle, { flex: 1 }]} numberOfLines={1}>
+            {item.title}
+          </Text>
+          <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
+        </View>
         <Text style={s.cardSub}>
           {trLevel(item.level)} · {item.word_count ?? "?"} kelime
         </Text>

@@ -18,6 +18,7 @@ import { getLists } from "../../supabase/database";
 import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import CategoryCover from "../../components/design/CategoryCover";
+import RatingChip from "../../components/design/RatingChip";
 import useUserLevel from "../../hooks/useUserLevel";
 import { getStreakBadge, getWordsBadge } from "../../lib/badges";
 import { getAchievementByKey } from "../../lib/achievements";
@@ -166,7 +167,7 @@ export default function ProfileScreen() {
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 160 }}>
+        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 220 }}>
           {/* Avatar + name + level */}
           <View style={s.headerBlock}>
             <View style={s.avatarWrap}>
@@ -433,14 +434,18 @@ export default function ProfileScreen() {
                     >
                       <CategoryCover
                         difficulty={item.level}
+                        cat={item.category}
                         imageUrl={item.image_url}
-                        height={68}
+                        height={72}
                         showLabel={false}
                       />
                       <View style={s.listCardBody}>
-                        <Text style={s.listCardTitle} numberOfLines={1}>
-                          {item.title}
-                        </Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                          <Text style={[s.listCardTitle, { flex: 1 }]} numberOfLines={1}>
+                            {item.title}
+                          </Text>
+                          <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
+                        </View>
                         <View style={s.listCardMeta}>
                           <Text style={s.listCardCount}>
                             {item.word_count ?? 0} kelime
@@ -765,7 +770,7 @@ function makeStyles(c) {
     listCardBody: { padding: 10, gap: 6 },
     listCardTitle: { fontFamily: c.fontBodyBold, fontSize: 13, color: c.textPrimary },
     listCardMeta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
-    listCardCount: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec },
+    listCardCount: { fontFamily: c.fontBodySemi, fontSize: 11.5, color: c.textPrimary, opacity: 0.85 },
     listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
     listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: 9.5, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
   });
