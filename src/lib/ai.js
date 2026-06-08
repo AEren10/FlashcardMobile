@@ -126,9 +126,9 @@ Cümle 6-12 kelime arası, günlük dil, bağlamlı olsun. Sadece JSON döndür.
     const data = await res.json();
     const text = data?.content?.[0]?.text || "";
     const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("invalid response format");
+    if (!jsonMatch) throw new Error("Yanıt geçersiz format — sunucu hatası");
     const parsed = JSON.parse(jsonMatch[0]);
-    if (!parsed?.sentence) throw new Error("no sentence in response");
+    if (!parsed?.sentence) throw new Error("Cümle bulunamadı — tekrar dene");
 
     await saveCache(word, parsed.sentence, parsed.translation || "");
     await bumpRate();

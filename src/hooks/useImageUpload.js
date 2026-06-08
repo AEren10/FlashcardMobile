@@ -51,7 +51,7 @@ export default function useImageUpload() {
         : asset;
     if (!a || !a.uri) return null;
     if (!a.base64) {
-      throw new Error("base64 missing — picker'da base64: true olmalı");
+      throw new Error("Görsel işlenemedi — lütfen tekrar dene");
     }
     setUploading(true);
     try {

@@ -17,7 +17,9 @@ export default function useBadgeWatcher({ streakDays, totalWords, enabled = true
     (async () => {
       try {
         const raw = await AsyncStorage.getItem(KEY_SEEN);
-        setSeenBadges(raw ? JSON.parse(raw) : []);
+        const parsed = raw ? JSON.parse(raw) : [];
+        // Tip safety: storage corrupt → non-array dönerse boş array (.includes crash önlenir)
+        setSeenBadges(Array.isArray(parsed) ? parsed : []);
       } catch {
         setSeenBadges([]);
       }

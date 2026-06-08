@@ -214,10 +214,12 @@ export default function HomeScreen({ navigation }) {
   };
 
   const startChallenge = () => {
-    if (lists.length) {
-      const pick = lists[Math.floor(Math.random() * Math.min(lists.length, 5))];
-      navigation.navigate("Study", { listId: pick.id, listTitle: pick.title });
-    }
+    if (!lists.length) return;
+    // 1-tap Çalış: recent list varsa ilk recent'i öncelikli aç,
+    // yoksa popüler/yeni listelerden random pick (kullanıcı sürpriz alır)
+    const recent = recentLists?.[0];
+    const pick = recent || lists[Math.floor(Math.random() * Math.min(lists.length, 5))];
+    navigation.navigate("Study", { listId: pick.id, listTitle: pick.title });
   };
 
   const recentLists = useMemo(() => lists.slice(0, 5), [lists]);
@@ -383,10 +385,16 @@ export default function HomeScreen({ navigation }) {
 
             <View style={s.chipAccent}>
               <Icon d={ICONS.bolt} size={13} fill={c.accent} stroke={c.accent} sw={1.5} />
-              <Text style={s.chipAccentTxt}>GÜNÜN MEYDAN OKUMASI</Text>
+              <Text style={s.chipAccentTxt}>BUGÜN</Text>
             </View>
-            <Text style={s.challengeTitle}>5 Yeni Kelime Öğren</Text>
-            <Text style={s.challengeSub}>~2 dakika · kolay tempo</Text>
+            <Text style={s.challengeTitle}>
+              {recentLists.length > 0 ? "Hemen Çalış" : "5 Yeni Kelime Öğren"}
+            </Text>
+            <Text style={s.challengeSub} numberOfLines={1}>
+              {recentLists.length > 0
+                ? `📚 ${recentLists[0]?.title || "Devam Et"}`
+                : "~2 dakika · kolay tempo"}
+            </Text>
             <View style={s.primaryBtn}>
               <Text style={s.primaryBtnTxt}>Başla</Text>
               <Icon d={ICONS.arrow} size={17} stroke={c.textOnAccent} sw={2.2} />
