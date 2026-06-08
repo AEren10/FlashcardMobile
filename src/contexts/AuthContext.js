@@ -3,7 +3,7 @@
   * Manages user authentication state and provides auth functions throughout the app
   */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import supabase from "../supabase/client";
 import { store } from "../store/store";
 import { fetchFavorites, clearFavorites } from "../store/favoritesSlice";
@@ -283,30 +283,33 @@ export const AuthProvider = ({ children }) => {
     return user?.email || null;
   };
 
-  // Context value
-  const value = {
-    // State
-    user,
-    session,
-    loading,
-    initializing,
-    isGuest,
-
-    // Methods
-    signUp,
-    signIn,
-    signInAsGuest,
-    signOut,
-    resetPassword,
-    updateProfile,
-    deleteAccount,
-
-    // Helpers
-    isAuthenticated,
-    isGuestUser,
-    getUserId,
-    getUserEmail,
-  };
+  // Context value — useMemo ile sarılı (perf raporu: 10+ consumer re-render leak fix).
+  // Methods/helpers parent scope'tan, sadece state değişimi value'yu yeniler.
+  const value = useMemo(
+    () => ({
+      // State
+      user,
+      session,
+      loading,
+      initializing,
+      isGuest,
+      // Methods
+      signUp,
+      signIn,
+      signInAsGuest,
+      signOut,
+      resetPassword,
+      updateProfile,
+      deleteAccount,
+      // Helpers
+      isAuthenticated,
+      isGuestUser,
+      getUserId,
+      getUserEmail,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user, session, loading, initializing, isGuest]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -30,9 +30,8 @@ import { useTheme } from "../../contexts/ThemeContext";
 import useStudyEngine from "../../hooks/useStudyEngine";
 import useStudySwipe from "../../hooks/useStudySwipe";
 import { GRADE } from "../../lib/srs";
-// StudyModeModal askıya alındı — kullanıcı isteği: direkt listenin kelimeleri ile başla
-// (Akıllı/Yeni/Hatalar gibi modlar kafa karıştırıyordu). Modal kodu kalıyor, sonra
-// Sprint 2'de filter UI ayrı yere taşınabilir.
+import ConfirmDialog from "../../components/design/ConfirmDialog";
+// StudyModeModal askıya alındı.
 
 const { width: SCREEN_W } = Dimensions.get("window");
 
@@ -43,8 +42,10 @@ export default function StudyScreen({ route, navigation }) {
   const title = presetTitle ?? listTitle ?? "Çalış";
 
   // Mod seçimi: kullanıcı isteği ile modal kaldırıldı — her zaman direkt başla.
-  // presetMode varsa o kullanılır (mistakes ekranından gelirse vb.), yoksa "all".
   const selectedMode = presetMode || "all";
+
+  // Çıkış onay dialog'u — Apple Alert yerine custom Türkçe modal
+  const [exitDialog, setExitDialog] = useState(null); // { onConfirm }
 
   // Business logic — session + mistakes
   const engine = useStudyEngine({
@@ -85,18 +86,13 @@ export default function StudyScreen({ route, navigation }) {
       if (engine.index === 0 && !feedback) return;
 
       e.preventDefault();
-      Alert.alert(
-        "Çalışmayı bırakmak istiyor musun?",
-        "İlerlemen kaydedilmeyecek ve baştan başlaman gerekecek.",
-        [
-          { text: "Devam et", style: "cancel", onPress: () => {} },
-          {
-            text: "Çık",
-            style: "destructive",
-            onPress: () => navigation.dispatch(e.data.action),
-          },
-        ]
-      );
+      // Apple Alert YERİNE custom ConfirmDialog (Türkçe + bizim tasarım)
+      setExitDialog({
+        onConfirm: () => {
+          setExitDialog(null);
+          navigation.dispatch(e.data.action);
+        },
+      });
     });
     return unsub;
   }, [navigation, engine.done, engine.loading, engine.index, engine.words, feedback]);
@@ -292,6 +288,18 @@ export default function StudyScreen({ route, navigation }) {
           />
         )}
       </SafeAreaView>
+
+      {/* Çıkış onayı — Apple Alert yerine custom Türkçe modal */}
+      <ConfirmDialog
+        visible={!!exitDialog}
+        title="Çalışmayı bırakmak istiyor musun?"
+        message="İlerlemen kaydedilmeyecek ve baştan başlaman gerekecek."
+        confirmText="Çık"
+        cancelText="Devam Et"
+        destructive
+        onConfirm={() => exitDialog?.onConfirm?.()}
+        onCancel={() => setExitDialog(null)}
+      />
     </View>
   );
 }

@@ -419,16 +419,35 @@ export default function ProfileScreen() {
                 <Text style={s.listsEmptyHint}>Liste oluştur ve paylaş →</Text>
               </Pressable>
             ) : (
-              <View style={s.listsGrid}>
+              // Horizontal scroll — 2-col grid yarım kalıyordu (title kesik, tab bar overlap)
+              // Yan yana kayan kart şeridi → title rahat, layout temiz
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 12, paddingRight: 8 }}
+              >
                 {visibleLists.map((item, i) => (
                   <StaggerEnter key={String(item.id)} index={i} delay={50}>
                     <Pressable
                       onPress={() =>
-                        navigation.navigate("FlashcardDetail", {
-                          listId: item.id,
-                          listTitle: item.title,
-                          listLevel: item.level,
-                          listIsPublic: item.is_public,
+                        // ProfileStack'te FlashcardDetail YOK — parent tab üzerinden MyListsStack'e geç
+                        navigation.getParent()?.navigate("MyLists", {
+                          screen: "FlashcardDetail",
+                          params: {
+                            listId: item.id,
+                            listTitle: item.title,
+                            listLevel: item.level,
+                            listIsPublic: item.is_public,
+                          },
+                        }) ??
+                        navigation.navigate("MyLists", {
+                          screen: "FlashcardDetail",
+                          params: {
+                            listId: item.id,
+                            listTitle: item.title,
+                            listLevel: item.level,
+                            listIsPublic: item.is_public,
+                          },
                         })
                       }
                       style={({ pressed }) => [
@@ -464,7 +483,7 @@ export default function ProfileScreen() {
                     </Pressable>
                   </StaggerEnter>
                 ))}
-              </View>
+              </ScrollView>
             )}
           </StaggerEnter>
 
@@ -769,8 +788,20 @@ function makeStyles(c) {
     listsEmpty: { borderRadius: 16, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
     listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: 13, color: c.textSec, marginTop: 4 },
     listsEmptyHint: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted },
-    listsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-    listCard: { width: "48%", borderRadius: 14, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated, overflow: "hidden" },
+    listsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 }, // legacy (artık ScrollView)
+    listCard: {
+      width: 170, // horizontal scroll için sabit genişlik
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: c.border,
+      backgroundColor: c.bgElevated,
+      overflow: "hidden",
+      shadowColor: c.cobalt,
+      shadowOpacity: 0.15,
+      shadowOffset: { width: 0, height: 3 },
+      shadowRadius: 8,
+      elevation: 2,
+    },
     listCardBody: { padding: 10, gap: 6 },
     listCardTitle: { fontFamily: c.fontBodyBold, fontSize: 13, color: c.textPrimary },
     listCardMeta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
