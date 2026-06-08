@@ -27,6 +27,7 @@ import {
 } from "../supabase/mistakesList";
 import { useAchievements } from "../contexts/AchievementsContext";
 import { useToast } from "../contexts/ToastContext";
+import { incrementDailyGoal } from "../lib/dailyGoal";
 
 const MISTAKES_MODAL_THRESHOLD = 5;
 const CONFETTI_STREAK = 5;
@@ -109,6 +110,18 @@ export default function useStudyEngine({ listId, presetWords, presetMode }) {
         duration_sec: duration,
         accuracy: words.length ? Math.round((finalCorrect / words.length) * 100) : 0,
       });
+      // Daily goal: bu oturumda doğru bilinen kelime sayısı kadar artır
+      if (finalCorrect > 0) {
+        incrementDailyGoal(finalCorrect).then((r) => {
+          if (r?.justCompleted) {
+            toast?.show?.({
+              message: "🎯 Günlük hedefini tamamladın! Süpersin.",
+              type: "success",
+              duration: 4000,
+            });
+          }
+        }).catch(() => {});
+      }
       maybeRequestReview();
 
       const allWrongIds = lastWordWrong ? [...wrongIds, lastWordWrong] : wrongIds;

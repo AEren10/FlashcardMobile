@@ -226,6 +226,48 @@ export async function removeExtraReminder(index) {
   return { success: true, extras };
 }
 
+// ───────── Streak Risk (akşam 21:00 kontrolü) ─────────
+
+const STREAK_RISK_ID = "fc-streak-risk";
+
+/**
+ * Akşam 21:00 için "bugün çalışmadıysan serini koru" pushu zamanla.
+ * App açıldığında çağrılır; her gün 21:00'da göstermek için günlük tekrar trigger.
+ *
+ * NOT: Mesaj generic — kullanıcının BUGÜN çalışıp çalışmadığını burada bilemiyoruz
+ * (Expo notification trigger sırasında JS çalışmaz). Server-side cron + per-user check
+ * gerçek dinamik mesaj için kullanılmalı (comeback-push pattern'i benzeri).
+ * Bu lokal hatırlatıcı ek katman — fallback.
+ */
+export async function scheduleStreakRiskCheck() {
+  const status = await getPermissionStatus();
+  if (status !== "granted") return { success: false, reason: "no_permission" };
+
+  await ensureChannel();
+  // Eski risk reminder'ı sil
+  await Notifications.cancelScheduledNotificationAsync(STREAK_RISK_ID).catch(() => {});
+
+  try {
+    await Notifications.scheduleNotificationAsync({
+      identifier: STREAK_RISK_ID,
+      content: {
+        title: "🔥 Serini bozma",
+        body: "Gün bitmek üzere — 2 dakikalık çalışma serini korur.",
+        sound: "default",
+      },
+      trigger: {
+        type: SchedulableTriggerInputTypes.DAILY,
+        hour: 21,
+        minute: 0,
+        channelId: "default",
+      },
+    });
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
+
 // ───────── Top-level convenience ─────────
 
 /**
@@ -240,6 +282,8 @@ export async function bootstrapReminders() {
   await ensureBaseReminders();
   const extras = await getExtraReminders();
   await rescheduleExtras(extras);
+  // Streak risk reminder de yeniden kur (21:00 lokal)
+  await scheduleStreakRiskCheck().catch(() => {});
   return { success: true, baseCount: BASE_TIMES.length, extraCount: extras.length };
 }
 

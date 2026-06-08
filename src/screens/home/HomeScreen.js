@@ -22,6 +22,7 @@ import supabaseApiService from "../../services/supabaseApi";
 import { getStudyStats } from "../../supabase/progress";
 import { getMistakesList } from "../../supabase/mistakesList";
 import { getTopLikedLists } from "../../supabase/social";
+import { getDailyGoal } from "../../lib/dailyGoal";
 import { selectFavoriteWordIds } from "../../store/favoriteWordsSlice";
 import Icon, { ICONS } from "../../components/design/Icon";
 import CategoryCover from "../../components/design/CategoryCover";
@@ -68,6 +69,7 @@ export default function HomeScreen({ navigation }) {
   const [authLoading, setAuthLoading] = useState(true);
   const [randomReviewOpen, setRandomReviewOpen] = useState(false);
   const [trendingLists, setTrendingLists] = useState([]);
+  const [daily, setDaily] = useState({ goal: 10, done: 0, pct: 0, completed: false });
   const favoriteWordIds = useSelector(selectFavoriteWordIds);
   const { syncStats: syncAchievements } = useAchievements();
   const loading = listsLoading || authLoading;
@@ -131,6 +133,13 @@ export default function HomeScreen({ navigation }) {
       mounted = false;
     };
   }, []);
+
+  // Daily goal — focus geldiğinde yenile (oturum sonrası güncel kalsın)
+  useFocusEffect(
+    useCallback(() => {
+      getDailyGoal(10).then(setDaily).catch(() => {});
+    }, [])
+  );
 
   const { profile } = useProfile();
   // Önce display_name (EditProfile'da yazdığı isim), yoksa email'den ilk parça
@@ -398,6 +407,49 @@ export default function HomeScreen({ navigation }) {
               totalWords={stats.totalWords || 0}
               onPress={() => navigation.navigate("Roadmap")}
             />
+          )}
+
+          {/* Daily goal chip — bugünün hedefi (10 kelime), gece 24:00 reset */}
+          {!loading && isAuthenticated() && (
+            <View
+              style={{
+                marginTop: 14,
+                marginBottom: 4,
+                padding: 14,
+                borderRadius: 14,
+                backgroundColor: daily.completed ? c.success + "1A" : c.bgElevated,
+                borderWidth: 1,
+                borderColor: daily.completed ? c.success + "AA" : c.border,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                <Text style={{ fontSize: 16 }}>{daily.completed ? "✅" : "🎯"}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: c.textPrimary, fontFamily: c.fontBodyBold, fontSize: 13 }}>
+                    {daily.completed ? "Bugünün hedefi tamam!" : "Bugünün hedefi"}
+                  </Text>
+                  <Text style={{ color: c.textSec, fontFamily: c.fontBody, fontSize: 11, marginTop: 2 }}>
+                    {daily.done} / {daily.goal} kelime
+                  </Text>
+                </View>
+                <Text style={{
+                  color: daily.completed ? c.success : c.accent,
+                  fontFamily: c.fontBodyBold,
+                  fontSize: 16,
+                }}>
+                  %{daily.pct}
+                </Text>
+              </View>
+              {/* Progress bar */}
+              <View style={{ height: 4, marginTop: 10, backgroundColor: c.bgSurface, borderRadius: 99, overflow: "hidden" }}>
+                <View style={{
+                  width: `${daily.pct}%`,
+                  height: "100%",
+                  backgroundColor: daily.completed ? c.success : c.accent,
+                  borderRadius: 99,
+                }} />
+              </View>
+            </View>
           )}
 
           {/* Search bar */}

@@ -320,7 +320,7 @@ function makeStyles(c) {
     progressFill: { height: "100%", borderRadius: 2 },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     empty: { color: c.textSec, fontFamily: c.fontBody },
-    cardArea: { flex: 1, padding: 24, justifyContent: "center", position: "relative", overflow: "hidden" },
+    cardArea: { flex: 1, paddingHorizontal: 24, paddingTop: 18, paddingBottom: 24, justifyContent: "flex-start", position: "relative", overflow: "hidden" },
     card: {
       backgroundColor: c.bgElevated,
       borderRadius: 24,
