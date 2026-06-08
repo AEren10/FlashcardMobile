@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Speech from "expo-speech";
+import { speak as ttsSpeak } from "../../lib/tts";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { getFavoriteWords } from "../../supabase/wordFavorites";
@@ -135,7 +136,7 @@ function WordCard({ item, c, s }) {
       <View style={s.cardTop}>
         <View style={{ flex: 1 }}>
           <Pressable
-            onPress={() => Speech.speak(wordText, { language: "en-US" })}
+            onPress={() => ttsSpeak(wordText)}
             hitSlop={10}
           >
             <Text style={s.word}>{wordText}</Text>
@@ -143,7 +144,7 @@ function WordCard({ item, c, s }) {
           <Text style={s.meaning}>{meaningText}</Text>
         </View>
         <Pressable
-          onPress={() => Speech.speak(wordText, { language: "en-US" })}
+          onPress={() => ttsSpeak(wordText)}
           hitSlop={10}
           style={({ pressed }) => [s.speakerBtn, { opacity: pressed ? 0.6 : 1 }]}
           accessibilityLabel="Kelimeyi sesli oku"

@@ -17,9 +17,10 @@ import {
   ActivityIndicator,
   Dimensions,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import * as Speech from "expo-speech";
+import { speak as ttsSpeak } from "../../lib/tts";
 import * as Haptics from "expo-haptics";
 import { GestureDetector, Gesture, GestureHandlerRootView } from "react-native-gesture-handler";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -37,16 +38,18 @@ const { width: W, height: H } = Dimensions.get("window");
 export default function LectioScreen({ route }) {
   const navigation = useNavigation();
   const { c } = useTheme();
-  const styles = useMemo(() => makeStyles(c), [c]);
+  const insets = useSafeAreaInsets();
+  const styles = useMemo(() => makeStyles(c, insets), [c, insets]);
   const toast = useToast();
   const { listId, listTitle } = route?.params || {};
 
-  // TabBar'ı tamamen sakla — okuma deneyimi full-screen olsun
+  // TabBar'ı tamamen sakla — okuma deneyimi full-screen olsun.
+  // 2 kademe getParent (Lectio → HomeStack → TabNavigator).
+  // Yine de bottomBar safe area + tab bar height kadar padding alıyor (style'da insets.bottom + 100).
   useLayoutEffect(() => {
-    const stack = navigation.getParent();
-    const tab = stack?.getParent();
-    tab?.setOptions({ tabBarStyle: { display: "none" } });
-    return () => tab?.setOptions({ tabBarStyle: undefined });
+    const tab = navigation.getParent()?.getParent() || navigation.getParent();
+    tab?.setOptions?.({ tabBarStyle: { display: "none" } });
+    return () => tab?.setOptions?.({ tabBarStyle: undefined });
   }, [navigation]);
 
   const [words, setWords] = useState([]);
@@ -144,12 +147,8 @@ export default function LectioScreen({ route }) {
 
   const speakWord = useCallback(() => {
     if (!current?.word) return;
-    try {
-      Speech.stop();
-      Speech.speak(String(current.word), { language: "en-US", pitch: 1, rate: 0.92 });
-    } catch {
-      /* sessiz */
-    }
+    Haptics.selectionAsync();
+    ttsSpeak(String(current.word));
   }, [current]);
 
   // Gesture: sağa swipe → TR aç, sola swipe → kapa, yukarı swipe → sonraki
@@ -284,7 +283,11 @@ export default function LectioScreen({ route }) {
   );
 }
 
-function makeStyles(c) {
+function makeStyles(c, insets = { top: 0, bottom: 0 }) {
+  // TabBar useLayoutEffect ile gizlenmeye çalışılıyor ama nested navigator hierarchy'de
+  // çağrı tabNavigator'a ulaşmıyor olabilir — bottomBar her halükarda tab bar + safe area
+  // kadar padding alıyor ki butonlar arkada kalmasın.
+  const tabBarFallback = 90;
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
     header: {
@@ -411,7 +414,11 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
-      padding: 18,
+      paddingHorizontal: 18,
+      paddingTop: 14,
+      // TabBar bazen gizlenmiyor (nested navigator) → safe area + tab bar yüksekliği
+      paddingBottom: Math.max(insets.bottom, 8) + tabBarFallback,
+      backgroundColor: c.bgBase,
     },
     navBtn: {
       width: 48,

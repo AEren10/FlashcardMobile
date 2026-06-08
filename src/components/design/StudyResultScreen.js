@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Speech from "expo-speech";
+import { speak as ttsSpeak } from "../../lib/tts";
 import * as Haptics from "expo-haptics";
 import ConfettiCannon from "react-native-confetti-cannon";
 
@@ -241,7 +242,7 @@ function WrongCard({ word, c, s }) {
       <Pressable
         hitSlop={10}
         style={[s.soundBtn, { borderColor: c.border }]}
-        onPress={() => Speech.speak(word.word, { language: "en-US" })}
+        onPress={() => ttsSpeak(word.word)}
         accessibilityLabel="Telaffuzu dinle"
       >
         <Icon d={ICONS.sound} size={16} stroke={c.cobalt} sw={1.8} />

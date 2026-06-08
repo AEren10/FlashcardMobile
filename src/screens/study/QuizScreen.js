@@ -18,6 +18,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Speech from "expo-speech";
+import { speak as ttsSpeak } from "../../lib/tts";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { getListWords } from "../../supabase/database";
@@ -457,7 +458,7 @@ export default function QuizScreen({ route, navigation }) {
             <>
               <Pressable
                 style={s.wordRow}
-                onPress={() => Speech.speak(current.word, { language: "en-US" })}
+                onPress={() => ttsSpeak(current.word)}
                 accessibilityLabel="Telaffuzu dinle"
               >
                 <Text style={s.word}>{current.word}</Text>

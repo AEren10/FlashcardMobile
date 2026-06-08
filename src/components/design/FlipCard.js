@@ -20,6 +20,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Speech from "expo-speech";
+import { speak as ttsSpeak } from "../../lib/tts";
 import { useTheme } from "../../contexts/ThemeContext";
 import BookmarkButton from "./BookmarkButton";
 import WordCardMenu from "./WordCardMenu";
@@ -95,16 +96,8 @@ export default function FlipCard({
 
   const speak = useCallback(() => {
     if (!word) return;
-    try {
-      Speech.stop();
-      Speech.speak(String(word), {
-        language: "en-US",
-        pitch: 1.0,
-        rate: 0.92,
-      });
-    } catch (err) {
-      // expo-speech bazen engine init'inde hata atar — sessizce yut
-    }
+    // tts.js helper: audio mode garanti + await Speech.stop + race fix
+    ttsSpeak(String(word));
   }, [word]);
 
   const s = useMemo(() => makeStyles(c), [c]);
