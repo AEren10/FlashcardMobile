@@ -16,7 +16,7 @@
  *
  * imperative kullanım da olabilir (useConfirm hook, sonra eklenir).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -104,8 +104,8 @@ export default function ConfirmDialog({
 }
 
 const s = StyleSheet.create({
-  title: { fontSize: 22, lineHeight: 26, marginBottom: 8 },
-  message: { fontSize: 14, lineHeight: 20, marginBottom: 20 },
+  title: { fontSize: 22, lineHeight: 26, marginBottom: spacing.sm },
+  message: { fontSize: 14, lineHeight: 20, marginBottom: spacing.xl },
   row: { flexDirection: "row", gap: 10 },
   btn: {
     flex: 1,

@@ -1,4 +1,4 @@
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -48,7 +48,7 @@ export default function HardWordsScreen({ navigation }) {
       <View style={s.root}>
         <SafeAreaView edges={["top"]} style={{ flex: 1 }}>
           <ScrollView
-            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}
             showsVerticalScrollIndicator={false}
           >
             {[0, 1, 2, 3, 4].map((i) => (
@@ -126,7 +126,7 @@ export default function HardWordsScreen({ navigation }) {
         <FlatList
           data={words}
           keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={{ padding: 16, gap: 8 }}
+          contentContainerStyle={{ padding: spacing.lg, gap: spacing.sm }}
           refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           renderItem={({ item, index }) => (
             <StaggerEnter index={Math.min(index, 8)} delay={50}>
@@ -154,13 +154,13 @@ export default function HardWordsScreen({ navigation }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 32 },
+    center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: spacing.xxxl },
     header: {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
       paddingVertical: 10,
-      gap: 12,
+      gap: spacing.md,
     },
     back: {
       width: 38,
@@ -180,8 +180,8 @@ function makeStyles(c) {
       color: c.textPrimary,
     },
     cta: {
-      marginHorizontal: 16,
-      marginTop: 4,
+      marginHorizontal: spacing.lg,
+      marginTop: spacing.xs,
       paddingVertical: 14,
       borderRadius: radius.md,
       alignItems: "center",
@@ -208,7 +208,7 @@ function makeStyles(c) {
     badge: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 4,
+      gap: spacing.xs,
       paddingHorizontal: 10,
       paddingVertical: 5,
       borderRadius: radius.full,
@@ -221,7 +221,7 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       color: c.textSec,
       textAlign: "center",
-      marginBottom: 20,
+      marginBottom: spacing.xl,
     },
   });
 }

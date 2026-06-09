@@ -3,7 +3,7 @@
  * App.js'teki initSentry sadece consent === true ise çalıştığı için
  * burada yapılan değişiklik bir sonraki açılışta etkili olur.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -91,8 +91,8 @@ function makeStyles(c) {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
     },
     back: {
       width: 34,
@@ -109,7 +109,7 @@ function makeStyles(c) {
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
     },
-    body: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
+    body: { paddingHorizontal: spacing.xl, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
     card: {
       flexDirection: "row",
       alignItems: "center",
@@ -117,16 +117,16 @@ function makeStyles(c) {
       borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 16,
-      gap: 12,
-      marginBottom: 16,
+      padding: spacing.lg,
+      gap: spacing.md,
+      marginBottom: spacing.lg,
     },
-    label: { fontSize: 15, fontFamily: c.fontBodyBold, color: c.textPrimary, marginBottom: 4 },
+    label: { fontSize: 15, fontFamily: c.fontBodyBold, color: c.textPrimary, marginBottom: spacing.xs },
     sub: { fontSize: 13, fontFamily: c.fontBody, color: c.textSec, lineHeight: 18 },
     linkRow: {
       flexDirection: "row",
       alignItems: "center",
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       borderBottomWidth: 1,
       borderBottomColor: c.border,
     },

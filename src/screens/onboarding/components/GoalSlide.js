@@ -3,7 +3,7 @@
  * 4 kart: Sınav / Kariyer / Seyahat / Hobi.
  * Tap → onSelect(slug). Seçilen kart highlighted.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -70,15 +70,15 @@ export default function GoalSlide({ c, selected, onSelect }) {
 export const GOAL_KEYS = GOALS.map((g) => g.key);
 
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: 24, paddingTop: 8, alignItems: "stretch", width: "100%" },
+  wrap: { paddingHorizontal: spacing.xxl, paddingTop: spacing.sm, alignItems: "stretch", width: "100%" },
   heading: { fontSize: 32, lineHeight: 36, textAlign: "center" },
-  sub: { fontSize: 14, textAlign: "center", marginTop: 8, opacity: 0.85 },
+  sub: { fontSize: 14, textAlign: "center", marginTop: spacing.sm, opacity: 0.85 },
   grid: {
     marginTop: 28,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12,
+    gap: spacing.md,
   },
   card: {
     width: "47%",
@@ -89,5 +89,5 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   label: { fontSize: 15, marginTop: 10 },
-  cardSub: { fontSize: 11, marginTop: 4, lineHeight: 14 },
+  cardSub: { fontSize: 11, marginTop: spacing.xs, lineHeight: 14 },
 });

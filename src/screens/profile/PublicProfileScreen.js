@@ -3,7 +3,7 @@
  * route.params: { userId, displayName? }
  * Gösterir: avatar + display_name + bio + 3 stat + public listeleri
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   View,
@@ -172,7 +172,7 @@ export default function PublicProfileScreen({ route }) {
         <View style={{ width: 36 }} />
       </View>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }}>
         {/* Avatar + İsim + Bio */}
         <View style={styles.heroWrap}>
           <View style={[styles.avatarRing, { borderColor: c.borderAccent }]}>
@@ -246,7 +246,7 @@ export default function PublicProfileScreen({ route }) {
                       showLabel={false}
                     />
                   </View>
-                  <View style={{ flex: 1, padding: 12 }}>
+                  <View style={{ flex: 1, padding: spacing.md }}>
                     <Text style={styles.listTitle} numberOfLines={1}>
                       {l.title}
                     </Text>
@@ -298,7 +298,7 @@ function makeStyles(c) {
       alignItems: "center",
       paddingHorizontal: 18,
       paddingVertical: 10,
-      gap: 12,
+      gap: spacing.md,
     },
     back: {
       width: 36,
@@ -317,13 +317,13 @@ function makeStyles(c) {
     },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     errorTxt: { color: c.textSec, fontFamily: c.fontBody, fontSize: 14 },
-    heroWrap: { alignItems: "center", paddingHorizontal: 24, paddingTop: 8, paddingBottom: 20 },
+    heroWrap: { alignItems: "center", paddingHorizontal: spacing.xxl, paddingTop: spacing.sm, paddingBottom: spacing.xl },
     avatarRing: {
       width: 110,
       height: 110,
       borderRadius: 55,
       borderWidth: 3,
-      padding: 4,
+      padding: spacing.xs,
       marginBottom: 14,
     },
     avatar: { width: "100%", height: "100%", borderRadius: 50 },
@@ -351,7 +351,7 @@ function makeStyles(c) {
       maxWidth: 320,
     },
     joined: {
-      marginTop: 8,
+      marginTop: spacing.sm,
       fontSize: 11,
       color: c.textMuted,
       fontFamily: c.fontBody,
@@ -405,7 +405,7 @@ function makeStyles(c) {
       fontSize: 15,
       color: c.textPrimary,
       fontFamily: c.fontBodyBold,
-      marginBottom: 4,
+      marginBottom: spacing.xs,
       letterSpacing: 0.3,
     },
     emptyTxt: {
@@ -423,7 +423,7 @@ function makeStyles(c) {
       borderColor: c.border,
       backgroundColor: c.bgElevated,
       overflow: "hidden",
-      paddingRight: 12,
+      paddingRight: spacing.md,
     },
     coverWrap: { width: 80, overflow: "hidden" },
     listTitle: { fontSize: 14, color: c.textPrimary, fontFamily: c.fontBodySemi },

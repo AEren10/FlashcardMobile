@@ -3,7 +3,7 @@
  * route.params: { title, filter ('popular'|'newest'|'category'|'continue'), category?, accent? }
  * FlatList ile alt alta detaylı liste kartları (perf).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -148,7 +148,7 @@ export default function ListExplorerScreen({ route, navigation }) {
 
         {loading ? (
           <ScrollView
-            contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}
             showsVerticalScrollIndicator={false}
           >
             {[0, 1, 2, 3, 4, 5].map((i) => (
@@ -184,7 +184,7 @@ export default function ListExplorerScreen({ route, navigation }) {
             data={visibleLists}
             renderItem={renderItem}
             keyExtractor={keyExtractor}
-            contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 12 }}
+            contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: spacing.md }}
             showsVerticalScrollIndicator={false}
             removeClippedSubviews
             maxToRenderPerBatch={8}
@@ -223,7 +223,7 @@ const ListItem = React.memo(function ListItem({ item, fav, tint, c, s, onPress }
           )}
         </CategoryCover>
       </View>
-      <View style={{ flex: 1, paddingVertical: 4 }}>
+      <View style={{ flex: 1, paddingVertical: spacing.xs }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text style={[s.cardTitle, { flex: 1 }]} numberOfLines={1}>{item.title}</Text>
           <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
@@ -253,9 +253,9 @@ function makeStyles(c) {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
-      paddingHorizontal: 20,
-      paddingVertical: 12,
+      gap: spacing.md,
+      paddingHorizontal: spacing.xl,
+      paddingVertical: spacing.md,
     },
     back: {
       width: 38,
@@ -287,13 +287,13 @@ function makeStyles(c) {
       shadowRadius: 8,
     },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
-    searchWrap: { paddingHorizontal: 20, paddingTop: 4, paddingBottom: 8 },
+    searchWrap: { paddingHorizontal: spacing.xl, paddingTop: spacing.xs, paddingBottom: spacing.sm },
     searchBox: {
       flexDirection: "row",
       alignItems: "center",
       gap: 10,
       paddingHorizontal: 14,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       borderRadius: radius.sm,
       borderWidth: 1,
     },
@@ -306,7 +306,7 @@ function makeStyles(c) {
       backgroundColor: c.bgElevated,
       borderRadius: radius.md,
       borderWidth: 1,
-      padding: 12,
+      padding: spacing.md,
     },
     coverWrap: {
       width: 90,
@@ -338,7 +338,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
     metaTxt: {
       fontFamily: c.fontBodyMed,

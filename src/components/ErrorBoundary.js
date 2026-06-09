@@ -1,7 +1,6 @@
-import { radius } from "../../themes/tokens";
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import T from "../themes/tokens";
+import T, { radius, spacing } from "../themes/tokens";
 import Icon, { ICONS } from "./design/Icon";
 
 export default class ErrorBoundary extends React.Component {
@@ -36,14 +35,14 @@ export default class ErrorBoundary extends React.Component {
 
 // ErrorBoundary class component, useTheme kullanamaz — dark token'ları statik kullan.
 const s = StyleSheet.create({
-  wrap: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, backgroundColor: T.bgBase },
-  emoji: { marginBottom: 12, alignItems: "center" },
-  title: { fontSize: 20, fontFamily: T.fontBodyBold, marginBottom: 8, color: T.textPrimary },
-  msg: { fontSize: 14, fontFamily: T.fontBody, color: T.textSec, textAlign: "center", marginBottom: 20 },
+  wrap: { flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxl, backgroundColor: T.bgBase },
+  emoji: { marginBottom: spacing.md, alignItems: "center" },
+  title: { fontSize: 20, fontFamily: T.fontBodyBold, marginBottom: spacing.sm, color: T.textPrimary },
+  msg: { fontSize: 14, fontFamily: T.fontBody, color: T.textSec, textAlign: "center", marginBottom: spacing.xl },
   btn: {
     backgroundColor: T.accent,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
     borderRadius: radius.sm,
   },
   btnText: { color: T.textOnAccent, fontFamily: T.fontBodyBold, fontSize: 15 },

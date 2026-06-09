@@ -2,7 +2,7 @@
  * Segmented control — Claude Design v2.
  * Animated indicator slide between segments.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Pressable, Text, StyleSheet, Animated } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -72,7 +72,7 @@ const s = StyleSheet.create({
   wrap: {
     position: "relative",
     flexDirection: "row",
-    padding: 4,
+    padding: spacing.xs,
     borderRadius: radius.sm,
     borderWidth: 1,
   },
@@ -91,7 +91,7 @@ const s = StyleSheet.create({
   },
   btn: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     alignItems: "center",
     zIndex: 1,
   },

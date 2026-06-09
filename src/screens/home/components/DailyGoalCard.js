@@ -3,7 +3,7 @@
  * progress < 1: lime fill + shimmer
  * progress >= 1: yeşil success + checkmark + gentle pulse
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -180,7 +180,7 @@ const s = StyleSheet.create({
     height: 9,
     borderRadius: radius.full,
     overflow: "hidden",
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   fill: {
     height: "100%",

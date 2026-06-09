@@ -3,7 +3,7 @@
  * Variants: primary (accent fill + glow shadow), secondary (outline), ghost.
  * Premium feel: subtle inner highlight (top edge brighter).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useRef } from "react";
 import { Pressable, Animated, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -144,7 +144,7 @@ export default function PremiumButton({
 
         <View style={s.content}>
           {icon && iconPosition === "left" && (
-            <View style={{ marginRight: 8 }}>{icon}</View>
+            <View style={{ marginRight: spacing.sm }}>{icon}</View>
           )}
           <Text
             style={[
@@ -159,7 +159,7 @@ export default function PremiumButton({
             {loading ? "..." : label}
           </Text>
           {icon && iconPosition === "right" && (
-            <View style={{ marginLeft: 8 }}>{icon}</View>
+            <View style={{ marginLeft: spacing.sm }}>{icon}</View>
           )}
         </View>
       </Pressable>

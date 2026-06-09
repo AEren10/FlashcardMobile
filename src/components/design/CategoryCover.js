@@ -4,7 +4,7 @@
  * cat → chip rengi (kategori kimliği) — dual color sistem
  */
 import React from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { CATEGORIES, getCategoryAccent, getCategoryName } from "../../lib/categoryMeta";
@@ -93,7 +93,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
   },

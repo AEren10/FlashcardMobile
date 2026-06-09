@@ -2,7 +2,7 @@
  * MistakesListModal — "Sana özel liste hazırladık" celebration modal.
  * Study/Quiz sonrası, 5+ yeni kelime mistakes listesine eklenirse açılır.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import Icon, { ICONS } from "./Icon";
 import {
@@ -132,7 +132,7 @@ export default function MistakesListModal({
             otomatik çıkar.
           </Text>
 
-          <View style={{ width: "100%", marginTop: 24, gap: 10 }}>
+          <View style={{ width: "100%", marginTop: spacing.xxl, gap: 10 }}>
             <PremiumButton
               label="Şimdi Çalış"
               variant="primary"

@@ -4,7 +4,7 @@
  * Liste kartları cover gradient + chip + social proof + Çalış CTA.
  * FAB sağ alt → CreateList.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -216,7 +216,7 @@ export default function MyListsScreen() {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 160 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <FlameRefreshControl
@@ -397,8 +397,8 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
           </View>
         )}
       </CategoryCover>
-      <View style={{ padding: 16 }}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+      <View style={{ padding: spacing.lg }}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.sm }}>
           <Text style={[s.cardTitle, { flex: 1 }]} numberOfLines={1}>
             {item.title}
           </Text>
@@ -474,7 +474,7 @@ function makeStyles(c) {
       marginBottom: 10,
       marginTop: 6,
     },
-    sortRow: { flexDirection: "row", gap: 8, marginTop: 14 },
+    sortRow: { flexDirection: "row", gap: spacing.sm, marginTop: 14 },
     sortChip: {
       paddingHorizontal: 14,
       paddingVertical: 6,
@@ -488,7 +488,7 @@ function makeStyles(c) {
     divider: {
       height: 1,
       backgroundColor: c.border,
-      marginVertical: 16,
+      marginVertical: spacing.lg,
       opacity: 0.5,
     },
     card: {
@@ -505,7 +505,7 @@ function makeStyles(c) {
       top: 10,
       right: 10,
       paddingHorizontal: 9,
-      paddingVertical: 4,
+      paddingVertical: spacing.xs,
       borderRadius: radius.full,
       backgroundColor: "rgba(0,0,0,0.32)",
       borderWidth: 1,

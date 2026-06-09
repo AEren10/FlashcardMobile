@@ -3,7 +3,7 @@
  * Liste favorilerinden ayrı: tek tek kelimeler.
  * Kart: kelime + meaning + sağ üstte liste badge'i + bookmark.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -73,7 +73,7 @@ export default function FavoriteWordsScreen({ navigation }) {
 
         {loading ? (
           <ScrollView
-            contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 10 }}
+            contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: 10 }}
             showsVerticalScrollIndicator={false}
           >
             {[0, 1, 2, 3, 4].map((i) => (
@@ -112,7 +112,7 @@ export default function FavoriteWordsScreen({ navigation }) {
                 <WordCard item={item} c={c} s={s} />
               </StaggerEnter>
             )}
-            contentContainerStyle={{ padding: 20, paddingBottom: 40, gap: 10 }}
+            contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40, gap: 10 }}
             showsVerticalScrollIndicator={false}
             removeClippedSubviews
             maxToRenderPerBatch={10}
@@ -195,17 +195,17 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       fontSize: 12,
       color: c.textSec,
-      marginBottom: 4,
+      marginBottom: spacing.xs,
     },
     card: {
       backgroundColor: c.bgElevated,
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 16,
-      gap: 8,
+      padding: spacing.lg,
+      gap: spacing.sm,
     },
-    cardTop: { flexDirection: "row", alignItems: "flex-start", gap: 8 },
+    cardTop: { flexDirection: "row", alignItems: "flex-start", gap: spacing.sm },
     speakerBtn: {
       width: 36,
       height: 36,

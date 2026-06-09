@@ -2,7 +2,7 @@
  * AchievementsScreen — Tüm rozetlerin grid'i (kilitli + açık).
  * Kategoriye göre gruplanmış, tier rengiyle renklendirilmiş.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -181,8 +181,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
-      paddingVertical: 12,
-      gap: 12,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
     },
     back: {
       width: 38,
@@ -207,7 +207,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      marginBottom: 12,
+      marginBottom: spacing.md,
     },
     overallBadge: {
       width: 60,
@@ -218,7 +218,7 @@ function makeStyles(c) {
       justifyContent: "center",
     },
     overallNum: { fontSize: 28, lineHeight: 30 },
-    overallLbl: { fontSize: 12, marginTop: 4 },
+    overallLbl: { fontSize: 12, marginTop: spacing.xs },
     progressTrack: {
       height: 8,
       borderRadius: radius.full,
@@ -233,7 +233,7 @@ function makeStyles(c) {
       alignItems: "baseline",
       justifyContent: "space-between",
       marginBottom: 10,
-      paddingHorizontal: 4,
+      paddingHorizontal: spacing.xs,
     },
     catTitle: {
       fontSize: 15,
@@ -278,7 +278,7 @@ function makeStyles(c) {
       paddingVertical: 2,
       borderRadius: radius.full,
       borderWidth: 1,
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
     tierBadgeTxt: { fontSize: 9, letterSpacing: 0.5 },
   });

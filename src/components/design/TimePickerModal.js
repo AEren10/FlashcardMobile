@@ -10,7 +10,7 @@
  *   onClose()
  *   title: string
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef } from "react";
 import {
   Modal,
@@ -265,7 +265,7 @@ const s = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.55)",
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
+    padding: spacing.xxl,
   },
   card: {
     width: "100%",
@@ -277,7 +277,7 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   sub: {
     fontSize: 13,
@@ -295,7 +295,7 @@ const s = StyleSheet.create({
   },
   colon: {
     fontSize: 28,
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
   highlight: {
     position: "absolute",

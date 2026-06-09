@@ -10,7 +10,7 @@
  *   - Tap → StudyScreen(presetWords: [...random], presetMode: "review")
  *   - Şu an known word count düşükse modal "henüz yeterli kelime yok, devam et" mesajı
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -261,7 +261,7 @@ const s = StyleSheet.create({
   },
   sub: {
     fontSize: 12,
-    marginTop: 4,
+    marginTop: spacing.xs,
     lineHeight: 16,
   },
   option: {

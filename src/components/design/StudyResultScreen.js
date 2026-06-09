@@ -5,7 +5,7 @@
  * - 3 aksiyon: Favorile / Sadece Bunlardan Çalış / Bitir
  * - Bilemediklerin (default expanded) + Bildiklerin (chip list)
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useMemo, useState } from "react";
 import {
   View,
@@ -68,12 +68,12 @@ export default function StudyResultScreen({
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}>
           {/* %80+ skorda büyük "Mükemmel/Harika" overlay; düşükse klasik DonutChart hero */}
           {ratio >= 0.8 ? (
             <>
               <PerfectScoreOverlay ratio={ratio} total={total} correct={correct} />
-              <Text style={[s.sub, { marginTop: 4 }]}>{subtitleFor(ratio)}</Text>
+              <Text style={[s.sub, { marginTop: spacing.xs }]}>{subtitleFor(ratio)}</Text>
             </>
           ) : (
             <View style={s.hero}>
@@ -133,7 +133,7 @@ export default function StudyResultScreen({
                   <Text style={s.sectionTitle}>Bilemediklerin</Text>
                   <Text style={s.sectionCount}>{wrongWords.length}</Text>
                 </View>
-                <View style={{ marginTop: 10, gap: 8 }}>
+                <View style={{ marginTop: 10, gap: spacing.sm }}>
                   {wrongWords.slice(0, 20).map((w) => (
                     <WrongCard key={w.id} word={w} c={c} s={s} />
                   ))}
@@ -154,7 +154,7 @@ export default function StudyResultScreen({
                   <Text style={s.sectionTitle}>Bildiklerin</Text>
                   <Text style={s.sectionCount}>{correctWords.length}</Text>
                 </View>
-                <View style={{ marginTop: 10, gap: 8 }}>
+                <View style={{ marginTop: 10, gap: spacing.sm }}>
                   {correctWords.slice(0, 20).map((w) => (
                     <WrongCard key={w.id} word={w} c={c} s={s} />
                   ))}
@@ -167,7 +167,7 @@ export default function StudyResultScreen({
           )}
 
           {/* Action buttons */}
-          <View style={{ gap: 10, marginTop: 24 }}>
+          <View style={{ gap: 10, marginTop: spacing.xxl }}>
             {wrongWords.length > 0 && (
               <PremiumButton
                 label={favorited ? "✓ Favorilere Eklendi" : "Bilemediklerimi Favorile"}
@@ -288,23 +288,23 @@ function makeStyles(c) {
       borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 12,
+      padding: spacing.md,
       alignItems: "center",
     },
-    statIcon: { fontSize: 18, marginBottom: 4 },
+    statIcon: { fontSize: 18, marginBottom: spacing.xs },
     statVal: { fontFamily: c.fontNum, fontSize: 18, color: c.textPrimary },
     statLbl: { fontFamily: c.fontBody, fontSize: 10, color: c.textSec, marginTop: 2 },
 
     infoCard: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       backgroundColor: c.accentGlow,
       borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.borderAccent,
       padding: 14,
-      marginTop: 16,
+      marginTop: spacing.lg,
     },
     infoIcon: {
       width: 36,
@@ -336,7 +336,7 @@ function makeStyles(c) {
     wrongCard: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       padding: 14,
       backgroundColor: c.errorDim,
       borderRadius: radius.sm,
@@ -378,7 +378,7 @@ function makeStyles(c) {
       fontSize: 12,
       color: c.textMuted,
       textAlign: "center",
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
   });
 }

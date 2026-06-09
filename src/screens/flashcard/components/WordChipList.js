@@ -1,7 +1,7 @@
 /**
  * WordChipList — horizontal scroll, aktif kelimeyi vurgular.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -46,14 +46,14 @@ function makeStyles(c) {
       letterSpacing: 1,
       textTransform: "uppercase",
       paddingHorizontal: 22,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     chip: {
       backgroundColor: c.bgElevated,
       paddingHorizontal: 14,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderRadius: radius.full,
-      marginRight: 8,
+      marginRight: spacing.sm,
       borderWidth: 1,
       borderColor: c.border,
     },

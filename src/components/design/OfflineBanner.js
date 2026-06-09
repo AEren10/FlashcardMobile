@@ -1,4 +1,5 @@
 /**
+import { spacing } from "../../themes/tokens";
  * OfflineBanner — internet kesilince üstte slide-down bant.
  * NetInfo subscription, useNativeDriver transform.
  */
@@ -64,9 +65,9 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
   },
   dot: { color: "#0B0D14", fontSize: 10 },
   txt: { color: "#0B0D14", fontSize: 12, letterSpacing: 0.3 },

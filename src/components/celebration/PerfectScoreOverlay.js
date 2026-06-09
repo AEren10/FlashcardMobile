@@ -8,7 +8,7 @@
  *
  * Sonuç ekranının üstüne yerleştirilir (mevcut DonutChart vs altta kalır).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -187,8 +187,8 @@ export default function PerfectScoreOverlay({ ratio, total = 0, correct = 0 }) {
 const s = StyleSheet.create({
   wrap: {
     alignItems: "center",
-    paddingTop: 12,
-    paddingBottom: 24,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   halo: {
     position: "absolute",
@@ -214,8 +214,8 @@ const s = StyleSheet.create({
     marginBottom: 14,
   },
   tag: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 10,
@@ -231,7 +231,7 @@ const s = StyleSheet.create({
   },
   sub: {
     fontSize: 13,
-    marginTop: 4,
+    marginTop: spacing.xs,
     textAlign: "center",
   },
 });

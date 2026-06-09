@@ -3,7 +3,7 @@
  * Title + horizontal scroll + mini liste kartları.
  */
 import React, { memo } from "react";
-import { fontSize, radius } from "../../../themes/tokens";
+import { fontSize, radius, spacing } from "../../../themes/tokens";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -72,7 +72,7 @@ export default function DiscoveryRow({
         scrollEventThrottle={16}
         decelerationRate="fast"
         snapToAlignment="start"
-        contentContainerStyle={{ gap: 12, paddingTop: 4, paddingBottom: 6, paddingRight: 8 }}
+        contentContainerStyle={{ gap: spacing.md, paddingTop: spacing.xs, paddingBottom: 6, paddingRight: spacing.sm }}
       >
         {loading
           ? Array.from({ length: skeletonCount }).map((_, i) => (
@@ -92,7 +92,7 @@ const SkelCard = memo(function SkelCard({ c }) {
   return (
     <View style={[s.card, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
       <Skeleton width="100%" height={100} radius={0} />
-      <View style={{ padding: 12, gap: 8 }}>
+      <View style={{ padding: spacing.md, gap: spacing.sm }}>
         <Skeleton width="75%" height={12} radius={6} />
         <Skeleton width="50%" height={9} radius={4} />
       </View>
@@ -126,7 +126,7 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
           <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
         </View>
         <Text
-          style={{ fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 4 }}
+          style={{ fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: spacing.xs }}
         >
           {item.word_count ?? "?"} kelime
           {item.study_count > 0 ? ` · ${item.study_count}` : ""}
@@ -146,7 +146,7 @@ const s = StyleSheet.create({
   title: { fontSize: fontSize.xl, lineHeight: 24, letterSpacing: 0.1 },
   sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },
   seeAll: {
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: radius.full,
     borderWidth: 1,

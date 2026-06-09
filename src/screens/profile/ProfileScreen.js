@@ -3,7 +3,7 @@
  * Ayarlar → sağ üst ⚙️ → SettingsScreen
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import { View, Text, StyleSheet, ScrollView, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -85,7 +85,7 @@ export default function ProfileScreen() {
   if (isGuestUser()) {
     return (
       <View style={s.root}>
-        <SafeAreaView style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32 }}>
+        <SafeAreaView style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxxl }}>
           <Icon d={ICONS.user} size={64} stroke="#A69E90" sw={1.5} />
           <Text style={s.guestTitle}>Profil</Text>
           <Text style={s.guestSub}>Bu özelliği kullanmak için kayıt ol</Text>
@@ -129,7 +129,7 @@ export default function ProfileScreen() {
           </Pressable>
         </View>
 
-        <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 0, paddingBottom: bottomPad }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingTop: 0, paddingBottom: bottomPad }}>
           {/* Avatar + name + level */}
           <View style={s.headerBlock}>
             <View style={s.avatarWrap}>
@@ -264,7 +264,7 @@ export default function ProfileScreen() {
                 <Text style={s.listsEmptyHint}>Liste oluştur ve paylaş →</Text>
               </Pressable>
             ) : (
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 8 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: spacing.md, paddingRight: spacing.sm }}>
                 {visibleLists.map((item, i) => (
                   <StaggerEnter key={String(item.id)} index={i} delay={50}>
                     <Pressable
@@ -273,7 +273,7 @@ export default function ProfileScreen() {
                     >
                       <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={72} showLabel={false} />
                       <View style={s.listCardBody}>
-                        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
                           <Text style={[s.listCardTitle, { flex: 1 }]} numberOfLines={1}>{item.title}</Text>
                           <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
                         </View>
@@ -323,53 +323,53 @@ function BadgeCard({ title, iconPath, color, value, hint, locked, onPress, c, s 
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8 },
-    topBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.full, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border },
+    topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: spacing.xl, paddingVertical: spacing.sm },
+    topBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: spacing.md, paddingVertical: 7, borderRadius: radius.full, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border },
     topBtnTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textSec },
     gearBtn: { width: 42, height: 42, borderRadius: radius.sm, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
-    headerBlock: { alignItems: "center", paddingTop: 4, paddingBottom: 16 },
+    headerBlock: { alignItems: "center", paddingTop: spacing.xs, paddingBottom: spacing.lg },
     avatarWrap: { shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 4, marginBottom: 14 },
     avatarGrad: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center" },
     avatarImg: { width: 84, height: 84, borderRadius: 42 },
     avatarTxt: { fontFamily: c.fontNum, fontSize: fontSize["3xl"], color: "#FFFFFF" },
     name: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 14 },
-    levelChip: { marginTop: 10, paddingLeft: 6, paddingRight: 14, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1, flexDirection: "row", alignItems: "center", gap: 8 },
+    levelChip: { marginTop: 10, paddingLeft: 6, paddingRight: 14, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1, flexDirection: "row", alignItems: "center", gap: spacing.sm },
     levelIconWrap: { width: 24, height: 24, borderRadius: radius.sm, alignItems: "center", justifyContent: "center" },
     levelTitle: { fontSize: fontSize.md, letterSpacing: 0.3 },
     levelDot: { width: 3, height: 3, borderRadius: 1.5 },
     levelSub: { fontSize: fontSize.sm, letterSpacing: 0.2, opacity: 0.85 },
     // streak hero
-    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 14 },
+    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1, borderColor: c.border, padding: spacing.lg, marginBottom: 14 },
     streakNum: { fontFamily: c.fontNum, fontSize: fontSize["2xl"], color: c.textPrimary, lineHeight: 30 },
     streakCap: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 2 },
-    listChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: 8 },
+    listChip: { flexDirection: "row", alignItems: "center", gap: spacing.xs, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: spacing.sm },
     listChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent },
     // stat tiles
-    tileRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
-    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden" },
+    tileRow: { flexDirection: "row", gap: 10, marginBottom: spacing.lg },
+    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: spacing.md, alignItems: "center", overflow: "hidden" },
     tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: radius.full, opacity: 0.9 },
     tileVal: { fontFamily: c.fontNum, fontSize: fontSize["2xl"] },
     tileLbl: { fontFamily: c.fontBody, fontSize: fontSize.xs, color: c.textSec, marginTop: 2 },
     // error
-    errorBanner: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: radius.sm, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
+    errorBanner: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 10, paddingHorizontal: 14, borderRadius: radius.sm, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
     errorTxt: { flex: 1, fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
     // sections
     sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 18, marginBottom: 10, paddingHorizontal: 2 },
     sectionTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, color: c.textPrimary, letterSpacing: 0.2 },
     sectionLink: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.accent },
     // badges
-    badgeRow: { flexDirection: "row", gap: 12 },
+    badgeRow: { flexDirection: "row", gap: spacing.md },
     badgeCard: { flex: 1, borderRadius: radius.md, borderWidth: 1, padding: 14, alignItems: "flex-start", minHeight: 140 },
     badgeIconBox: { width: 42, height: 42, borderRadius: radius.sm, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 10 },
-    badgeTitle: { fontSize: fontSize.md, letterSpacing: 0.2, marginBottom: 4 },
+    badgeTitle: { fontSize: fontSize.md, letterSpacing: 0.2, marginBottom: spacing.xs },
     badgeValue: { fontSize: fontSize.md, marginBottom: 6 },
     badgeHint: { fontSize: fontSize.sm, lineHeight: 14 },
     recentBadges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
     recentBadgePill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1 },
     recentBadgeTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
     // lists
-    listsEmpty: { borderRadius: radius.md, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
-    listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
+    listsEmpty: { borderRadius: radius.md, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: spacing.xl, alignItems: "center", gap: spacing.xs },
+    listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.md, color: c.textSec, marginTop: spacing.xs },
     listsEmptyHint: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textMuted },
     listCard: { width: 170, borderRadius: radius.sm, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated, overflow: "hidden", shadowColor: c.cobalt, shadowOpacity: 0.15, shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, elevation: 2 },
     listCardBody: { padding: 10, gap: 6 },
@@ -379,9 +379,9 @@ function makeStyles(c) {
     listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: radius.full, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
     listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
     // guest
-    guestTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 12 },
-    guestSub: { fontFamily: c.fontBody, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
-    primaryBtn: { marginTop: 24, backgroundColor: c.accent, borderRadius: radius.sm, paddingVertical: 14, paddingHorizontal: 32 },
+    guestTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: spacing.md },
+    guestSub: { fontFamily: c.fontBody, fontSize: fontSize.md, color: c.textSec, marginTop: spacing.xs },
+    primaryBtn: { marginTop: spacing.xxl, backgroundColor: c.accent, borderRadius: radius.sm, paddingVertical: 14, paddingHorizontal: spacing.xxxl },
     primaryBtnTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: fontSize.lg },
   });
 }

@@ -6,7 +6,7 @@
  *
  * onGraduate ve onReport callback'leri opsiyonel — props olarak gelmezse o seçenek görünmez.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useState, useRef, useEffect } from "react";
 import { Pressable, View, Text, StyleSheet, Modal, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -171,16 +171,16 @@ const s = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 32,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxxl,
   },
   handle: {
     width: 40,
     height: 4,
     borderRadius: 2,
     alignSelf: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
     opacity: 0.4,
   },
   item: {

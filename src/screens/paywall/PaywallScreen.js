@@ -6,7 +6,7 @@
  *
  * Features listesi free vs pro karşılaştırması yapar.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -182,7 +182,7 @@ export default function PaywallScreen({ navigation, route }) {
           </Pressable>
         </View>
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 32 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: spacing.xxxl }} showsVerticalScrollIndicator={false}>
           {/* Hero */}
           <View style={s.hero}>
             <View style={[s.crown, { backgroundColor: c.accentGlow, borderColor: c.borderAccent }]}>
@@ -284,7 +284,7 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 18,
-    paddingTop: 8,
+    paddingTop: spacing.sm,
   },
   close: {
     width: 36,
@@ -296,8 +296,8 @@ const s = StyleSheet.create({
   restore: { fontSize: 13 },
   hero: {
     alignItems: "center",
-    paddingTop: 16,
-    paddingBottom: 24,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
     paddingHorizontal: 22,
   },
   crown: {
@@ -307,10 +307,10 @@ const s = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   title: { fontSize: 30, lineHeight: 34, textAlign: "center" },
-  subtitle: { fontSize: 14, lineHeight: 20, textAlign: "center", marginTop: 8, maxWidth: 300 },
+  subtitle: { fontSize: 14, lineHeight: 20, textAlign: "center", marginTop: spacing.sm, maxWidth: 300 },
   features: {
     paddingHorizontal: 22,
     gap: 10,
@@ -318,7 +318,7 @@ const s = StyleSheet.create({
   feature: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
   },
   featureIcon: {
     width: 26,
@@ -337,7 +337,7 @@ const s = StyleSheet.create({
   pack: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    padding: spacing.lg,
     borderRadius: radius.md,
     borderWidth: 2,
     overflow: "hidden",
@@ -368,7 +368,7 @@ const s = StyleSheet.create({
     position: "absolute",
     top: -10,
     right: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 3,
     borderRadius: radius.full,
   },
@@ -376,7 +376,7 @@ const s = StyleSheet.create({
   cta: {
     marginHorizontal: 22,
     marginTop: 22,
-    paddingVertical: 16,
+    paddingVertical: spacing.lg,
     borderRadius: radius.md,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },
@@ -387,8 +387,8 @@ const s = StyleSheet.create({
   ctaText: { fontSize: 15, letterSpacing: 0.3 },
   legal: {
     fontSize: 11,
-    marginHorizontal: 32,
-    marginTop: 16,
+    marginHorizontal: spacing.xxxl,
+    marginTop: spacing.lg,
     textAlign: "center",
     lineHeight: 16,
   },

@@ -1,4 +1,5 @@
 /**
+import { spacing } from "../../themes/tokens";
  * AchievementModal — rozet kazandığında full-screen celebration.
  * Sequence: backdrop fade → rozet fly-in spring → 3 katman radial wave → text fade → confetti → haptic
  *
@@ -199,7 +200,7 @@ export default function AchievementModal({ visible, badge, onClose }) {
         </Animated.View>
 
         {/* CTA */}
-        <Animated.View style={{ opacity: buttonOp, marginTop: 32 }}>
+        <Animated.View style={{ opacity: buttonOp, marginTop: spacing.xxxl }}>
           <PremiumButton
             label="Harika!"
             variant="primary"
@@ -244,7 +245,7 @@ const s = StyleSheet.create({
   label: {
     fontSize: 11,
     letterSpacing: 2,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   title: {
     fontSize: 34,
@@ -253,7 +254,7 @@ const s = StyleSheet.create({
   },
   desc: {
     fontSize: 14,
-    marginTop: 8,
+    marginTop: spacing.sm,
     textAlign: "center",
     maxWidth: 260,
     lineHeight: 20,

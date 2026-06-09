@@ -1,7 +1,7 @@
 /**
  * RoadmapHeader — kullanıcının mevcut seviye + XP progress bar + sonraki ünvan.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -76,7 +76,7 @@ export default function RoadmapHeader({ level }) {
             sonra:{" "}
           </Text>
           <Icon d={level.nextMilestone.icon || ICONS.star} size={13} stroke={level.nextMilestone.color} sw={1.6} />
-          <Text style={[s.next, { color: level.nextMilestone.color, fontFamily: c.fontBody, marginLeft: 4 }]}>
+          <Text style={[s.next, { color: level.nextMilestone.color, fontFamily: c.fontBody, marginLeft: spacing.xs }]}>
             {level.nextMilestone.title}
           </Text>
         </View>
@@ -87,8 +87,8 @@ export default function RoadmapHeader({ level }) {
 
 const s = StyleSheet.create({
   wrap: {
-    margin: 20,
-    padding: 20,
+    margin: spacing.xl,
+    padding: spacing.xl,
     borderRadius: radius.lg,
     borderWidth: 1,
     overflow: "hidden",

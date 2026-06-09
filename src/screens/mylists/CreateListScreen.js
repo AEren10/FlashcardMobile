@@ -2,7 +2,7 @@
  * CreateListScreen — Premium Dark redesign.
  * Form state → useListEditor, image → useImageUpload.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -477,7 +477,7 @@ function makeStyles(c) {
   title: { fontSize: 18, color: c.textPrimary, fontFamily: c.fontBodyBold },
   saveBtn: {
     borderRadius: radius.sm,
-    paddingVertical: 8,
+    paddingVertical: spacing.sm,
     paddingHorizontal: 18,
     minWidth: 70,
     alignItems: "center",
@@ -509,7 +509,7 @@ function makeStyles(c) {
     color: c.textPrimary,
     fontFamily: c.fontBodySemi,
     borderBottomWidth: 2,
-    paddingBottom: 8,
+    paddingBottom: spacing.sm,
     paddingTop: 0,
   },
 
@@ -525,7 +525,7 @@ function makeStyles(c) {
     alignItems: "center",
   },
   imagePreview: { width: "100%", height: "100%" },
-  imageEmpty: { alignItems: "center", gap: 8 },
+  imageEmpty: { alignItems: "center", gap: spacing.sm },
   imageEmojiIcon: { fontSize: 32, opacity: 0.7 },
   imageEmptyText: { fontSize: 12, color: c.textMuted, fontFamily: c.fontBody },
   imageOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.5)", alignItems: "center", justifyContent: "center" },
@@ -536,10 +536,10 @@ function makeStyles(c) {
     gap: 10,
     backgroundColor: c.accentGlow,
     borderRadius: radius.sm,
-    padding: 12,
+    padding: spacing.md,
     borderWidth: 1,
     borderColor: c.borderAccent,
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   tipText: { flex: 1, fontSize: 12, color: c.textPrimary, fontFamily: c.fontBody, lineHeight: 18 },
 
@@ -548,10 +548,10 @@ function makeStyles(c) {
     alignItems: "center",
     justifyContent: "space-between",
     marginTop: 10,
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   bulkBtn: {
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
     paddingVertical: 6,
     borderRadius: radius.full,
     backgroundColor: c.accentGlow,
@@ -567,14 +567,14 @@ function makeStyles(c) {
   wordRow: {
     backgroundColor: c.bgElevated,
     borderRadius: radius.md,
-    padding: 16,
+    padding: spacing.lg,
     paddingLeft: 14,
     flexDirection: "row",
     alignItems: "flex-start",
     gap: 14,
     borderWidth: 1,
     borderColor: c.border,
-    marginBottom: 12,
+    marginBottom: spacing.md,
     // subtle elevation
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -616,7 +616,7 @@ function makeStyles(c) {
   addWordText: { fontSize: 14, color: c.accent, fontFamily: c.fontBodyBold },
 
   toggleRow: {
-    marginTop: 16,
+    marginTop: spacing.lg,
     backgroundColor: c.bgElevated,
     borderRadius: radius.sm,
     padding: 14,

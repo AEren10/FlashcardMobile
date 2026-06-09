@@ -9,7 +9,7 @@
  *   visible: bool
  *   onDismiss(): kapatma + storage yazma
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import {
   Modal,
@@ -335,7 +335,7 @@ const s = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.xxxl,
   },
   halo: {
     position: "absolute",
@@ -368,7 +368,7 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   tagChip: {
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
     paddingVertical: 5,
     borderRadius: radius.full,
     borderWidth: 1,
@@ -383,14 +383,14 @@ const s = StyleSheet.create({
     lineHeight: 36,
     textAlign: "center",
     marginBottom: 10,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
   },
   sub: {
     fontSize: 14,
     lineHeight: 20,
     textAlign: "center",
     maxWidth: 300,
-    marginBottom: 16,
+    marginBottom: spacing.lg,
   },
   nextHint: {
     paddingHorizontal: 14,

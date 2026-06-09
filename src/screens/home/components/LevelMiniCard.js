@@ -1,4 +1,4 @@
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -106,7 +106,7 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
 
 const s = StyleSheet.create({
   wrap: {
-    marginTop: 12,
+    marginTop: spacing.md,
     borderRadius: radius.md,
     borderWidth: 1.5,
     padding: 14,
@@ -121,7 +121,7 @@ const s = StyleSheet.create({
     borderRadius: 70,
     opacity: 0.7,
   },
-  row: { flexDirection: "row", alignItems: "center", gap: 12 },
+  row: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   badge: {
     width: 42,
     height: 42,
@@ -130,11 +130,11 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm },
   lvChip: {
     fontSize: 11,
     letterSpacing: 0.5,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: radius.full,
     overflow: "hidden",

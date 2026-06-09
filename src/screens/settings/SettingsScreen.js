@@ -2,7 +2,7 @@
  * SettingsScreen — tüm ayarları tek yerde topla.
  * Görünüm, Dil, Hatırlatıcı, Gizlilik, Hesap.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -151,7 +151,7 @@ export default function SettingsScreen({ navigation }) {
           <View style={{ width: 38 }} />
         </View>
 
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 60 }}>
           <Section title="Abonelik" c={c} s={s}>
             <Row
               iconPath={ICONS.crown}
@@ -286,7 +286,7 @@ export default function SettingsScreen({ navigation }) {
 
 function Section({ title, children, c, s }) {
   return (
-    <View style={{ marginBottom: 24 }}>
+    <View style={{ marginBottom: spacing.xxl }}>
       <Text style={s.sectionTitle}>{title.toUpperCase()}</Text>
       <View style={s.sectionCard}>{children}</View>
     </View>
@@ -333,8 +333,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
-      paddingVertical: 12,
-      gap: 12,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
     },
     back: {
       width: 38,
@@ -359,7 +359,7 @@ function makeStyles(c) {
       color: c.textMuted,
       letterSpacing: 1.4,
       marginBottom: 10,
-      marginLeft: 4,
+      marginLeft: spacing.xs,
     },
     sectionCard: {
       backgroundColor: c.bgElevated,
@@ -371,8 +371,8 @@ function makeStyles(c) {
     row: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
-      paddingHorizontal: 16,
+      gap: spacing.md,
+      paddingHorizontal: spacing.lg,
       paddingVertical: 14,
       borderBottomWidth: 1,
       borderBottomColor: c.border,
@@ -385,7 +385,7 @@ function makeStyles(c) {
       textAlign: "center",
       fontSize: 11,
       color: c.textMuted,
-      marginTop: 12,
+      marginTop: spacing.md,
     },
   });
 }

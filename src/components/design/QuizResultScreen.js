@@ -10,7 +10,7 @@
  *
  * Animation: counter tick + stagger entrance + confetti (≥80%)
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -126,7 +126,7 @@ export default function QuizResultScreen({
   return (
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 30 }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 30 }}>
           {/* Perfect/Excellent — büyük başlık + glow + konfeti */}
           <PerfectScoreOverlay ratio={ratio} total={total} correct={correct} />
 
@@ -260,7 +260,7 @@ export default function QuizResultScreen({
                   <Text style={s.sectionTitle}>Bunları biliyorsun</Text>
                   <Text style={s.sectionCount}>{correctWords.length}</Text>
                 </View>
-                <View style={{ marginTop: 12, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+                <View style={{ marginTop: spacing.md, flexDirection: "row", flexWrap: "wrap", gap: spacing.sm }}>
                   {correctWords.slice(0, 20).map((w) => (
                     <View
                       key={w.id}
@@ -293,7 +293,7 @@ export default function QuizResultScreen({
                   <Text style={s.sectionTitle}>Şurada takıldın</Text>
                   <Text style={s.sectionCount}>{wrongWords.length}</Text>
                 </View>
-                <View style={{ marginTop: 12, gap: 8 }}>
+                <View style={{ marginTop: spacing.md, gap: spacing.sm }}>
                   {wrongWords.slice(0, 10).map((w) => (
                     <View
                       key={w.id}
@@ -332,7 +332,7 @@ export default function QuizResultScreen({
 
           {/* Save wrongs CTA */}
           {wrongWords.length > 0 && (
-            <View style={{ marginTop: 16 }}>
+            <View style={{ marginTop: spacing.lg }}>
               <PremiumButton
                 label={favorited ? "✓ Favorilere Eklendi" : "Bilemediklerimi Favorile"}
                 variant={favorited ? "secondary" : "primary"}
@@ -394,7 +394,7 @@ function StatPill({ icon, value, label, accent, c, s }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    hero: { alignItems: "center", paddingVertical: 20 },
+    hero: { alignItems: "center", paddingVertical: spacing.xl },
     medalBox: {
       width: 96,
       height: 96,
@@ -407,7 +407,7 @@ function makeStyles(c) {
       shadowOpacity: 0.5,
       shadowRadius: 40,
       elevation: 12,
-      marginBottom: 16,
+      marginBottom: spacing.lg,
     },
     medalEmoji: { fontSize: 52 },
     scoreNum: {
@@ -422,7 +422,7 @@ function makeStyles(c) {
       fontFamily: c.fontDisplay,
       fontSize: 30,
       color: c.textPrimary,
-      marginTop: 16,
+      marginTop: spacing.lg,
       textAlign: "center",
     },
     subtitle: {
@@ -437,8 +437,8 @@ function makeStyles(c) {
 
     statsRow: {
       flexDirection: "row",
-      gap: 8,
-      marginTop: 20,
+      gap: spacing.sm,
+      marginTop: spacing.xl,
     },
     statPill: {
       flex: 1,
@@ -463,7 +463,7 @@ function makeStyles(c) {
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 16,
+      padding: spacing.lg,
     },
     sectionHead: { flexDirection: "row", alignItems: "center", gap: 10 },
     sectionIcon: {
@@ -492,7 +492,7 @@ function makeStyles(c) {
     },
     wordChipTxt: { fontFamily: c.fontBodySemi, fontSize: 13 },
     wrongRow: {
-      padding: 12,
+      padding: spacing.md,
       borderRadius: radius.sm,
       borderWidth: 1,
       flexDirection: "row",
@@ -507,20 +507,20 @@ function makeStyles(c) {
       textAlign: "right",
       lineHeight: 16,
     },
-    moreTxt: { fontFamily: c.fontBody, fontSize: 12, marginTop: 4 },
+    moreTxt: { fontFamily: c.fontBody, fontSize: 12, marginTop: spacing.xs },
 
-    ctaRow: { flexDirection: "row", gap: 12, marginTop: 16 },
+    ctaRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.lg },
 
     infoCard: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       backgroundColor: c.accentGlow,
       borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.borderAccent,
       padding: 14,
-      marginTop: 16,
+      marginTop: spacing.lg,
     },
     infoIcon: {
       width: 36,
@@ -541,7 +541,7 @@ function makeStyles(c) {
     shareCard: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       borderRadius: radius.sm,
       borderWidth: 1,
       padding: 14,

@@ -10,7 +10,7 @@
  *
  * Mod tercihi AsyncStorage'da '@fc:homeMode' altında tutulur.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -134,14 +134,14 @@ export default function ExamHomeScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <FlameRefreshControl refreshing={refreshing} onRefresh={refresh} />
           }
         >
           {loading ? (
-            <View style={{ marginBottom: 4 }}>
+            <View style={{ marginBottom: spacing.xs }}>
               <SkeletonStatRow />
             </View>
           ) : (

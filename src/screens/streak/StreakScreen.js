@@ -2,7 +2,7 @@
  * StreakScreen — Claude Design v2 spec.
  * Hero flame (animated float) + 3 stat tiles with trends + 35-day grid + badges.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -108,7 +108,7 @@ export default function StreakScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 180 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 180 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
@@ -198,7 +198,7 @@ export default function StreakScreen({ navigation }) {
           </Pressable>
 
           {/* Bu hafta — 7 gün yuvarlaklar */}
-          <View style={{ marginTop: 8 }}>
+          <View style={{ marginTop: spacing.sm }}>
             <Last7DaysDots days={days} />
           </View>
 
@@ -406,7 +406,7 @@ function mix(base, accent, t) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    header: { flexDirection: "row", alignItems: "center", marginBottom: 4 },
+    header: { flexDirection: "row", alignItems: "center", marginBottom: spacing.xs },
     back: {
       width: 34,
       height: 34,
@@ -422,28 +422,28 @@ function makeStyles(c) {
       fontFamily: c.fontBodySemi,
       color: c.textSec,
     },
-    hero: { alignItems: "center", paddingVertical: 16 },
+    hero: { alignItems: "center", paddingVertical: spacing.lg },
     flame: { fontSize: 64, textShadowColor: c.warning, textShadowRadius: 24 },
     heroNum: {
       fontFamily: c.fontNum,
       fontSize: 64,
       lineHeight: 64,
       color: c.textPrimary,
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
-    heroCap: { fontFamily: c.fontBody, fontSize: 12, color: c.textSec, marginTop: 4 },
+    heroCap: { fontFamily: c.fontBody, fontSize: 12, color: c.textSec, marginTop: spacing.xs },
     heroNext: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted, marginTop: 10 },
 
-    tileRow: { flexDirection: "row", gap: 12, marginTop: 10 },
+    tileRow: { flexDirection: "row", gap: spacing.md, marginTop: 10 },
     freezeChip: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
-      paddingVertical: 12,
+      gap: spacing.md,
+      paddingVertical: spacing.md,
       paddingHorizontal: 14,
       borderRadius: radius.sm,
       borderWidth: 1,
-      marginTop: 12,
+      marginTop: spacing.md,
     },
     freezeTitle: { fontSize: 14 },
     freezeSub: { fontSize: 11, marginTop: 2, lineHeight: 14 },
@@ -453,7 +453,7 @@ function makeStyles(c) {
       borderRadius: radius.md,
       borderWidth: 1.5,
       borderColor: c.border,
-      padding: 16,
+      padding: spacing.lg,
       paddingTop: 14,
       alignItems: "center",
       overflow: "hidden",
@@ -474,7 +474,7 @@ function makeStyles(c) {
     tileLbl: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec, marginTop: 2 },
     trendChip: {
       marginTop: 9,
-      paddingHorizontal: 8,
+      paddingHorizontal: spacing.sm,
       paddingVertical: 3,
       borderRadius: radius.full,
     },
@@ -486,7 +486,7 @@ function makeStyles(c) {
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 16,
+      padding: spacing.lg,
     },
     gridHead: {
       flexDirection: "row",
@@ -510,7 +510,7 @@ function makeStyles(c) {
       fontFamily: c.fontBodyBold,
       fontSize: 17,
       color: c.textPrimary,
-      marginTop: 24,
+      marginTop: spacing.xxl,
       marginBottom: 14,
     },
     badgeRow: { flexDirection: "row", gap: 10 },

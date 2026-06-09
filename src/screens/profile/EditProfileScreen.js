@@ -2,7 +2,7 @@
  * EditProfileScreen — display_name + avatar düzenleme.
  * profiles tablosuna update.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -197,7 +197,7 @@ export default function EditProfileScreen({ navigation }) {
             <Text style={s.emailTxt}>{email || "—"}</Text>
 
             {/* Save */}
-            <View style={{ marginTop: 32 }}>
+            <View style={{ marginTop: spacing.xxxl }}>
               <PremiumButton
                 label="Kaydet"
                 variant="primary"
@@ -222,8 +222,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
-      paddingVertical: 12,
-      gap: 12,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
     },
     iconBtn: {
       width: 38,
@@ -242,7 +242,7 @@ function makeStyles(c) {
     },
     avatarWrap: {
       alignSelf: "center",
-      marginTop: 12,
+      marginTop: spacing.md,
       marginBottom: 28,
       width: 110,
       height: 110,
@@ -283,11 +283,11 @@ function makeStyles(c) {
       letterSpacing: 1.5,
       color: c.textMuted,
       fontFamily: c.fontBodyBold,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     input: {
       borderBottomWidth: 2,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       fontSize: 18,
       color: c.textPrimary,
       fontFamily: c.fontBodySemi,

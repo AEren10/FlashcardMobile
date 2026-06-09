@@ -5,7 +5,7 @@
  * Şimdilik UI seçimi, asıl filtering useStudyEngine'in client-side filter'ında.
  * Server-side filtering Sprint sonraki turn'de (yeni RPC: get_study_words).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Animated } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -142,16 +142,16 @@ export default function StudyModeModal({ visible, onPick, onClose }) {
 }
 
 const s = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center", padding: 24 },
+  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", alignItems: "center", justifyContent: "center", padding: spacing.xxl },
   card: { width: "100%", maxWidth: 400, borderRadius: radius.lg, borderWidth: 1, padding: 22 },
   title: { fontSize: 26, textAlign: "center" },
-  sub: { fontSize: 13, textAlign: "center", marginTop: 4, marginBottom: 14 },
+  sub: { fontSize: 13, textAlign: "center", marginTop: spacing.xs, marginBottom: 14 },
   mode: { borderRadius: radius.sm, borderWidth: 1, overflow: "hidden", padding: 14 },
-  modeRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  modeRow: { flexDirection: "row", alignItems: "center", gap: spacing.md },
   modeTitle: { fontSize: 15 },
   modeDesc: { fontSize: 11.5, marginTop: 2, lineHeight: 15 },
   badge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: radius.full },
   badgeTxt: { fontSize: 9, letterSpacing: 0.3 },
-  cancel: { marginTop: 14, alignItems: "center", paddingVertical: 8 },
+  cancel: { marginTop: 14, alignItems: "center", paddingVertical: spacing.sm },
   cancelTxt: { fontSize: 13 },
 });

@@ -2,7 +2,7 @@
  * RoadmapScreen — kullanıcının seviye yolu (Duolingo path tarzı).
  * LEVELS milestone'ları zigzag layout. Tamamlanmış / aktif / locked durumları.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -54,10 +54,10 @@ export default function RoadmapScreen({ navigation }) {
         </View>
 
         {loading ? (
-          <View style={{ padding: 22, gap: 16 }}>
+          <View style={{ padding: 22, gap: spacing.lg }}>
             <Skeleton height={130} radius={20} />
             {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} height={80} radius={20} style={{ marginTop: 8 }} />
+              <Skeleton key={i} height={80} radius={20} style={{ marginTop: spacing.sm }} />
             ))}
           </View>
         ) : (
@@ -105,8 +105,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
-      paddingVertical: 12,
-      gap: 12,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
     },
     back: {
       width: 38,

@@ -4,7 +4,7 @@
  *   - "paired": her satır "word - meaning" (ayraç: - , : | tab — )
  *   - "en-only": her satır 1 İngilizce kelime, anlamı sözlükten otomatik gelir
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useState } from "react";
 import {
   Modal,
@@ -197,7 +197,7 @@ const s = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: spacing.md,
     paddingHorizontal: 18,
     paddingVertical: 14,
     borderBottomWidth: 1,
@@ -218,13 +218,13 @@ const s = StyleSheet.create({
     marginTop: 14,
     borderRadius: radius.sm,
     borderWidth: 1,
-    padding: 4,
-    gap: 4,
+    padding: spacing.xs,
+    gap: spacing.xs,
   },
   segBtn: {
     flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: spacing.md,
     borderRadius: radius.sm,
     alignItems: "center",
     borderWidth: 1,
@@ -237,8 +237,8 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     marginHorizontal: 18,
-    marginTop: 12,
-    padding: 12,
+    marginTop: spacing.md,
+    padding: spacing.md,
     borderRadius: radius.sm,
     borderWidth: 1,
   },
@@ -246,7 +246,7 @@ const s = StyleSheet.create({
   textarea: {
     flex: 1,
     marginHorizontal: 18,
-    marginTop: 12,
+    marginTop: spacing.md,
     marginBottom: 18,
     padding: 14,
     borderRadius: radius.sm,
@@ -258,6 +258,6 @@ const s = StyleSheet.create({
   ctaWrap: {
     paddingHorizontal: 18,
     paddingBottom: 28,
-    paddingTop: 4,
+    paddingTop: spacing.xs,
   },
 });

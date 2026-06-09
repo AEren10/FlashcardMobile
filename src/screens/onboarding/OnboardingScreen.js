@@ -2,7 +2,7 @@
  * OnboardingScreen — Claude Design v2 spec.
  * 3 ekran abstract illustration (network / stack / graph), display title, body, primary CTA + atla.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -129,7 +129,7 @@ function DemoFlashcard({ c }) {
           borderRadius: radius.lg,
           alignItems: "center",
           justifyContent: "center",
-          padding: 20,
+          padding: spacing.xl,
           shadowColor: c.accent,
           shadowOpacity: 0.5,
           shadowRadius: 24,
@@ -156,7 +156,7 @@ function DemoFlashcard({ c }) {
           borderRadius: radius.lg,
           alignItems: "center",
           justifyContent: "center",
-          padding: 20,
+          padding: spacing.xl,
           shadowColor: c.cobalt,
           shadowOpacity: 0.5,
           shadowRadius: 24,
@@ -167,7 +167,7 @@ function DemoFlashcard({ c }) {
         <Text style={{ fontFamily: c.fontDisplay, fontSize: 30, color: c.textPrimary }}>
           kısa süreli
         </Text>
-        <Text style={{ fontFamily: c.fontDisplay, fontSize: 12, color: c.textSec, marginTop: 8, fontStyle: "italic", textAlign: "center" }}>
+        <Text style={{ fontFamily: c.fontDisplay, fontSize: 12, color: c.textSec, marginTop: spacing.sm, fontStyle: "italic", textAlign: "center" }}>
           "Their happiness was ephemeral."
         </Text>
       </Animated.View>
@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
     lineHeight: 44,
     textAlign: "center",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   body: {
     fontSize: 16,
@@ -442,10 +442,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     maxWidth: 290,
   },
-  bottom: { paddingHorizontal: 22, paddingBottom: 24 },
+  bottom: { paddingHorizontal: 22, paddingBottom: spacing.xxl },
   ctaBtn: {
     borderRadius: radius.sm,
-    paddingVertical: 16,
+    paddingVertical: spacing.lg,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,

@@ -3,7 +3,7 @@
  * Abstract geometric illustration (no mascot) + display title + body + CTA.
  * Variants: list (floating cards), offline (broken cloud), search (magnifier + ?).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable, Animated, Easing } from "react-native";
 import Svg, { G, Rect, Line, Circle, Path, Text as SvgText } from "react-native-svg";
@@ -159,14 +159,14 @@ function EmptyIllu({ kind }) {
 }
 
 const s = StyleSheet.create({
-  wrap: { alignItems: "center", justifyContent: "center", padding: 32, paddingVertical: 40 },
-  emoji: { fontSize: 56, marginBottom: 12 },
+  wrap: { alignItems: "center", justifyContent: "center", padding: spacing.xxxl, paddingVertical: 40 },
+  emoji: { fontSize: 56, marginBottom: spacing.md },
   illuWrap: {
     width: 188,
     height: 188,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   illuFloating: {
     position: "absolute",
@@ -175,10 +175,10 @@ const s = StyleSheet.create({
     right: 0,
     alignItems: "center",
   },
-  title: { fontSize: 30, marginBottom: 6, textAlign: "center", marginTop: 16 },
-  sub: { fontSize: 14, textAlign: "center", marginBottom: 20, lineHeight: 20, maxWidth: 280 },
+  title: { fontSize: 30, marginBottom: 6, textAlign: "center", marginTop: spacing.lg },
+  sub: { fontSize: 14, textAlign: "center", marginBottom: spacing.xl, lineHeight: 20, maxWidth: 280 },
   btn: {
-    paddingHorizontal: 24,
+    paddingHorizontal: spacing.xxl,
     paddingVertical: 14,
     borderRadius: radius.sm,
     minWidth: 200,
@@ -189,6 +189,6 @@ const s = StyleSheet.create({
     elevation: 4,
   },
   btnTxt: { fontSize: 15 },
-  secBtn: { marginTop: 12, paddingHorizontal: 16, paddingVertical: 10 },
+  secBtn: { marginTop: spacing.md, paddingHorizontal: spacing.lg, paddingVertical: 10 },
   secTxt: { fontSize: 14 },
 });

@@ -5,7 +5,7 @@
  * UX: Kart üstünde İngilizce + sıfat tipi, tap → çevir → Türkçe + örnek cümle.
  * Sonraki butona bas → next kart. 5/5 tamamlandıysa onComplete tetiklenir + confetti.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, Pressable, Animated, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -148,14 +148,14 @@ const s = StyleSheet.create({
   pos: { fontSize: 12, marginTop: 6, letterSpacing: 0.3 },
   hint: { position: "absolute", bottom: 18, fontSize: 11, opacity: 0.7 },
   meaning: { fontSize: 24, textAlign: "center", fontStyle: "italic" },
-  ex: { fontSize: 12, marginTop: 12, textAlign: "center", fontStyle: "italic", opacity: 0.9 },
+  ex: { fontSize: 12, marginTop: spacing.md, textAlign: "center", fontStyle: "italic", opacity: 0.9 },
   nextBtn: {
-    marginTop: 24,
+    marginTop: spacing.xxl,
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xxl,
     borderRadius: radius.sm,
     shadowOpacity: 0.32,
     shadowRadius: 14,

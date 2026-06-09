@@ -38,7 +38,9 @@ export const spacing = {
   lg: 16,
   xl: 20,
   "2xl": 24,
+  xxl: 24,
   "3xl": 32,
+  xxxl: 32,
 };
 
 export const elevation = {

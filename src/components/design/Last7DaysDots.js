@@ -3,7 +3,7 @@
  * Bugün vurgulu, dolu günler accent, boş günler dim.
  * StreakScreen'in en üstünde "bu hafta nasıl gitti" özet görselidir.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -143,7 +143,7 @@ function makeStyles(c) {
       borderWidth: 1,
       borderColor: c.border,
       paddingVertical: 18,
-      paddingHorizontal: 16,
+      paddingHorizontal: spacing.lg,
       marginBottom: 14,
     },
     title: {
@@ -154,7 +154,7 @@ function makeStyles(c) {
       textTransform: "uppercase",
       marginBottom: 14,
     },
-    row: { flexDirection: "row", gap: 4 },
+    row: { flexDirection: "row", gap: spacing.xs },
     dot: {
       width: 40,
       height: 40,

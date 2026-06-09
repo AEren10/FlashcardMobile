@@ -2,7 +2,7 @@
  * RegisterScreen — Claude Design v2.
  */
 import React, { useMemo, useRef, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -83,7 +83,7 @@ export default function RegisterScreen({ navigation }) {
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
-            <View style={{ alignItems: "center", marginBottom: 4 }}>
+            <View style={{ alignItems: "center", marginBottom: spacing.xs }}>
               <AbstractIllustration kind="stack" size={120} />
             </View>
             <Text style={s.title}>Hesap oluştur</Text>
@@ -196,7 +196,7 @@ export default function RegisterScreen({ navigation }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    scroll: { padding: 24, paddingTop: 16, flexGrow: 1 },
+    scroll: { padding: spacing.xxl, paddingTop: spacing.lg, flexGrow: 1 },
     nameRow: { flexDirection: "row", gap: 10 },
     flex: { flex: 1 },
     title: {
@@ -204,23 +204,23 @@ function makeStyles(c) {
       fontFamily: c.fontDisplay,
       color: c.textPrimary,
       textAlign: "center",
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
     sub: {
       fontSize: fontSize.md,
       color: c.textSec,
       textAlign: "center",
       fontFamily: c.fontBody,
-      marginTop: 4,
-      marginBottom: 20,
+      marginTop: spacing.xs,
+      marginBottom: spacing.xl,
     },
     primaryBtn: {
       backgroundColor: c.accent,
       borderRadius: radius.sm,
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       alignItems: "center",
       minHeight: 52,
-      marginTop: 12,
+      marginTop: spacing.md,
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.4,

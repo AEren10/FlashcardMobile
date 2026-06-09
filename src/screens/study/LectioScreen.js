@@ -6,7 +6,7 @@
  *
  * route.params: { listId, listTitle }
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   View,
@@ -302,7 +302,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       alignItems: "center",
       paddingHorizontal: 18,
       paddingVertical: 10,
-      gap: 12,
+      gap: spacing.md,
     },
     iconBtn: {
       width: 36,
@@ -330,13 +330,13 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     progressFill: { height: "100%", borderRadius: 2 },
     center: { flex: 1, alignItems: "center", justifyContent: "center" },
     empty: { color: c.textSec, fontFamily: c.fontBody },
-    cardArea: { flex: 1, paddingHorizontal: 24, paddingVertical: 12, justifyContent: "center", position: "relative", overflow: "hidden" },
+    cardArea: { flex: 1, paddingHorizontal: spacing.xxl, paddingVertical: spacing.md, justifyContent: "center", position: "relative", overflow: "hidden" },
     card: {
       backgroundColor: c.bgElevated,
       borderRadius: 24,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 32,
+      padding: spacing.xxxl,
       alignItems: "center",
       minHeight: 380,
       maxHeight: 480,
@@ -360,12 +360,12 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       maxWidth: 320,
     },
     speakerCircle: {
-      marginTop: 12,
+      marginTop: spacing.md,
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
+      gap: spacing.sm,
       paddingHorizontal: 14,
-      paddingVertical: 8,
+      paddingVertical: spacing.sm,
       borderRadius: radius.full,
       backgroundColor: c.cobalt + "1A",
       borderWidth: 1,
@@ -386,7 +386,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       bottom: 0,
       backgroundColor: c.bgElevated,
       borderRadius: 24,
-      padding: 32,
+      padding: spacing.xxxl,
       paddingTop: 56,
     },
     trClose: {
@@ -423,7 +423,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     bottomBar: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       paddingHorizontal: 18,
       paddingTop: 14,
       // TabBar bazen gizlenmiyor (nested navigator) → safe area + tab bar yüksekliği

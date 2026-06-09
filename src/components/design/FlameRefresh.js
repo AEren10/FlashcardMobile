@@ -6,7 +6,7 @@
  * Kullanım:
  *   <FlameScrollView refreshing={r} onRefresh={fn}>...</FlameScrollView>
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useRef, useState } from "react";
 import {
   Animated,
@@ -104,7 +104,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: spacing.sm,
     zIndex: 100,
   },
   glowDot: {

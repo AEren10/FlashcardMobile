@@ -3,7 +3,7 @@
  * Streak > 0: warming glow + amber accent.
  * Streak = 0: soft muted, "başla" mood.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -164,7 +164,7 @@ const s = StyleSheet.create({
     height: 90,
     borderRadius: 50,
   },
-  row: { flexDirection: "row", alignItems: "center", gap: 4 },
+  row: { flexDirection: "row", alignItems: "center", gap: spacing.xs },
   num: { fontSize: 28, lineHeight: 30 },
-  cap: { fontSize: 11, marginTop: 8, letterSpacing: 0.2 },
+  cap: { fontSize: 11, marginTop: spacing.sm, letterSpacing: 0.2 },
 });

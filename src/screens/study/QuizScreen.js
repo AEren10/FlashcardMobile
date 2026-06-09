@@ -7,7 +7,7 @@
  *          wrong → red shake + correct reveal in green + 1200ms hold
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -431,7 +431,7 @@ export default function QuizScreen({ route, navigation }) {
           >
             <Icon d={ICONS.x} size={22} stroke={c.textSec} sw={2} />
           </Pressable>
-          <View style={{ flex: 1, gap: 4 }}>
+          <View style={{ flex: 1, gap: spacing.xs }}>
             <ProgressBar progress={progress} height={6} />
             {timed && (
               <View style={{ height: 3, backgroundColor: c.bgSurface, borderRadius: radius.full, overflow: "hidden" }}>
@@ -620,9 +620,9 @@ function makeStyles(c) {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
-      paddingHorizontal: 20,
-      paddingTop: 8,
+      gap: spacing.md,
+      paddingHorizontal: spacing.xl,
+      paddingTop: spacing.sm,
     },
     closeBtn: {
       width: 36,
@@ -641,7 +641,7 @@ function makeStyles(c) {
     blankSentenceBox: {
       paddingHorizontal: 26,
       paddingVertical: 22,
-      marginTop: 12,
+      marginTop: spacing.md,
       borderRadius: radius.md,
       backgroundColor: c.bgElevated,
       borderWidth: 1.5,
@@ -662,12 +662,12 @@ function makeStyles(c) {
     },
     prompt: {
       alignItems: "center",
-      paddingHorizontal: 24,
+      paddingHorizontal: spacing.xxl,
       paddingTop: 50,
       paddingBottom: 30,
     },
     chipAccent: {
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       paddingVertical: 6,
       borderRadius: radius.full,
       backgroundColor: c.accentGlow,
@@ -692,14 +692,14 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       fontSize: fontSize.md,
       color: c.textSec,
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
 
     grid: {
       flex: 1,
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 12,
+      gap: spacing.md,
       paddingHorizontal: 18,
       paddingBottom: 30,
       alignContent: "center",

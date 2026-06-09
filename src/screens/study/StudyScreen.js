@@ -6,7 +6,7 @@
  * Stack peek, verdict badges, ✓/✗ feedback pop, confetti (streak ≥5), shake
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -313,7 +313,7 @@ function GradeBtn({ label, sub, color, onPress, c }) {
       onPress={onPress}
       style={({ pressed }) => ({
         flex: 1,
-        paddingVertical: 12,
+        paddingVertical: spacing.md,
         paddingHorizontal: 6,
         borderRadius: radius.sm,
         borderWidth: 1.5,
@@ -468,9 +468,9 @@ function makeStyles(c) {
     progressRow: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       paddingHorizontal: 18,
-      paddingTop: 16,
+      paddingTop: spacing.lg,
     },
     counter: { fontFamily: c.fontNum, fontSize: fontSize.md, color: c.textSec },
     stageWrap: { flex: 1, justifyContent: "center", paddingHorizontal: 18 },
@@ -540,9 +540,9 @@ function makeStyles(c) {
       justifyContent: "space-between",
       paddingHorizontal: 28,
       paddingBottom: 30,
-      paddingTop: 8,
+      paddingTop: spacing.sm,
     },
-    arrowBtn: { paddingVertical: 12, paddingHorizontal: 6 },
+    arrowBtn: { paddingVertical: spacing.md, paddingHorizontal: 6 },
     arrowTxt: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, letterSpacing: 0.3 },
     swipeGuide: {
       flexDirection: "row",
@@ -556,7 +556,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
+      gap: spacing.sm,
     },
     guideCenter: {
       width: 36,
@@ -577,7 +577,7 @@ function makeStyles(c) {
     },
     gradeBtn: {
       flex: 1,
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       paddingHorizontal: 6,
       borderRadius: radius.sm,
       borderWidth: 1.5,
@@ -591,7 +591,7 @@ function makeStyles(c) {
       fontSize: fontSize.sm,
       letterSpacing: 0.2,
       paddingHorizontal: 22,
-      paddingBottom: 8,
+      paddingBottom: spacing.sm,
       marginTop: -4,
       opacity: 0.7,
     },

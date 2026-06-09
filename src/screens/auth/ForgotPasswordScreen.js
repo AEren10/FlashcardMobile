@@ -2,7 +2,7 @@
  * ForgotPasswordScreen — Claude Design v2.
  */
 import React, { useMemo, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -73,7 +73,7 @@ export default function ForgotPasswordScreen({ navigation }) {
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
-            <View style={{ alignItems: "center", marginBottom: 8 }}>
+            <View style={{ alignItems: "center", marginBottom: spacing.sm }}>
               <AbstractIllustration kind="graph" size={140} />
             </View>
             <Text style={s.title}>Şifreni sıfırla</Text>
@@ -131,7 +131,7 @@ export default function ForgotPasswordScreen({ navigation }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    headerBar: { paddingHorizontal: 16, paddingTop: 8 },
+    headerBar: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
     back: {
       width: 34,
       height: 34,
@@ -140,28 +140,28 @@ function makeStyles(c) {
       alignItems: "center",
       justifyContent: "center",
     },
-    scroll: { padding: 24, paddingTop: 4, flexGrow: 1 },
+    scroll: { padding: spacing.xxl, paddingTop: spacing.xs, flexGrow: 1 },
     title: {
       fontSize: fontSize["3xl"],
       fontFamily: c.fontDisplay,
       color: c.textPrimary,
       textAlign: "center",
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
     sub: {
       fontSize: fontSize.md,
       color: c.textSec,
       textAlign: "center",
       fontFamily: c.fontBody,
-      marginTop: 4,
+      marginTop: spacing.xs,
       marginBottom: 28,
-      paddingHorizontal: 12,
+      paddingHorizontal: spacing.md,
       lineHeight: 20,
     },
     primaryBtn: {
       backgroundColor: c.accent,
       borderRadius: radius.sm,
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       alignItems: "center",
       minHeight: 52,
       shadowColor: c.accent,
@@ -176,23 +176,23 @@ function makeStyles(c) {
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.borderAccent,
-      padding: 24,
+      padding: spacing.xxl,
       alignItems: "center",
-      gap: 8,
+      gap: spacing.sm,
     },
     successTitle: {
       fontSize: fontSize.lg,
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
     successSub: {
       fontSize: fontSize.md,
       fontFamily: c.fontBody,
       color: c.textSec,
       textAlign: "center",
-      marginBottom: 16,
-      paddingHorizontal: 8,
+      marginBottom: spacing.lg,
+      paddingHorizontal: spacing.sm,
       lineHeight: 18,
     },
   });

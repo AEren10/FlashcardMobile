@@ -2,7 +2,7 @@
  * ContinueCard — "Devam Et" satırındaki memoize'li kart.
  * HomeScreen'den ayrı dosya (modülarite).
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React from "react";
 import { View, Text } from "react-native";
 import CategoryCover from "../../../components/design/CategoryCover";
@@ -33,7 +33,7 @@ const ContinueCard = React.memo(function ContinueCard({
       </Text>
       <View
         style={{
-          marginTop: 8,
+          marginTop: spacing.sm,
           height: 5,
           backgroundColor: c.bgSurface,
           borderRadius: radius.full,

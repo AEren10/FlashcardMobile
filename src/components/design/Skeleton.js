@@ -7,7 +7,7 @@
  *              SkeletonGoalCard, SkeletonWordCard, SkeletonListItem,
  *              SkeletonFlipCard, SkeletonStatRow
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Easing } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -76,7 +76,7 @@ export function SkeletonListCard() {
       ]}
     >
       <Skeleton height={72} radius={0} width="100%" />
-      <View style={{ padding: 16, gap: 8 }}>
+      <View style={{ padding: spacing.lg, gap: spacing.sm }}>
         <Skeleton width="65%" height={18} radius={6} />
         <Skeleton width="40%" height={12} radius={6} />
         <View style={{ marginTop: 6 }}>
@@ -94,7 +94,7 @@ export function SkeletonContinueCard() {
       <View style={{ marginTop: 10, gap: 6 }}>
         <Skeleton width="80%" height={14} radius={6} />
         <Skeleton width="55%" height={11} radius={6} />
-        <Skeleton width="100%" height={5} radius={6} style={{ marginTop: 8 }} />
+        <Skeleton width="100%" height={5} radius={6} style={{ marginTop: spacing.sm }} />
       </View>
     </View>
   );
@@ -110,7 +110,7 @@ export function SkeletonStatChip() {
       ]}
     >
       <Skeleton width={50} height={26} radius={8} />
-      <Skeleton width="70%" height={11} radius={6} style={{ marginTop: 12 }} />
+      <Skeleton width="70%" height={11} radius={6} style={{ marginTop: spacing.md }} />
     </View>
   );
 }
@@ -128,7 +128,7 @@ export function SkeletonGoalCard() {
         <Skeleton width="55%" height={14} radius={6} />
         <Skeleton width={36} height={14} radius={6} />
       </View>
-      <Skeleton width="100%" height={9} radius={6} style={{ marginTop: 12 }} />
+      <Skeleton width="100%" height={9} radius={6} style={{ marginTop: spacing.md }} />
       <Skeleton width="50%" height={11} radius={6} style={{ marginTop: 14 }} />
     </View>
   );
@@ -154,14 +154,14 @@ export function SkeletonWordCard() {
         { backgroundColor: c.bgElevated, borderColor: c.border },
       ]}
     >
-      <View style={{ flexDirection: "row", gap: 12 }}>
+      <View style={{ flexDirection: "row", gap: spacing.md }}>
         <View style={{ flex: 1, gap: 6 }}>
           <Skeleton width="55%" height={22} radius={6} />
           <Skeleton width="80%" height={13} radius={6} />
         </View>
         <Skeleton width={36} height={36} radius={10} />
       </View>
-      <Skeleton width="90%" height={12} radius={6} style={{ marginTop: 8 }} />
+      <Skeleton width="90%" height={12} radius={6} style={{ marginTop: spacing.sm }} />
       <Skeleton width={110} height={22} radius={999} style={{ marginTop: 6 }} />
     </View>
   );
@@ -231,12 +231,12 @@ const s = StyleSheet.create({
     minHeight: 96,
     justifyContent: "space-between",
   },
-  statRow: { flexDirection: "row", gap: 12 },
+  statRow: { flexDirection: "row", gap: spacing.md },
   wordCard: {
     borderRadius: radius.md,
     borderWidth: 1,
-    padding: 16,
-    gap: 8,
+    padding: spacing.lg,
+    gap: spacing.sm,
     marginBottom: 10,
   },
   listItem: {
@@ -245,8 +245,8 @@ const s = StyleSheet.create({
     gap: 14,
     borderRadius: radius.md,
     borderWidth: 1,
-    padding: 12,
-    marginBottom: 12,
+    padding: spacing.md,
+    marginBottom: spacing.md,
   },
   flipCard: {
     width: "100%",

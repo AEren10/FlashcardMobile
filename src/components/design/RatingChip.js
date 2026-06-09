@@ -5,7 +5,7 @@
  * `avg` 0 ise hiç render etmez (boş kart spam yok).
  * `count` 0 ise sadece "Yeni" göster (opsiyonel — şimdilik null döner).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Path } from "react-native-svg";
@@ -57,7 +57,7 @@ const s = StyleSheet.create({
   wrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
   },

@@ -11,7 +11,7 @@
  *   - Done node sonrası: solid colored line
  *   - Aktif node sonrası: dashed (henüz açılmadı)
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -255,7 +255,7 @@ export default function RoadmapNode({
         </View>
 
         {/* Label area */}
-        <View style={{ alignItems: "center", marginTop: 4, maxWidth: 160 }}>
+        <View style={{ alignItems: "center", marginTop: spacing.xs, maxWidth: 160 }}>
           {/* Current → "Buradasın" pill */}
           {isCurrent && (
             <View style={[s.youAreHere, { backgroundColor: accent }]}>
@@ -309,7 +309,7 @@ export default function RoadmapNode({
           ) : isDone ? (
             <View style={s.doneRow}>
               <Icon d={ICONS.check} size={11} stroke={accent} sw={2.5} />
-              <Text style={[s.subDone, { color: accent, fontFamily: c.fontBody, marginLeft: 4 }]}>
+              <Text style={[s.subDone, { color: accent, fontFamily: c.fontBody, marginLeft: spacing.xs }]}>
                 tamamlandı
               </Text>
             </View>
@@ -358,7 +358,7 @@ function hexShift(hex, amount) {
 const s = StyleSheet.create({
   row: {
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: spacing.xs,
   },
   node: {
     width: NODE_SIZE,
@@ -376,10 +376,10 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 5,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
     borderRadius: radius.full,
     marginBottom: 6,
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   youAreHereDot: {
     width: 6,
@@ -398,7 +398,7 @@ const s = StyleSheet.create({
     borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 6,
-    marginTop: 8,
+    marginTop: spacing.sm,
   },
   lvPillTxt: { fontSize: 10, letterSpacing: 0.8 },
   label: {
@@ -413,7 +413,7 @@ const s = StyleSheet.create({
   },
   subActive: {
     fontSize: 11,
-    marginTop: 4,
+    marginTop: spacing.xs,
     letterSpacing: 0.3,
   },
   subDone: {
@@ -423,7 +423,7 @@ const s = StyleSheet.create({
   doneRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 4,
+    marginTop: spacing.xs,
   },
   connectorWrap: {
     width: 6,

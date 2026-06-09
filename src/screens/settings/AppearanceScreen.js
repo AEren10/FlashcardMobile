@@ -1,7 +1,7 @@
 /**
  * AppearanceScreen — Light / Dark / System tercih ekranı.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,7 +45,7 @@ export default function AppearanceScreen({ navigation }) {
           <View style={{ width: 34 }} />
         </View>
 
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <ScrollView contentContainerStyle={{ padding: spacing.xl, paddingBottom: 40 }}>
           <Text style={s.lead}>
             Uygulamanın görünüm temasını seç. Sistem'i seçersen telefon ayarlarını takip eder.
           </Text>
@@ -110,8 +110,8 @@ function makeStyles(c) {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
     },
     back: {
       width: 34,
@@ -133,7 +133,7 @@ function makeStyles(c) {
       fontSize: 14,
       color: c.textSec,
       lineHeight: 20,
-      marginBottom: 16,
+      marginBottom: spacing.lg,
     },
     list: {
       backgroundColor: c.bgElevated,
@@ -146,8 +146,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.lg,
     },
     checkWrap: {
       width: 28,

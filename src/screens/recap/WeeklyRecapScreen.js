@@ -9,7 +9,7 @@
  *   - 7 günlük bar chart
  *   - Paylaş + Kapat butonları
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -72,7 +72,7 @@ export default function WeeklyRecapScreen({ navigation }) {
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
           <Header c={c} s={s} onClose={() => navigation.goBack()} />
-          <View style={{ padding: 22, gap: 12 }}>
+          <View style={{ padding: 22, gap: spacing.md }}>
             <Skeleton width="60%" height={28} radius={8} />
             <Skeleton width="100%" height={180} radius={20} />
             <Skeleton width="100%" height={100} radius={16} />
@@ -88,7 +88,7 @@ export default function WeeklyRecapScreen({ navigation }) {
       <View style={s.root}>
         <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
           <Header c={c} s={s} onClose={() => navigation.goBack()} />
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 16 }}>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: "center", padding: spacing.xxxl, gap: spacing.lg }}>
             <View
               style={{
                 width: 80, height: 80, borderRadius: 40,
@@ -223,7 +223,7 @@ export default function WeeklyRecapScreen({ navigation }) {
 
           {/* Top list spotlight */}
           {recap.topListTitle && (
-            <View style={[s.spotlightCard, { borderColor: c.cobalt + "44", marginTop: 12 }]}>
+            <View style={[s.spotlightCard, { borderColor: c.cobalt + "44", marginTop: spacing.md }]}>
               <LinearGradient
                 colors={[c.cobalt + "1F", "transparent"]}
                 start={{ x: 0, y: 0 }}
@@ -300,8 +300,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 18,
-      paddingVertical: 12,
-      gap: 12,
+      paddingVertical: spacing.md,
+      gap: spacing.md,
     },
     iconBtn: {
       width: 38, height: 38,
@@ -334,7 +334,7 @@ function makeStyles(c) {
       letterSpacing: 1.8,
       color: c.accent,
       fontFamily: c.fontBodyBold,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     heroBig: {
       fontSize: 76,
@@ -349,7 +349,7 @@ function makeStyles(c) {
       fontSize: 15,
       color: c.textSec,
       fontFamily: c.fontBody,
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
     statsRow: {
       flexDirection: "row",
@@ -367,7 +367,7 @@ function makeStyles(c) {
     statVal: { fontSize: 22 },
     statLbl: { fontSize: 11, letterSpacing: 0.3 },
     section: {
-      marginTop: 4,
+      marginTop: spacing.xs,
       padding: 18,
       borderRadius: radius.md,
       backgroundColor: c.bgElevated,
@@ -402,7 +402,7 @@ function makeStyles(c) {
       letterSpacing: 0.3,
     },
     spotlightCard: {
-      padding: 16,
+      padding: spacing.lg,
       borderRadius: radius.md,
       borderWidth: 1,
       overflow: "hidden",
@@ -411,7 +411,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 6,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     spotlightTag: {
       fontSize: 10,
@@ -429,8 +429,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
-      paddingVertical: 16,
+      gap: spacing.sm,
+      paddingVertical: spacing.lg,
       borderRadius: radius.md,
       marginTop: 22,
       shadowOffset: { width: 0, height: 0 },

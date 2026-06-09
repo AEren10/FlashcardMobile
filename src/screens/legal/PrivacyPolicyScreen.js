@@ -2,7 +2,7 @@
  * PrivacyPolicyScreen — KVKK/GDPR uyumlu gizlilik politikası.
  * App Store metadata'sında URL yerine in-app erişim için.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -131,8 +131,8 @@ function makeStyles(c) {
     header: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 16,
-      paddingVertical: 8,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
     },
     back: {
       width: 34,
@@ -149,14 +149,14 @@ function makeStyles(c) {
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
     },
-    body: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 24 },
-    muted: { fontSize: 12, fontFamily: c.fontBody, color: c.textMuted, marginBottom: 16 },
-    section: { marginBottom: 24 },
+    body: { paddingHorizontal: spacing.xl, paddingTop: spacing.sm, paddingBottom: spacing.xxl },
+    muted: { fontSize: 12, fontFamily: c.fontBody, color: c.textMuted, marginBottom: spacing.lg },
+    section: { marginBottom: spacing.xxl },
     sectionTitle: {
       fontSize: 16,
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     p: {
       fontSize: 14,

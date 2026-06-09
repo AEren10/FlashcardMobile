@@ -1,4 +1,5 @@
 /**
+import { spacing } from "../../../themes/tokens";
  * HeroDashboard — HomeScreen üstü animasyonlu, canlı dashboard.
  * Card değil, full-bleed alan. Floating particles + radial daily goal + streak orbit.
  * Tap → ilgili sayfa.
@@ -462,7 +463,7 @@ const FLAME_BOX = 58;
 function makeStyles(c) {
   return StyleSheet.create({
     wrap: {
-      paddingTop: 4,
+      paddingTop: spacing.xs,
       paddingBottom: 10,
       marginBottom: 6,
       overflow: "hidden",
@@ -479,7 +480,7 @@ function makeStyles(c) {
     greetSub: {
       fontSize: 13,
       lineHeight: 18,
-      marginTop: 8,
+      marginTop: spacing.sm,
       letterSpacing: 0.2,
       fontStyle: "italic",
       opacity: 0.92,
@@ -488,13 +489,13 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      marginTop: 20,
-      paddingRight: 4,
+      marginTop: spacing.xl,
+      paddingRight: spacing.xs,
     },
     streakBox: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
+      gap: spacing.md,
       flex: 1,
       paddingVertical: 6,
     },

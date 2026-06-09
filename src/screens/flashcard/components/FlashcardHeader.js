@@ -3,7 +3,7 @@
  * Tema-aware (useTheme).
  */
 import React, { useMemo } from "react";
-import { fontSize, radius } from "../../../themes/tokens";
+import { fontSize, radius, spacing } from "../../../themes/tokens";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -107,7 +107,7 @@ function makeStyles(c) {
       alignItems: "center",
       paddingHorizontal: 22,
       paddingTop: 14,
-      gap: 12,
+      gap: spacing.md,
     },
     title: {
       fontSize: fontSize.lg,
@@ -116,7 +116,7 @@ function makeStyles(c) {
       textAlign: "center",
     },
     tintChip: {
-      marginTop: 4,
+      marginTop: spacing.xs,
       paddingHorizontal: 9,
       paddingVertical: 3,
       borderRadius: radius.full,
@@ -127,7 +127,7 @@ function makeStyles(c) {
       letterSpacing: 0.4,
       textTransform: "uppercase",
     },
-    actions: { flexDirection: "row", gap: 8 },
+    actions: { flexDirection: "row", gap: spacing.sm },
     iconBtn: {
       width: 36,
       height: 36,

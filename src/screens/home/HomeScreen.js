@@ -3,7 +3,7 @@
  * Greeting + 2 stat box + glow challenge card + horizontal "Devam Et" carousel.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -306,7 +306,7 @@ export default function HomeScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 160 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <FlameRefreshControl
@@ -326,7 +326,7 @@ export default function HomeScreen({ navigation }) {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                gap: 8,
+                gap: spacing.sm,
                 paddingVertical: 10,
                 paddingHorizontal: 14,
                 borderRadius: radius.sm,
@@ -345,7 +345,7 @@ export default function HomeScreen({ navigation }) {
 
           {/* Hero Dashboard — animasyonlu canlı üst alan */}
           {loading ? (
-            <View style={{ marginBottom: 4 }}>
+            <View style={{ marginBottom: spacing.xs }}>
               <SkeletonStatRow />
             </View>
           ) : (
@@ -419,8 +419,8 @@ export default function HomeScreen({ navigation }) {
             <View
               style={{
                 marginTop: 14,
-                marginBottom: 4,
-                padding: 16,
+                marginBottom: spacing.xs,
+                padding: spacing.lg,
                 borderRadius: radius.md,
                 backgroundColor: daily.completed ? c.success + "26" : (c.mint || c.cobalt) + "26",
                 borderWidth: 1.5,
@@ -479,7 +479,7 @@ export default function HomeScreen({ navigation }) {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 14, paddingTop: 4, paddingBottom: 8 }}
+              contentContainerStyle={{ gap: 14, paddingTop: spacing.xs, paddingBottom: spacing.sm }}
             >
               {[0, 1, 2].map((i) => (
                 <SkeletonContinueCard key={i} />
@@ -517,7 +517,7 @@ export default function HomeScreen({ navigation }) {
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 14, paddingTop: 4, paddingBottom: 8 }}
+              contentContainerStyle={{ gap: 14, paddingTop: spacing.xs, paddingBottom: spacing.sm }}
             >
               {recentLists.map((item, i) => (
                 <StaggerEnter key={String(item.id)} index={i} delay={80}>
@@ -673,9 +673,9 @@ function makeStyles(c) {
       color: c.textPrimary,
       marginTop: 2,
     },
-    statsRow: { flexDirection: "row", gap: 12, marginTop: 20 },
+    statsRow: { flexDirection: "row", gap: spacing.md, marginTop: spacing.xl },
     challengeCard: {
-      marginTop: 16,
+      marginTop: spacing.lg,
       borderRadius: radius.lg,
       padding: 22,
       borderWidth: 1.5,
@@ -725,17 +725,17 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       fontSize: fontSize.md,
       color: c.textSec,
-      marginTop: 4,
+      marginTop: spacing.xs,
     },
     primaryBtn: {
       alignSelf: "flex-start",
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
+      gap: spacing.sm,
       backgroundColor: c.accent,
       borderRadius: radius.sm,
-      paddingVertical: 12,
-      paddingHorizontal: 24,
+      paddingVertical: spacing.md,
+      paddingHorizontal: spacing.xxl,
       marginTop: 18,
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 6 },
@@ -753,7 +753,7 @@ function makeStyles(c) {
       justifyContent: "space-between",
       alignItems: "baseline",
       marginTop: 26,
-      marginBottom: 12,
+      marginBottom: spacing.md,
     },
     sectionTitle: {
       fontFamily: c.fontBodyBold,
@@ -771,19 +771,19 @@ function makeStyles(c) {
       textAlign: "center",
       color: c.textMuted,
       fontFamily: c.fontBody,
-      marginTop: 16,
+      marginTop: spacing.lg,
       fontSize: fontSize.md,
     },
     emptyCta: {
       flexDirection: "row",
       alignItems: "center",
       gap: 14,
-      padding: 16,
+      padding: spacing.lg,
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.borderAccent,
       backgroundColor: c.bgElevated,
-      marginTop: 8,
+      marginTop: spacing.sm,
       overflow: "hidden",
     },
     emptyCtaIcon: {
@@ -807,7 +807,7 @@ function makeStyles(c) {
       color: c.textSec,
       letterSpacing: 0.5,
       textTransform: "uppercase",
-      marginBottom: 12,
+      marginBottom: spacing.md,
     },
   });
 }

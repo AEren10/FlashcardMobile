@@ -1,4 +1,4 @@
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -88,7 +88,7 @@ function makeStyles(c) {
       color: c.textMuted,
       fontFamily: c.fontBody,
     },
-    starBtn: { padding: 4 },
+    starBtn: { padding: spacing.xs },
   });
 }
 

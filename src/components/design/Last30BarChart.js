@@ -3,7 +3,7 @@
  * GitHub grid yerine daha canlı, mobil-friendly bar görünüm.
  * Tap bar → o gün için detay alt yazı (sessions).
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -51,7 +51,7 @@ export default function Last30BarChart({ days = [] }) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 4, alignItems: "flex-end", paddingVertical: 8 }}
+        contentContainerStyle={{ paddingHorizontal: spacing.xs, alignItems: "flex-end", paddingVertical: spacing.sm }}
       >
         {padded.map((d, i) => (
           <Bar
@@ -162,7 +162,7 @@ function Bar({ sessions, maxSessions, index, isToday, isSelected, onPress, c }) 
           />
         </Animated.View>
       </Pressable>
-      {isToday && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.accent, marginTop: 4 }} />}
+      {isToday && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.accent, marginTop: spacing.xs }} />}
     </Animated.View>
   );
 }
@@ -174,13 +174,13 @@ function makeStyles(c) {
       borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
-      padding: 16,
+      padding: spacing.lg,
     },
     headRow: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "baseline",
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     title: {
       fontFamily: c.fontBodyBold,
@@ -195,7 +195,7 @@ function makeStyles(c) {
     axisRow: {
       flexDirection: "row",
       justifyContent: "space-between",
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
     axisTxt: {
       fontFamily: c.fontBody,

@@ -3,7 +3,7 @@
  * Shimmer + sparkle vurgusu, normal liste kartlarından ayrılır.
  */
 import React, { useEffect, useRef } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -168,7 +168,7 @@ const s = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     overflow: "hidden",
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   shimmer: {
     position: "absolute",
@@ -184,7 +184,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  titleRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   title: { fontSize: fontSize.lg, flex: 1 },
   aiBadge: {
     paddingHorizontal: 7,
@@ -193,7 +193,7 @@ const s = StyleSheet.create({
     borderWidth: 1,
   },
   sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },
-  footer: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8 },
+  footer: { flexDirection: "row", alignItems: "center", gap: spacing.xs, marginTop: spacing.sm },
   count: { fontSize: fontSize.lg },
   countLbl: { fontSize: fontSize.sm },
 });

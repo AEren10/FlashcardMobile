@@ -3,7 +3,7 @@
  * Liste zorluk seviyesi tint ile renklenir.
  */
 import React, { useRef } from "react";
-import { fontSize, radius } from "../../../themes/tokens";
+import { fontSize, radius, spacing } from "../../../themes/tokens";
 import { View, Text, Pressable, Animated, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -267,7 +267,7 @@ const s = StyleSheet.create({
   row: { flexDirection: "row", gap: 10, paddingHorizontal: 22, marginTop: 14 },
   miniCta: {
     paddingVertical: 14,
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1,
     overflow: "hidden",

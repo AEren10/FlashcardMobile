@@ -3,7 +3,7 @@
  * Abstract geometric hero (network illustration) + accent CTA + dark/light parite.
  */
 import React, { useMemo, useRef, useState } from "react";
-import { fontSize, radius } from "../../themes/tokens";
+import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -60,7 +60,7 @@ export default function LoginScreen({ navigation }) {
             keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
-            <View style={{ alignItems: "center", marginBottom: 8 }}>
+            <View style={{ alignItems: "center", marginBottom: spacing.sm }}>
               <AbstractIllustration kind="network" size={140} />
             </View>
             <Text style={s.title}>Hoş geldin</Text>
@@ -146,28 +146,28 @@ export default function LoginScreen({ navigation }) {
 function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
-    scroll: { padding: 24, paddingTop: 24, flexGrow: 1 },
+    scroll: { padding: spacing.xxl, paddingTop: spacing.xxl, flexGrow: 1 },
     title: {
       fontSize: fontSize["3xl"],
       fontFamily: c.fontDisplay,
       color: c.textPrimary,
       textAlign: "center",
-      marginTop: 8,
+      marginTop: spacing.sm,
     },
     sub: {
       fontSize: fontSize.md,
       color: c.textSec,
       textAlign: "center",
       fontFamily: c.fontBody,
-      marginTop: 4,
-      marginBottom: 24,
+      marginTop: spacing.xs,
+      marginBottom: spacing.xxl,
     },
-    forgot: { alignSelf: "flex-end", marginTop: 2, marginBottom: 18, padding: 4 },
+    forgot: { alignSelf: "flex-end", marginTop: 2, marginBottom: 18, padding: spacing.xs },
     forgotText: { fontSize: fontSize.md, color: c.accent, fontFamily: c.fontBodySemi },
     primaryBtn: {
       backgroundColor: c.accent,
       borderRadius: radius.sm,
-      paddingVertical: 16,
+      paddingVertical: spacing.lg,
       alignItems: "center",
       minHeight: 52,
       shadowColor: c.accent,
@@ -177,7 +177,7 @@ function makeStyles(c) {
       elevation: 4,
     },
     primaryText: { color: c.textOnAccent, fontSize: fontSize.lg, fontFamily: c.fontBodyBold },
-    ghostBtn: { marginTop: 12, paddingVertical: 14, alignItems: "center" },
+    ghostBtn: { marginTop: spacing.md, paddingVertical: 14, alignItems: "center" },
     ghostText: { color: c.textSec, fontSize: fontSize.md, fontFamily: c.fontBodySemi },
     bottomRow: { flexDirection: "row", justifyContent: "center", marginTop: 28 },
     bottomText: { color: c.textSec, fontFamily: c.fontBody, fontSize: fontSize.md },

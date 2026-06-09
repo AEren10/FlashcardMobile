@@ -6,7 +6,7 @@
  * Zor:      lapses ≥ 2 olan kelimeler — mini progress
  * Quiz:     2 kolon grid, liste cover'ları
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -84,7 +84,7 @@ export default function FavoritesScreen() {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
-          contentContainerStyle={{ padding: 20, paddingBottom: 160 }}
+          contentContainerStyle={{ padding: spacing.xl, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
@@ -100,7 +100,7 @@ export default function FavoritesScreen() {
           />
 
           {loading ? (
-            <View style={{ marginTop: 18, gap: 12 }}>
+            <View style={{ marginTop: 18, gap: spacing.md }}>
               <Skeleton height={130} radius={20} />
               <Skeleton width="40%" height={14} radius={6} style={{ marginTop: 10 }} />
               {[0, 1, 2].map((i) => (
@@ -257,7 +257,7 @@ function ZorTab({ hardWords, c, s, lapsedWords, navigation }) {
 
   if (!combined.length) {
     return (
-      <View style={{ minHeight: 420, paddingTop: 20 }}>
+      <View style={{ minHeight: 420, paddingTop: spacing.xl }}>
         <View style={[s.emptyHelper, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
           <View style={{ alignItems: "center", marginBottom: 10 }}><Icon d={ICONS.target} size={32} stroke={c.accent} sw={1.5} /></View>
           <Text style={[s.emptyTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
@@ -406,7 +406,7 @@ function makeStyles(c) {
 
     heroCard: {
       borderRadius: radius.lg,
-      padding: 24,
+      padding: spacing.xxl,
       borderWidth: 1,
       borderColor: c.borderAccent,
       overflow: "hidden",
@@ -442,7 +442,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 8,
+      gap: spacing.sm,
       backgroundColor: c.accent,
       borderRadius: radius.sm,
       paddingVertical: 14,
@@ -453,8 +453,8 @@ function makeStyles(c) {
       fontFamily: c.fontBodyBold,
       fontSize: 18,
       color: c.textPrimary,
-      marginTop: 24,
-      marginBottom: 12,
+      marginTop: spacing.xxl,
+      marginBottom: spacing.md,
     },
 
     dueRow: {
@@ -477,13 +477,13 @@ function makeStyles(c) {
     },
     dueLabel: { fontFamily: c.fontBodySemi, fontSize: 15, color: c.textPrimary },
     dueSub: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted, marginTop: 2 },
-    dueCount: { fontFamily: c.fontNum, fontSize: 20, color: c.textPrimary, marginRight: 4 },
+    dueCount: { fontFamily: c.fontNum, fontSize: 20, color: c.textPrimary, marginRight: spacing.xs },
 
     hardCard: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 12,
-      padding: 16,
+      gap: spacing.md,
+      padding: spacing.lg,
       backgroundColor: c.bgElevated,
       borderRadius: radius.md,
       borderWidth: 1,
@@ -493,8 +493,8 @@ function makeStyles(c) {
     emptyHelper: {
       borderRadius: radius.md,
       borderWidth: 1,
-      padding: 24,
-      margin: 20,
+      padding: spacing.xxl,
+      margin: spacing.xl,
     },
     emptyTitle: {
       fontSize: 18,
@@ -509,7 +509,7 @@ function makeStyles(c) {
     emptyCta: {
       marginTop: 18,
       alignSelf: "stretch",
-      paddingVertical: 12,
+      paddingVertical: spacing.md,
       borderRadius: radius.sm,
       alignItems: "center",
     },
@@ -536,7 +536,7 @@ function makeStyles(c) {
     hardDot: { width: 7, height: 7, borderRadius: 4 },
     hardMiss: { fontFamily: c.fontBody, fontSize: 11, marginTop: 5 },
 
-    quizGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+    quizGrid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
     quizCard: {
       width: "47.5%",
       backgroundColor: c.bgElevated,
@@ -549,6 +549,6 @@ function makeStyles(c) {
     quizSub: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec, marginTop: 3 },
 
     emptyTitle: { fontSize: 16, marginTop: 14 },
-    emptySub: { fontSize: 13, marginTop: 6, textAlign: "center", maxWidth: 240, paddingHorizontal: 20 },
+    emptySub: { fontSize: 13, marginTop: 6, textAlign: "center", maxWidth: 240, paddingHorizontal: spacing.xl },
   });
 }

@@ -2,7 +2,7 @@
  * ConsentModal — Sentry/analytics için GDPR/KVKK consent prompt.
  * İlk açılışta gösterilir, AsyncStorage ile bir kez sorulur.
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Modal, Pressable } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
@@ -48,22 +48,22 @@ function makeStyles(c) {
       flex: 1,
       backgroundColor: "rgba(0,0,0,0.7)",
       justifyContent: "center",
-      paddingHorizontal: 24,
+      paddingHorizontal: spacing.xxl,
     },
     card: {
       backgroundColor: c.bgElevated,
       borderRadius: radius.md,
-      padding: 24,
+      padding: spacing.xxl,
       borderWidth: 1,
       borderColor: c.border,
       alignItems: "center",
     },
-    emoji: { marginBottom: 8, alignItems: "center" },
+    emoji: { marginBottom: spacing.sm, alignItems: "center" },
     title: {
       fontSize: 20,
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
-      marginBottom: 12,
+      marginBottom: spacing.md,
       textAlign: "center",
     },
     body: {
@@ -72,7 +72,7 @@ function makeStyles(c) {
       color: c.textSec,
       lineHeight: 20,
       textAlign: "center",
-      marginBottom: 24,
+      marginBottom: spacing.xxl,
     },
     primaryBtn: {
       backgroundColor: c.accent,
@@ -80,7 +80,7 @@ function makeStyles(c) {
       paddingVertical: 14,
       width: "100%",
       alignItems: "center",
-      marginBottom: 8,
+      marginBottom: spacing.sm,
     },
     primaryTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: 15 },
     secondaryBtn: { paddingVertical: 14, width: "100%", alignItems: "center" },

@@ -1,7 +1,7 @@
 /**
  * FlashcardCardArea — progress bar + flip card + swipe gezinme.
  */
-import { radius } from "../../../themes/tokens";
+import { radius, spacing } from "../../../themes/tokens";
 import React from "react";
 import { View, Pressable, Text, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -102,7 +102,7 @@ const s = StyleSheet.create({
 
   navRow: {
     alignItems: "center",
-    marginTop: 12,
+    marginTop: spacing.md,
   },
   knowChip: {
     flexDirection: "row",
@@ -116,8 +116,8 @@ const s = StyleSheet.create({
   completeCta: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 12,
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
     paddingHorizontal: 22,
     borderRadius: radius.sm,
     shadowOffset: { width: 0, height: 0 },

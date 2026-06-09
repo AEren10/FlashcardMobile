@@ -1,4 +1,5 @@
 /**
+import { spacing } from "../../themes/tokens";
  * StarRating — 5 yıldız puan göstergesi / etkileşimli oy verici.
  * Props:
  *   value: 0-5 (decimal kabul eder, en yakın yarıya yuvarlanmaz; dolu eşiği >= i)
@@ -101,10 +102,10 @@ export default function StarRating({
 
 function makeStyles(c) {
   return StyleSheet.create({
-    row: { flexDirection: "row", alignItems: "center", gap: 8 },
+    row: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
     stars: { flexDirection: "row", alignItems: "center", gap: 2 },
     starWrap: { padding: 2 },
-    meta: { flexDirection: "row", alignItems: "baseline", gap: 4, marginLeft: 4 },
+    meta: { flexDirection: "row", alignItems: "baseline", gap: spacing.xs, marginLeft: spacing.xs },
     metaTxt: { fontSize: 13, fontFamily: c.fontBodySemi },
     metaSub: { fontSize: 12 },
   });

@@ -13,7 +13,7 @@
  *   visible, nudge: { type, title, headline, sub, ctaLabel, secondaryLabel, icon, color }
  *   onAccept, onDismiss
  */
-import { radius } from "../../themes/tokens";
+import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -199,7 +199,7 @@ const s = StyleSheet.create({
   },
   tag: {
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
     borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 10,
@@ -218,7 +218,7 @@ const s = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     textAlign: "center",
-    marginTop: 8,
+    marginTop: spacing.sm,
     maxWidth: 280,
   },
   actions: {
@@ -229,7 +229,7 @@ const s = StyleSheet.create({
   },
   secondary: {
     flex: 1,
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
@@ -240,7 +240,7 @@ const s = StyleSheet.create({
   },
   primary: {
     flex: 1.3,
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     borderRadius: radius.sm,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },

@@ -1,4 +1,5 @@
 /**
+import { spacing } from "../../themes/tokens";
  * FlashcardDetailScreen — orchestrator.
  * Alt parçalar `./components/` altında.
  */
@@ -181,8 +182,8 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   if (loading) {
     return (
       <View style={s.root}>
-        <SafeAreaView style={{ flex: 1, padding: 22, gap: 16 }} edges={["top"]}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+        <SafeAreaView style={{ flex: 1, padding: 22, gap: spacing.lg }} edges={["top"]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.md }}>
             <Skeleton width={36} height={36} radius={12} />
             <Skeleton width={140} height={20} radius={6} />
             <View style={{ flex: 1 }} />
@@ -304,8 +305,8 @@ function makeStyles(c) {
     ratingRow: {
       alignItems: "center",
       paddingHorizontal: 22,
-      paddingTop: 8,
-      paddingBottom: 4,
+      paddingTop: spacing.sm,
+      paddingBottom: spacing.xs,
     },
   });
 }
