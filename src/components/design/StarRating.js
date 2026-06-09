@@ -1,5 +1,4 @@
 /**
-import { spacing } from "../../themes/tokens";
  * StarRating — 5 yıldız puan göstergesi / etkileşimli oy verici.
  * Props:
  *   value: 0-5 (decimal kabul eder, en yakın yarıya yuvarlanmaz; dolu eşiği >= i)
@@ -9,6 +8,7 @@ import { spacing } from "../../themes/tokens";
  *   color: dolu yıldız rengi (varsayılan tema warning #D4A457)
  * Tema-aware (useTheme).
  */
+import { spacing } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";

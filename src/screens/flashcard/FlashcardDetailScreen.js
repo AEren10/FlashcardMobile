@@ -1,8 +1,8 @@
 /**
-import { spacing } from "../../themes/tokens";
  * FlashcardDetailScreen — orchestrator.
  * Alt parçalar `./components/` altında.
  */
+import { spacing } from "../../themes/tokens";
 import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import { View, StyleSheet, Alert, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

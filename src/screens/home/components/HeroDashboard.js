@@ -1,9 +1,9 @@
 /**
-import { spacing } from "../../../themes/tokens";
  * HeroDashboard — HomeScreen üstü animasyonlu, canlı dashboard.
  * Card değil, full-bleed alan. Floating particles + radial daily goal + streak orbit.
  * Tap → ilgili sayfa.
  */
+import { spacing } from "../../../themes/tokens";
 import React, { memo, useEffect, useMemo, useRef } from "react";
 import { View, Text, Pressable, Animated, Easing, StyleSheet, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -228,6 +228,7 @@ export default memo(HeroDashboard);
 /** DailyGoal — üstte büyük yüzde + altta 10 dot horizontal bar.
  *  Dolu dotlar cobalt (mavi), tamamlanınca success (yeşil). Pulse animasyonu.
  */
+import { spacing } from "../../../themes/tokens";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const RADIAL_SIZE = 100;
 const RADIAL_STROKE = 8;

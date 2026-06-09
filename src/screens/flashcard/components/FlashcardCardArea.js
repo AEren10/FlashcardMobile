@@ -26,8 +26,8 @@ export default function FlashcardCardArea({
 
   return (
     <>
-      {/* Progress bar + sayaç */}
-      <View style={s.progressRow}>
+      {/* Sticky progress bar */}
+      <View style={[s.progressRow, { backgroundColor: c.bgBase, borderBottomColor: c.divider }]}>
         <View style={[s.track, { backgroundColor: c.bgSurface }]}>
           <View style={[s.fill, { width: `${pct}%`, backgroundColor: c.accent }]} />
         </View>
@@ -87,7 +87,9 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 10,
     paddingHorizontal: 22,
-    marginTop: 14,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    zIndex: 10,
   },
   track: {
     flex: 1,

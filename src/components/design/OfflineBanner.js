@@ -1,8 +1,8 @@
 /**
-import { spacing } from "../../themes/tokens";
  * OfflineBanner — internet kesilince üstte slide-down bant.
  * NetInfo subscription, useNativeDriver transform.
  */
+import { spacing } from "../../themes/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Text, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

@@ -1,8 +1,8 @@
 /**
-import { spacing } from "../../../themes/tokens";
  * QuizLoadingState — QuizScreen yüklenirken skeleton.
  * Ayrı dosya (modülarite).
  */
+import { spacing } from "../../../themes/tokens";
 import React from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";

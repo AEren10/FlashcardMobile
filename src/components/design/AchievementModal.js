@@ -1,5 +1,4 @@
 /**
-import { spacing } from "../../themes/tokens";
  * AchievementModal — rozet kazandığında full-screen celebration.
  * Sequence: backdrop fade → rozet fly-in spring → 3 katman radial wave → text fade → confetti → haptic
  *
@@ -10,6 +9,7 @@ import { spacing } from "../../themes/tokens";
  *      onClose={() => setEarned(null)}
  *   />
  */
+import { spacing } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import {
   Modal,
