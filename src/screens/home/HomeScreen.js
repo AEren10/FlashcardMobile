@@ -43,7 +43,6 @@ import useNudge from "../../hooks/useNudge";
 import NudgeModal from "../../components/design/NudgeModal";
 import { getKnownWordsCount } from "../../supabase/progress";
 import HomeSearchBar from "./components/HomeSearchBar";
-import LevelMiniCard from "./components/LevelMiniCard";
 import RandomReviewModal from "../../components/design/RandomReviewModal";
 import ModeSegment from "../../components/design/ModeSegment";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -402,11 +401,16 @@ export default function HomeScreen({ navigation }) {
             </View>
           </PressableScale>
 
-          {/* Level mini card — challenge'tan sonra "ilerleme" sekansı */}
-          {!loading && isAuthenticated() && (
-            <LevelMiniCard
-              totalWords={stats.totalWords || 0}
-              onPress={() => navigation.navigate("Roadmap")}
+          {/* Search bar — challenge'tan hemen sonra, kullanıcı hemen arasın */}
+          {!loading && (
+            <HomeSearchBar
+              onPress={() =>
+                navigation.navigate("ListExplorer", {
+                  title: "Liste Ara",
+                  filter: "popular",
+                  searchMode: true,
+                })
+              }
             />
           )}
 
@@ -456,19 +460,6 @@ export default function HomeScreen({ navigation }) {
                 }} />
               </View>
             </View>
-          )}
-
-          {/* Search bar */}
-          {!loading && (
-            <HomeSearchBar
-              onPress={() =>
-                navigation.navigate("ListExplorer", {
-                  title: "Liste Ara",
-                  filter: "popular",
-                  searchMode: true,
-                })
-              }
-            />
           )}
 
           {/* Continue Et */}
