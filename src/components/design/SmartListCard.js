@@ -107,12 +107,7 @@ export default function SmartListCard({
       onPressIn={onPressIn}
       onPressOut={onPressOut}
       style={[s.wrap, {
-        borderColor: fillColor + "88",
-        shadowColor: fillColor,
-        shadowOpacity: 0.35,
-        shadowRadius: 14,
-        shadowOffset: { width: 0, height: 5 },
-        elevation: 5,
+        borderColor: fillColor + "55",
       }]}
     >
       <LinearGradient

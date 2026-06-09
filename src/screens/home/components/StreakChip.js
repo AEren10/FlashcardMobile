@@ -96,9 +96,9 @@ export default function StreakChip({ streak = 0, onPress }) {
             borderWidth: active ? 2 : 1.5,
             shadowColor: c.warning,
             shadowOffset: { width: 0, height: 0 },
-            shadowOpacity: active ? 0.45 : 0.15,
-            shadowRadius: 14,
-            elevation: active ? 4 : 1,
+            shadowOpacity: active ? 0.2 : 0,
+            shadowRadius: 8,
+            elevation: active ? 2 : 0,
           },
         ]}
       >

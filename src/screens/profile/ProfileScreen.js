@@ -328,7 +328,7 @@ function makeStyles(c) {
     topBtnTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textSec },
     gearBtn: { width: 42, height: 42, borderRadius: radius.sm, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
     headerBlock: { alignItems: "center", paddingTop: 4, paddingBottom: 16 },
-    avatarWrap: { shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.4, shadowRadius: 30, elevation: 8, marginBottom: 14 },
+    avatarWrap: { shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 4, marginBottom: 14 },
     avatarGrad: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center" },
     avatarImg: { width: 84, height: 84, borderRadius: 42 },
     avatarTxt: { fontFamily: c.fontNum, fontSize: fontSize["3xl"], color: "#FFFFFF" },
@@ -346,7 +346,7 @@ function makeStyles(c) {
     listChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent },
     // stat tiles
     tileRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
-    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 3 },
+    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden" },
     tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: radius.full, opacity: 0.9 },
     tileVal: { fontFamily: c.fontNum, fontSize: fontSize["2xl"] },
     tileLbl: { fontFamily: c.fontBody, fontSize: fontSize.xs, color: c.textSec, marginTop: 2 },

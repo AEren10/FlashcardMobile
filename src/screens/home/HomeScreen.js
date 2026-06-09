@@ -426,10 +426,10 @@ export default function HomeScreen({ navigation }) {
                 borderWidth: 1.5,
                 borderColor: daily.completed ? c.success + "AA" : (c.mint || c.cobalt) + "AA",
                 shadowColor: daily.completed ? c.success : (c.mint || c.cobalt),
-                shadowOpacity: 0.45,
-                shadowRadius: 16,
-                shadowOffset: { width: 0, height: 6 },
-                elevation: 6,
+                shadowOpacity: 0.15,
+                shadowRadius: 8,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 2,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
