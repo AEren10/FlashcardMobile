@@ -163,16 +163,7 @@ export default function ProfileScreen() {
             </Pressable>
           </View>
 
-          {/* 3-stat bar */}
-          <View style={s.statBar}>
-            <StatItem icon={ICONS.flame} value={stats.streakDays} label="gün seri" color="#FF8A4C" c={c} s={s} />
-            <View style={s.statDivider} />
-            <StatItem icon={ICONS.books} value={stats.totalWords} label="kelime" color={c.cobalt} c={c} s={s} />
-            <View style={s.statDivider} />
-            <StatItem icon={ICONS.grid} value={publicLists.length} label="liste" color={c.accent} c={c} s={s} />
-          </View>
-
-          {/* Streak hero — flame + sayı + bu hafta */}
+          {/* Streak hero — flame + sayı + liste chip */}
           <Pressable
             onPress={() => navigation.navigate("Streak")}
             style={({ pressed }) => [s.streakHero, { transform: [{ scale: pressed ? 0.99 : 1 }] }]}
@@ -183,6 +174,10 @@ export default function ProfileScreen() {
               <Text style={s.streakCap}>
                 {stats.streakDays === 0 ? "henüz seri yok" : stats.streakDays === 1 ? "ilk gün — devam et" : "gün üst üste"}
               </Text>
+            </View>
+            <View style={s.listChip}>
+              <Icon d={ICONS.grid} size={12} stroke={c.accent} sw={1.8} />
+              <Text style={s.listChipTxt}>{publicLists.length} liste</Text>
             </View>
             <Icon d={ICONS.arrow} size={16} stroke={c.textMuted} sw={1.8} />
           </Pressable>
@@ -207,20 +202,6 @@ export default function ProfileScreen() {
               <Text style={{ color: c.warning, fontSize: fontSize.md }}>↻</Text>
             </Pressable>
           )}
-
-          {/* Motivation card */}
-          <Pressable
-            onPress={() => navigation.navigate("Streak")}
-            style={({ pressed }) => [s.motivationCard, { transform: [{ scale: pressed ? 0.99 : 1 }] }]}
-          >
-            <LinearGradient colors={[c.bgElevated, c.bgSurface]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-            <View style={s.motivationGlow} />
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <Text style={s.motTitle}>Bu hafta {Math.min(stats.totalWords, 99)} kelime öğrendin</Text>
-              <Icon d={ICONS.sparkle} size={20} stroke={c.warning} fill={c.warning} sw={1.5} />
-            </View>
-            <Text style={s.motSub}>Detayları gör →</Text>
-          </Pressable>
 
           {/* Rozetlerim */}
           <StaggerEnter index={0}>
@@ -313,16 +294,6 @@ export default function ProfileScreen() {
   );
 }
 
-function StatItem({ icon, value, label, color, c, s }) {
-  return (
-    <View style={s.statItem}>
-      <Icon d={icon} size={16} stroke={color} sw={1.8} />
-      <Text style={[s.statValue, { color: c.textPrimary }]}>{value}</Text>
-      <Text style={[s.statLabel, { color: c.textSec }]}>{label}</Text>
-    </View>
-  );
-}
-
 function ProfileTile({ value, label, accent, c, s }) {
   return (
     <View style={[s.tile, { borderTopColor: accent, borderColor: accent + "44", shadowColor: accent }]}>
@@ -367,16 +338,12 @@ function makeStyles(c) {
     levelTitle: { fontSize: fontSize.md, letterSpacing: 0.3 },
     levelDot: { width: 3, height: 3, borderRadius: 1.5 },
     levelSub: { fontSize: fontSize.sm, letterSpacing: 0.2, opacity: 0.85 },
-    // 3-stat bar
-    statBar: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: c.border, paddingVertical: 14, marginBottom: 16 },
-    statItem: { flex: 1, alignItems: "center", gap: 4 },
-    statValue: { fontFamily: c.fontNum, fontSize: fontSize.xl },
-    statLabel: { fontFamily: c.fontBody, fontSize: fontSize.xs },
-    statDivider: { width: 1, height: 32, backgroundColor: c.border },
     // streak hero
     streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 14 },
     streakNum: { fontFamily: c.fontNum, fontSize: fontSize["2xl"], color: c.textPrimary, lineHeight: 30 },
     streakCap: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 2 },
+    listChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: 8 },
+    listChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent },
     // stat tiles
     tileRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
     tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 3 },
@@ -386,11 +353,6 @@ function makeStyles(c) {
     // error
     errorBanner: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
     errorTxt: { flex: 1, fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
-    // motivation
-    motivationCard: { borderRadius: 18, padding: 18, borderWidth: 1, borderColor: c.borderAccent, overflow: "hidden", marginBottom: 20, shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.35, shadowRadius: 32, elevation: 4 },
-    motivationGlow: { position: "absolute", top: -34, right: -24, width: 130, height: 130, borderRadius: 65, backgroundColor: c.accentGlow },
-    motTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, color: c.textPrimary },
-    motSub: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 3 },
     // sections
     sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 18, marginBottom: 10, paddingHorizontal: 2 },
     sectionTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, color: c.textPrimary, letterSpacing: 0.2 },
