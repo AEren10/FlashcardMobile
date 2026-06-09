@@ -11,6 +11,7 @@
  * Tutarlılık: NudgeModal, QuizModeModal, MistakesListModal, RandomReviewModal,
  * StudyModeModal hepsi bu pattern'e refactor edilebilir (eski stiller şimdilik kalıyor).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Modal, View, Pressable, StyleSheet, Animated } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -85,7 +86,7 @@ const s = StyleSheet.create({
   },
   card: {
     width: "100%",
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: 24,
     shadowOpacity: 0.45,

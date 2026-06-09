@@ -3,7 +3,7 @@
  * Abstract geometric hero (network illustration) + accent CTA + dark/light parite.
  */
 import React, { useMemo, useRef, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -166,7 +166,7 @@ function makeStyles(c) {
     forgotText: { fontSize: fontSize.md, color: c.accent, fontFamily: c.fontBodySemi },
     primaryBtn: {
       backgroundColor: c.accent,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       paddingVertical: 16,
       alignItems: "center",
       minHeight: 52,

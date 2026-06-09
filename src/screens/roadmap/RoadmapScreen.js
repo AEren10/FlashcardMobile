@@ -2,6 +2,7 @@
  * RoadmapScreen — kullanıcının seviye yolu (Duolingo path tarzı).
  * LEVELS milestone'ları zigzag layout. Tamamlanmış / aktif / locked durumları.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -110,7 +111,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       borderWidth: 1,
       borderColor: c.border,

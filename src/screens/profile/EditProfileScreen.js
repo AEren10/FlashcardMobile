@@ -2,6 +2,7 @@
  * EditProfileScreen — display_name + avatar düzenleme.
  * profiles tablosuna update.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -227,7 +228,7 @@ function makeStyles(c) {
     iconBtn: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -271,7 +272,7 @@ function makeStyles(c) {
       right: 0,
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 2,

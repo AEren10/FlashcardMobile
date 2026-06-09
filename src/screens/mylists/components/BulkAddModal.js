@@ -4,6 +4,7 @@
  *   - "paired": her satır "word - meaning" (ayraç: - , : | tab — )
  *   - "en-only": her satır 1 İngilizce kelime, anlamı sözlükten otomatik gelir
  */
+import { radius } from "../../../themes/tokens";
 import React, { useState } from "react";
 import {
   Modal,
@@ -204,7 +205,7 @@ const s = StyleSheet.create({
   iconBtn: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -215,7 +216,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     marginHorizontal: 18,
     marginTop: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
     padding: 4,
     gap: 4,
@@ -224,7 +225,7 @@ const s = StyleSheet.create({
     flex: 1,
     paddingVertical: 10,
     paddingHorizontal: 12,
-    borderRadius: 11,
+    borderRadius: radius.sm,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "transparent",
@@ -238,7 +239,7 @@ const s = StyleSheet.create({
     marginHorizontal: 18,
     marginTop: 12,
     padding: 12,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
   },
   hintTxt: { flex: 1, fontSize: 12, lineHeight: 17 },
@@ -248,7 +249,7 @@ const s = StyleSheet.create({
     marginTop: 12,
     marginBottom: 18,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
     fontSize: 14,
     lineHeight: 22,

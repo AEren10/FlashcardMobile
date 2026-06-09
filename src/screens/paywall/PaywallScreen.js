@@ -6,6 +6,7 @@
  *
  * Features listesi free vs pro karşılaştırması yapar.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -288,7 +289,7 @@ const s = StyleSheet.create({
   close: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -337,7 +338,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 16,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 2,
     overflow: "hidden",
   },
@@ -350,7 +351,7 @@ const s = StyleSheet.create({
   radio: {
     width: 22,
     height: 22,
-    borderRadius: 11,
+    borderRadius: radius.sm,
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
@@ -369,14 +370,14 @@ const s = StyleSheet.create({
     right: 14,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 99,
+    borderRadius: radius.full,
   },
   badgeTxt: { fontSize: 9, letterSpacing: 0.5 },
   cta: {
     marginHorizontal: 22,
     marginTop: 22,
     paddingVertical: 16,
-    borderRadius: 16,
+    borderRadius: radius.md,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
@@ -395,7 +396,7 @@ const s = StyleSheet.create({
     marginHorizontal: 22,
     marginTop: 14,
     padding: 10,
-    borderRadius: 10,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
   },

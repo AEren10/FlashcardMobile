@@ -2,6 +2,7 @@
  * SettingsScreen — tüm ayarları tek yerde topla.
  * Görünüm, Dil, Hatırlatıcı, Gizlilik, Hesap.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -338,7 +339,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       borderWidth: 1,
       borderColor: c.border,
@@ -362,7 +363,7 @@ function makeStyles(c) {
     },
     sectionCard: {
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       overflow: "hidden",

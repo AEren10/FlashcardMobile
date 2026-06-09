@@ -2,6 +2,7 @@
  * StreakScreen — Claude Design v2 spec.
  * Hero flame (animated float) + 3 stat tiles with trends + 35-day grid + badges.
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -409,7 +410,7 @@ function makeStyles(c) {
     back: {
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -440,7 +441,7 @@ function makeStyles(c) {
       gap: 12,
       paddingVertical: 12,
       paddingHorizontal: 14,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       marginTop: 12,
     },
@@ -449,7 +450,7 @@ function makeStyles(c) {
     tile: {
       flex: 1,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1.5,
       borderColor: c.border,
       padding: 16,
@@ -466,7 +467,7 @@ function makeStyles(c) {
       top: -22,
       width: 90,
       height: 46,
-      borderRadius: 99,
+      borderRadius: radius.full,
       opacity: 0.9,
     },
     tileVal: { fontFamily: c.fontNum, fontSize: 28, color: c.textPrimary },
@@ -475,14 +476,14 @@ function makeStyles(c) {
       marginTop: 9,
       paddingHorizontal: 8,
       paddingVertical: 3,
-      borderRadius: 99,
+      borderRadius: radius.full,
     },
     trendTxt: { fontFamily: c.fontBodyBold, fontSize: 10 },
 
     gridCard: {
       marginTop: 18,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       padding: 16,
@@ -516,7 +517,7 @@ function makeStyles(c) {
     badgeBox: {
       width: "100%",
       aspectRatio: 1,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",

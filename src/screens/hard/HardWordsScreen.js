@@ -1,3 +1,4 @@
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -164,7 +165,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       borderWidth: 1,
       borderColor: c.border,
@@ -182,7 +183,7 @@ function makeStyles(c) {
       marginHorizontal: 16,
       marginTop: 4,
       paddingVertical: 14,
-      borderRadius: 16,
+      borderRadius: radius.md,
       alignItems: "center",
       backgroundColor: c.accent,
       shadowColor: c.accent,
@@ -197,7 +198,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 10,
       padding: 14,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       backgroundColor: c.bgElevated,
       borderColor: c.border,
@@ -210,7 +211,7 @@ function makeStyles(c) {
       gap: 4,
       paddingHorizontal: 10,
       paddingVertical: 5,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: c.errorDim,
     },
     badgeText: { color: c.error, fontSize: 11, fontFamily: c.fontBodyBold },

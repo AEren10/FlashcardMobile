@@ -6,7 +6,7 @@
  * - returnKeyType + onSubmitEditing → klavye next/go davranışı
  */
 import React, { forwardRef, useState, useMemo } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import { View, Text, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -91,7 +91,7 @@ function makeStyles(c) {
     },
     input: {
       backgroundColor: c.bgElevated,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       paddingHorizontal: 14,
       paddingVertical: 4,
       borderWidth: 1,

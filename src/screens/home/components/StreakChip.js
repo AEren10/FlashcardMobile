@@ -3,6 +3,7 @@
  * Streak > 0: warming glow + amber accent.
  * Streak = 0: soft muted, "başla" mood.
  */
+import { radius } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -148,7 +149,7 @@ export default function StreakChip({ streak = 0, onPress }) {
 
 const s = StyleSheet.create({
   wrap: {
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 14,
     overflow: "hidden",

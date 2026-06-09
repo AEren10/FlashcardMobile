@@ -7,6 +7,7 @@
  *              SkeletonGoalCard, SkeletonWordCard, SkeletonListItem,
  *              SkeletonFlipCard, SkeletonStatRow
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Easing } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -210,21 +211,21 @@ export function SkeletonFlipCard() {
 const s = StyleSheet.create({
   box: { overflow: "hidden" },
   card: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     overflow: "hidden",
     marginBottom: 14,
   },
   statChip: {
     width: 110,
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 14,
     minHeight: 96,
     justifyContent: "space-between",
   },
   goalCard: {
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 14,
     minHeight: 96,
@@ -232,7 +233,7 @@ const s = StyleSheet.create({
   },
   statRow: { flexDirection: "row", gap: 12 },
   wordCard: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 16,
     gap: 8,
@@ -242,7 +243,7 @@ const s = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 12,
     marginBottom: 12,
@@ -252,7 +253,7 @@ const s = StyleSheet.create({
     aspectRatio: 0.72,
     maxHeight: 430,
     alignSelf: "center",
-    borderRadius: 28,
+    borderRadius: radius.xl,
     borderWidth: 1,
     padding: 22,
     overflow: "hidden",

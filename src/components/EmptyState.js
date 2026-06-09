@@ -3,6 +3,7 @@
  * Abstract geometric illustration (no mascot) + display title + body + CTA.
  * Variants: list (floating cards), offline (broken cloud), search (magnifier + ?).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable, Animated, Easing } from "react-native";
 import Svg, { G, Rect, Line, Circle, Path, Text as SvgText } from "react-native-svg";
@@ -179,7 +180,7 @@ const s = StyleSheet.create({
   btn: {
     paddingHorizontal: 24,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     minWidth: 200,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },

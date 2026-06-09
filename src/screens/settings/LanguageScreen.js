@@ -2,6 +2,7 @@
  * LanguageScreen — TR/EN seçimi.
  * AsyncStorage'a kaydedilir; tam i18n setup sonra (placeholder).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -105,7 +106,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       borderWidth: 1,
       borderColor: c.border,
@@ -124,7 +125,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 14,
       padding: 16,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       marginBottom: 10,
     },

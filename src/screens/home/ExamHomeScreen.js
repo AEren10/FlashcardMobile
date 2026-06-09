@@ -10,6 +10,7 @@
  *
  * Mod tercihi AsyncStorage'da '@fc:homeMode' altında tutulur.
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -246,7 +247,7 @@ function makeStyles(c) {
     empty: {
       marginTop: 26,
       padding: 22,
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderStyle: "dashed",
       alignItems: "center",

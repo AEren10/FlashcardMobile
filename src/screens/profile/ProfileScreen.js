@@ -3,7 +3,7 @@
  * Ayarlar → sağ üst ⚙️ → SettingsScreen
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import { View, Text, StyleSheet, ScrollView, Pressable, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -324,34 +324,34 @@ function makeStyles(c) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: c.bgBase },
     topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8 },
-    topBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border },
+    topBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: radius.full, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border },
     topBtnTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textSec },
-    gearBtn: { width: 42, height: 42, borderRadius: 14, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
+    gearBtn: { width: 42, height: 42, borderRadius: radius.sm, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
     headerBlock: { alignItems: "center", paddingTop: 4, paddingBottom: 16 },
     avatarWrap: { shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.4, shadowRadius: 30, elevation: 8, marginBottom: 14 },
     avatarGrad: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center" },
     avatarImg: { width: 84, height: 84, borderRadius: 42 },
     avatarTxt: { fontFamily: c.fontNum, fontSize: fontSize["3xl"], color: "#FFFFFF" },
     name: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 14 },
-    levelChip: { marginTop: 10, paddingLeft: 6, paddingRight: 14, paddingVertical: 5, borderRadius: 999, borderWidth: 1, flexDirection: "row", alignItems: "center", gap: 8 },
-    levelIconWrap: { width: 24, height: 24, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+    levelChip: { marginTop: 10, paddingLeft: 6, paddingRight: 14, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1, flexDirection: "row", alignItems: "center", gap: 8 },
+    levelIconWrap: { width: 24, height: 24, borderRadius: radius.sm, alignItems: "center", justifyContent: "center" },
     levelTitle: { fontSize: fontSize.md, letterSpacing: 0.3 },
     levelDot: { width: 3, height: 3, borderRadius: 1.5 },
     levelSub: { fontSize: fontSize.sm, letterSpacing: 0.2, opacity: 0.85 },
     // streak hero
-    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 14 },
+    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 14 },
     streakNum: { fontFamily: c.fontNum, fontSize: fontSize["2xl"], color: c.textPrimary, lineHeight: 30 },
     streakCap: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 2 },
-    listChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: 8 },
+    listChip: { flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: 8 },
     listChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent },
     // stat tiles
     tileRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
-    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 3 },
-    tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: 99, opacity: 0.9 },
+    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 3 },
+    tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: radius.full, opacity: 0.9 },
     tileVal: { fontFamily: c.fontNum, fontSize: fontSize["2xl"] },
     tileLbl: { fontFamily: c.fontBody, fontSize: fontSize.xs, color: c.textSec, marginTop: 2 },
     // error
-    errorBanner: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
+    errorBanner: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: radius.sm, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
     errorTxt: { flex: 1, fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
     // sections
     sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 18, marginBottom: 10, paddingHorizontal: 2 },
@@ -359,29 +359,29 @@ function makeStyles(c) {
     sectionLink: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.accent },
     // badges
     badgeRow: { flexDirection: "row", gap: 12 },
-    badgeCard: { flex: 1, borderRadius: 16, borderWidth: 1, padding: 14, alignItems: "flex-start", minHeight: 140 },
-    badgeIconBox: { width: 42, height: 42, borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 10 },
+    badgeCard: { flex: 1, borderRadius: radius.md, borderWidth: 1, padding: 14, alignItems: "flex-start", minHeight: 140 },
+    badgeIconBox: { width: 42, height: 42, borderRadius: radius.sm, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 10 },
     badgeTitle: { fontSize: fontSize.md, letterSpacing: 0.2, marginBottom: 4 },
     badgeValue: { fontSize: fontSize.md, marginBottom: 6 },
     badgeHint: { fontSize: fontSize.sm, lineHeight: 14 },
     recentBadges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
-    recentBadgePill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1 },
+    recentBadgePill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, borderWidth: 1 },
     recentBadgeTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
     // lists
-    listsEmpty: { borderRadius: 16, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
+    listsEmpty: { borderRadius: radius.md, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
     listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
     listsEmptyHint: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textMuted },
-    listCard: { width: 170, borderRadius: 14, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated, overflow: "hidden", shadowColor: c.cobalt, shadowOpacity: 0.15, shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, elevation: 2 },
+    listCard: { width: 170, borderRadius: radius.sm, borderWidth: 1, borderColor: c.border, backgroundColor: c.bgElevated, overflow: "hidden", shadowColor: c.cobalt, shadowOpacity: 0.15, shadowOffset: { width: 0, height: 3 }, shadowRadius: 8, elevation: 2 },
     listCardBody: { padding: 10, gap: 6 },
     listCardTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.md, color: c.textPrimary },
     listCardMeta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
     listCardCount: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textPrimary, opacity: 0.85 },
-    listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
+    listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: radius.full, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
     listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
     // guest
     guestTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 12 },
     guestSub: { fontFamily: c.fontBody, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
-    primaryBtn: { marginTop: 24, backgroundColor: c.accent, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 32 },
+    primaryBtn: { marginTop: 24, backgroundColor: c.accent, borderRadius: radius.sm, paddingVertical: 14, paddingHorizontal: 32 },
     primaryBtnTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: fontSize.lg },
   });
 }

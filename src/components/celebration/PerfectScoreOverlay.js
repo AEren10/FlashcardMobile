@@ -8,6 +8,7 @@
  *
  * Sonuç ekranının üstüne yerleştirilir (mevcut DonutChart vs altta kalır).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -215,7 +216,7 @@ const s = StyleSheet.create({
   tag: {
     paddingHorizontal: 12,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 10,
   },

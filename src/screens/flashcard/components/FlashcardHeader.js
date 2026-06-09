@@ -3,7 +3,7 @@
  * Tema-aware (useTheme).
  */
 import React, { useMemo } from "react";
-import { fontSize } from "../../../themes/tokens";
+import { fontSize, radius } from "../../../themes/tokens";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -119,7 +119,7 @@ function makeStyles(c) {
       marginTop: 4,
       paddingHorizontal: 9,
       paddingVertical: 3,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
     },
     tintTxt: {
@@ -131,7 +131,7 @@ function makeStyles(c) {
     iconBtn: {
       width: 36,
       height: 36,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",

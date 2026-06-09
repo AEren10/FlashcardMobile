@@ -9,6 +9,7 @@
  *   - 7 günlük bar chart
  *   - Paylaş + Kapat butonları
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -126,7 +127,7 @@ export default function WeeklyRecapScreen({ navigation }) {
               colors={["rgba(255,255,255,0.18)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 0.4 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
+              style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
               pointerEvents="none"
             />
             <Text style={s.heroTag}>BU HAFTA</Text>
@@ -304,7 +305,7 @@ function makeStyles(c) {
     },
     iconBtn: {
       width: 38, height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center", justifyContent: "center",
     },
@@ -314,7 +315,7 @@ function makeStyles(c) {
       fontSize: 19,
     },
     heroCard: {
-      borderRadius: 22,
+      borderRadius: radius.lg,
       padding: 28,
       borderWidth: 1,
       borderColor: c.borderAccent,
@@ -358,7 +359,7 @@ function makeStyles(c) {
     statTile: {
       flex: 1,
       padding: 14,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       gap: 6,
@@ -368,7 +369,7 @@ function makeStyles(c) {
     section: {
       marginTop: 4,
       padding: 18,
-      borderRadius: 18,
+      borderRadius: radius.md,
       backgroundColor: c.bgElevated,
       borderWidth: 1,
       borderColor: c.border,
@@ -402,7 +403,7 @@ function makeStyles(c) {
     },
     spotlightCard: {
       padding: 16,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       overflow: "hidden",
     },
@@ -430,7 +431,7 @@ function makeStyles(c) {
       justifyContent: "center",
       gap: 8,
       paddingVertical: 16,
-      borderRadius: 16,
+      borderRadius: radius.md,
       marginTop: 22,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.5,

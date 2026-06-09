@@ -2,6 +2,7 @@
  * CreateListScreen — Premium Dark redesign.
  * Form state → useListEditor, image → useImageUpload.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -475,7 +476,7 @@ function makeStyles(c) {
   backText: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi },
   title: { fontSize: 18, color: c.textPrimary, fontFamily: c.fontBodyBold },
   saveBtn: {
-    borderRadius: 12,
+    borderRadius: radius.sm,
     paddingVertical: 8,
     paddingHorizontal: 18,
     minWidth: 70,
@@ -490,7 +491,7 @@ function makeStyles(c) {
 
   card: {
     backgroundColor: c.bgElevated,
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 18,
     borderWidth: 1,
     borderColor: c.border,
@@ -514,7 +515,7 @@ function makeStyles(c) {
 
   imagePicker: {
     height: 140,
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: c.bgElevated,
     borderWidth: 1,
     borderColor: c.border,
@@ -534,7 +535,7 @@ function makeStyles(c) {
     alignItems: "center",
     gap: 10,
     backgroundColor: c.accentGlow,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     padding: 12,
     borderWidth: 1,
     borderColor: c.borderAccent,
@@ -552,7 +553,7 @@ function makeStyles(c) {
   bulkBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: radius.full,
     backgroundColor: c.accentGlow,
     borderWidth: 1,
     borderColor: c.borderAccent,
@@ -565,7 +566,7 @@ function makeStyles(c) {
   },
   wordRow: {
     backgroundColor: c.bgElevated,
-    borderRadius: 18,
+    borderRadius: radius.md,
     padding: 16,
     paddingLeft: 14,
     flexDirection: "row",
@@ -588,7 +589,7 @@ function makeStyles(c) {
   wordNum: {
     width: 36,
     height: 36,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     backgroundColor: c.accentGlow,
     alignItems: "center",
     justifyContent: "center",
@@ -605,7 +606,7 @@ function makeStyles(c) {
   addWordBtn: {
     marginTop: 2,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 2,
     borderStyle: "dashed",
     borderColor: c.borderAccent,
@@ -617,7 +618,7 @@ function makeStyles(c) {
   toggleRow: {
     marginTop: 16,
     backgroundColor: c.bgElevated,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
@@ -626,11 +627,11 @@ function makeStyles(c) {
   },
   toggleTitle: { fontSize: 15, color: c.textPrimary, fontFamily: c.fontBodySemi },
   toggleSub: { fontSize: 11, color: c.textMuted, fontFamily: c.fontBody, marginTop: 2 },
-  toggle: { width: 50, height: 28, borderRadius: 99, position: "relative" },
+  toggle: { width: 50, height: 28, borderRadius: radius.full, position: "relative" },
   toggleKnob: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     position: "absolute",
     top: 2,
   },

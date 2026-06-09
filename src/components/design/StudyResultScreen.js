@@ -5,6 +5,7 @@
  * - 3 aksiyon: Favorile / Sadece Bunlardan Çalış / Bitir
  * - Bilemediklerin (default expanded) + Bildiklerin (chip list)
  */
+import { radius } from "../../themes/tokens";
 import React, { useMemo, useState } from "react";
 import {
   View,
@@ -284,7 +285,7 @@ function makeStyles(c) {
     statBox: {
       flex: 1,
       backgroundColor: c.bgElevated,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.border,
       padding: 12,
@@ -299,7 +300,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 12,
       backgroundColor: c.accentGlow,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.borderAccent,
       padding: 14,
@@ -308,7 +309,7 @@ function makeStyles(c) {
     infoIcon: {
       width: 36,
       height: 36,
-      borderRadius: 10,
+      borderRadius: radius.sm,
       backgroundColor: c.bgBase,
       alignItems: "center",
       justifyContent: "center",
@@ -338,7 +339,7 @@ function makeStyles(c) {
       gap: 12,
       padding: 14,
       backgroundColor: c.errorDim,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.error + "33",
     },
@@ -355,7 +356,7 @@ function makeStyles(c) {
     soundBtn: {
       width: 34,
       height: 34,
-      borderRadius: 10,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -365,7 +366,7 @@ function makeStyles(c) {
     knownChip: {
       paddingHorizontal: 10,
       paddingVertical: 5,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: c.successDim,
       borderWidth: 1,
       borderColor: c.success + "33",

@@ -7,6 +7,7 @@
  *   - Controlled mode: plain View wrapper lets parent PanResponder handle taps
  *   - Interactive overlay (bookmark + sound) floats above in box-none layer
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
@@ -282,7 +283,7 @@ function makeStyles(c) {
     face: {
       position: "absolute",
       top: 0, left: 0, right: 0, bottom: 0,
-      borderRadius: 28,
+      borderRadius: radius.xl,
       overflow: "hidden",
       padding: 22,
       borderWidth: 1,
@@ -295,7 +296,7 @@ function makeStyles(c) {
       position: "absolute",
       width: 280,
       height: 220,
-      borderRadius: 200,
+      borderRadius: radius.lg0,
       opacity: 0.8,
     },
     glint: {
@@ -321,7 +322,7 @@ function makeStyles(c) {
     chip: {
       paddingHorizontal: 12,
       paddingVertical: 6,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
     },
     chipTxt: {
@@ -332,7 +333,7 @@ function makeStyles(c) {
     soundBtn: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",

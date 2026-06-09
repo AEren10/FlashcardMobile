@@ -10,6 +10,7 @@
  *   onClose()
  *   title: string
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef } from "react";
 import {
   Modal,
@@ -269,7 +270,7 @@ const s = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 360,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: 22,
     alignItems: "center",
@@ -301,7 +302,7 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     height: ITEM_H,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
   },
   fadeTop: {
@@ -329,7 +330,7 @@ const s = StyleSheet.create({
   btn: {
     flex: 1,
     height: 46,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

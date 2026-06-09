@@ -3,6 +3,7 @@
  * route.params: { userId, displayName? }
  * Gösterir: avatar + display_name + bio + 3 stat + public listeleri
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   View,
@@ -302,7 +303,7 @@ function makeStyles(c) {
     back: {
       width: 36,
       height: 36,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: c.bgSurface,
@@ -367,7 +368,7 @@ function makeStyles(c) {
     followBtn: {
       paddingHorizontal: 18,
       paddingVertical: 9,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
     },
     followBtnIdle: { backgroundColor: c.accent, borderColor: c.accent },
@@ -385,7 +386,7 @@ function makeStyles(c) {
       flex: 1,
       alignItems: "center",
       padding: 14,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       backgroundColor: c.bgElevated,
       gap: 6,
@@ -393,7 +394,7 @@ function makeStyles(c) {
     statIcon: {
       width: 32,
       height: 32,
-      borderRadius: 10,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -417,7 +418,7 @@ function makeStyles(c) {
     listCard: {
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       backgroundColor: c.bgElevated,

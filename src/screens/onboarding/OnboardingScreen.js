@@ -2,6 +2,7 @@
  * OnboardingScreen — Claude Design v2 spec.
  * 3 ekran abstract illustration (network / stack / graph), display title, body, primary CTA + atla.
  */
+import { radius } from "../../themes/tokens";
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -125,7 +126,7 @@ function DemoFlashcard({ c }) {
           backgroundColor: c.bgElevated,
           borderColor: c.accent + "66",
           borderWidth: 1.5,
-          borderRadius: 22,
+          borderRadius: radius.lg,
           alignItems: "center",
           justifyContent: "center",
           padding: 20,
@@ -152,7 +153,7 @@ function DemoFlashcard({ c }) {
           backgroundColor: c.bgElevated,
           borderColor: c.cobalt + "66",
           borderWidth: 1.5,
-          borderRadius: 22,
+          borderRadius: radius.lg,
           alignItems: "center",
           justifyContent: "center",
           padding: 20,
@@ -419,7 +420,7 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   dots: { flexDirection: "row", gap: 7, alignItems: "center" },
-  dot: { height: 6, borderRadius: 99 },
+  dot: { height: 6, borderRadius: radius.full },
   skipBtn: { width: 60, alignItems: "flex-end" },
   skipText: { fontSize: 14 },
   slide: {
@@ -443,7 +444,7 @@ const styles = StyleSheet.create({
   },
   bottom: { paddingHorizontal: 22, paddingBottom: 24 },
   ctaBtn: {
-    borderRadius: 14,
+    borderRadius: radius.sm,
     paddingVertical: 16,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },

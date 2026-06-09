@@ -1,3 +1,4 @@
+import { radius } from "../../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -58,7 +59,7 @@ function makeStyles(c) {
   return StyleSheet.create({
     listItem: {
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       padding: 14,
       flexDirection: "row",
       alignItems: "center",
@@ -70,7 +71,7 @@ function makeStyles(c) {
     emojiBox: {
       width: 46,
       height: 46,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",

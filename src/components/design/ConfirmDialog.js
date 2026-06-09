@@ -16,6 +16,7 @@
  *
  * imperative kullanım da olabilir (useConfirm hook, sonra eklenir).
  */
+import { radius } from "../../themes/tokens";
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -109,7 +110,7 @@ const s = StyleSheet.create({
   btn: {
     flex: 1,
     paddingVertical: 13,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

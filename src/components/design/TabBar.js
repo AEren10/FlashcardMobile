@@ -3,6 +3,7 @@
  * Indicator: 280ms spring slide between tabs.
  * Active: lime indicator + filled glow icon + label color shift.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Pressable, Text, StyleSheet, Platform, Animated, Easing } from "react-native";
 import { BlurView } from "expo-blur";
@@ -268,7 +269,7 @@ const s = StyleSheet.create({
   bar: {
     flexDirection: "row",
     height: 64,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     overflow: "hidden",
     alignItems: "center",
@@ -289,7 +290,7 @@ const s = StyleSheet.create({
     position: "absolute",
     width: 44,
     height: 44,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 2,
     top: "50%",
     marginTop: -22,
@@ -300,7 +301,7 @@ const s = StyleSheet.create({
     left: 0,
     width: 24,
     height: 4,
-    borderRadius: 99,
+    borderRadius: radius.full,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 8,

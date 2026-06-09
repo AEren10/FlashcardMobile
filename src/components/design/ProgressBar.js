@@ -3,6 +3,7 @@
  * Design v2: fm-fill + fm-shimmer.
  * GPU-friendly: only transform/opacity animations.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Easing } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -68,12 +69,12 @@ export default function ProgressBar({ progress = 0, height = 8, showShimmer = tr
 
 const s = StyleSheet.create({
   track: {
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
   fill: {
     height: "100%",
-    borderRadius: 999,
+    borderRadius: radius.full,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 12,

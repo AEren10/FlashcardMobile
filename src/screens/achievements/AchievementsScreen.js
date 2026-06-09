@@ -2,6 +2,7 @@
  * AchievementsScreen — Tüm rozetlerin grid'i (kilitli + açık).
  * Kategoriye göre gruplanmış, tier rengiyle renklendirilmiş.
  */
+import { radius } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -186,7 +187,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -197,7 +198,7 @@ function makeStyles(c) {
       fontSize: 22,
     },
     overall: {
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       padding: 18,
       overflow: "hidden",
@@ -211,7 +212,7 @@ function makeStyles(c) {
     overallBadge: {
       width: 60,
       height: 60,
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -220,12 +221,12 @@ function makeStyles(c) {
     overallLbl: { fontSize: 12, marginTop: 4 },
     progressTrack: {
       height: 8,
-      borderRadius: 999,
+      borderRadius: radius.full,
       overflow: "hidden",
     },
     progressFill: {
       height: "100%",
-      borderRadius: 999,
+      borderRadius: radius.full,
     },
     catHeader: {
       flexDirection: "row",
@@ -248,7 +249,7 @@ function makeStyles(c) {
     },
     card: {
       width: "48.5%",
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       padding: 14,
       overflow: "hidden",
@@ -256,7 +257,7 @@ function makeStyles(c) {
     iconBox: {
       width: 44,
       height: 44,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",
@@ -275,7 +276,7 @@ function makeStyles(c) {
       alignSelf: "flex-start",
       paddingHorizontal: 7,
       paddingVertical: 2,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
       marginTop: 8,
     },

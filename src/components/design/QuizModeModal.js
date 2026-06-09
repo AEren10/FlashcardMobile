@@ -2,6 +2,7 @@
  * QuizModeModal — Quiz başlamadan önce mod seçimi (Normal / Hızlı).
  * Hızlı modda her soru için 10sn süre.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -185,14 +186,14 @@ const s = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 400,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: 24,
   },
   title: { fontSize: 26, textAlign: "center" },
   sub: { fontSize: 13, textAlign: "center", marginTop: 4, marginBottom: 20 },
   mode: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     overflow: "hidden",
     padding: 16,
@@ -201,7 +202,7 @@ const s = StyleSheet.create({
   modeEmoji: { fontSize: 30 },
   modeTitle: { fontSize: 16 },
   modeDesc: { fontSize: 12, marginTop: 2, lineHeight: 16 },
-  badge: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: 999 },
+  badge: { paddingHorizontal: 9, paddingVertical: 4, borderRadius: radius.full },
   badgeTxt: { fontSize: 11, letterSpacing: 0.3 },
   cancel: { marginTop: 16, alignItems: "center", paddingVertical: 8 },
   cancelTxt: { fontSize: 13 },

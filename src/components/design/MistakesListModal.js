@@ -2,6 +2,7 @@
  * MistakesListModal — "Sana özel liste hazırladık" celebration modal.
  * Study/Quiz sonrası, 5+ yeni kelime mistakes listesine eklenirse açılır.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import Icon, { ICONS } from "./Icon";
 import {
@@ -186,7 +187,7 @@ const s = StyleSheet.create({
   iconCircle: {
     width: 96,
     height: 96,
-    borderRadius: 28,
+    borderRadius: radius.xl,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

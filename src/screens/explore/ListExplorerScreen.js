@@ -3,6 +3,7 @@
  * route.params: { title, filter ('popular'|'newest'|'category'|'continue'), category?, accent? }
  * FlatList ile alt alta detaylı liste kartları (perf).
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -259,7 +260,7 @@ function makeStyles(c) {
     back: {
       width: 38,
       height: 38,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       backgroundColor: c.bgSurface,
       alignItems: "center",
@@ -293,7 +294,7 @@ function makeStyles(c) {
       gap: 10,
       paddingHorizontal: 14,
       paddingVertical: 12,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
     },
     searchInput: { flex: 1, fontSize: 14, padding: 0 },
@@ -303,13 +304,13 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 14,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       padding: 12,
     },
     coverWrap: {
       width: 90,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       overflow: "hidden",
     },
     starBadge: {
@@ -318,7 +319,7 @@ function makeStyles(c) {
       right: 6,
       width: 22,
       height: 22,
-      borderRadius: 11,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
     },

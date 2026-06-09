@@ -2,6 +2,7 @@
  * BookmarkButton — kelime favorileme butonu.
  * Tap → scale bounce + haptic + Redux dispatch + uçan ghost animasyonu (sadece add).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, StyleSheet, View, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -83,7 +84,7 @@ export default function BookmarkButton({ wordId, listId, size = 38 }) {
           {
             width: size,
             height: size,
-            borderRadius: 12,
+            borderRadius: radius.sm,
             borderColor: isFavorite ? c.borderAccent : c.border,
             backgroundColor: isFavorite ? c.accentGlow : c.bgSurface,
           },

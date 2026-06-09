@@ -6,6 +6,7 @@
  * Kullanım:
  *   <FlameScrollView refreshing={r} onRefresh={fn}>...</FlameScrollView>
  */
+import { radius } from "../../themes/tokens";
 import React, { useRef, useState } from "react";
 import {
   Animated,
@@ -110,7 +111,7 @@ const s = StyleSheet.create({
     position: "absolute",
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: radius.lg,
     top: 2,
   },
   emoji: {

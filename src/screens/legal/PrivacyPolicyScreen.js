@@ -2,6 +2,7 @@
  * PrivacyPolicyScreen — KVKK/GDPR uyumlu gizlilik politikası.
  * App Store metadata'sında URL yerine in-app erişim için.
  */
+import { radius } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -136,7 +137,7 @@ function makeStyles(c) {
     back: {
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",

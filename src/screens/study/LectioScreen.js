@@ -6,6 +6,7 @@
  *
  * route.params: { listId, listTitle }
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
 import {
   View,
@@ -306,7 +307,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     iconBtn: {
       width: 36,
       height: 36,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: c.bgSurface,
@@ -365,7 +366,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       gap: 8,
       paddingHorizontal: 14,
       paddingVertical: 8,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: c.cobalt + "1A",
       borderWidth: 1,
       borderColor: c.cobalt + "55",
@@ -394,7 +395,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
       right: 16,
       width: 32,
       height: 32,
-      borderRadius: 10,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
       backgroundColor: c.bgElevated,
@@ -432,7 +433,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     navBtn: {
       width: 48,
       height: 48,
-      borderRadius: 16,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -443,7 +444,7 @@ function makeStyles(c, insets = { top: 0, bottom: 0 }) {
     trCta: {
       flex: 1,
       paddingVertical: 14,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",

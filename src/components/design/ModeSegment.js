@@ -8,6 +8,7 @@
  * Tasarım: greeting'in altında geniş bir segment; aktif olan accent, diğeri muted.
  * Animasyonlu indicator + scale press feedback.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -133,7 +134,7 @@ const s = StyleSheet.create({
   wrap: {
     flexDirection: "row",
     height: 48,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
     marginTop: 18,
     overflow: "hidden",
@@ -145,7 +146,7 @@ const s = StyleSheet.create({
     top: 3,
     bottom: 3,
     width: "49%",
-    borderRadius: 11,
+    borderRadius: radius.sm,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.35,
     shadowRadius: 10,

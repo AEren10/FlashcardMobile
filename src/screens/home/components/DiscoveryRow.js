@@ -3,7 +3,7 @@
  * Title + horizontal scroll + mini liste kartları.
  */
 import React, { memo } from "react";
-import { fontSize } from "../../../themes/tokens";
+import { fontSize, radius } from "../../../themes/tokens";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -148,7 +148,7 @@ const s = StyleSheet.create({
   seeAll: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
   },
   seeAllTxt: {

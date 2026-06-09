@@ -2,7 +2,7 @@
  * ForgotPasswordScreen — Claude Design v2.
  */
 import React, { useMemo, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -135,7 +135,7 @@ function makeStyles(c) {
     back: {
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -160,7 +160,7 @@ function makeStyles(c) {
     },
     primaryBtn: {
       backgroundColor: c.accent,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       paddingVertical: 16,
       alignItems: "center",
       minHeight: 52,
@@ -173,7 +173,7 @@ function makeStyles(c) {
     primaryText: { color: c.textOnAccent, fontSize: fontSize.lg, fontFamily: c.fontBodyBold },
     successCard: {
       backgroundColor: c.bgElevated,
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.borderAccent,
       padding: 24,

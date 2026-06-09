@@ -3,6 +3,7 @@
  * GitHub grid yerine daha canlı, mobil-friendly bar görünüm.
  * Tap bar → o gün için detay alt yazı (sessions).
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -170,7 +171,7 @@ function makeStyles(c) {
   return StyleSheet.create({
     wrap: {
       backgroundColor: c.bgElevated,
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       padding: 16,

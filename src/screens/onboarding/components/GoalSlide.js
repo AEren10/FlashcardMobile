@@ -3,6 +3,7 @@
  * 4 kart: Sınav / Kariyer / Seyahat / Hobi.
  * Tap → onSelect(slug). Seçilen kart highlighted.
  */
+import { radius } from "../../../themes/tokens";
 import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -82,7 +83,7 @@ const styles = StyleSheet.create({
   card: {
     width: "47%",
     minHeight: 130,
-    borderRadius: 16,
+    borderRadius: radius.md,
     padding: 14,
     alignItems: "flex-start",
     justifyContent: "space-between",

@@ -3,7 +3,7 @@
  * Greeting + 2 stat box + glow challenge card + horizontal "Devam Et" carousel.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -329,7 +329,7 @@ export default function HomeScreen({ navigation }) {
                 gap: 8,
                 paddingVertical: 10,
                 paddingHorizontal: 14,
-                borderRadius: 12,
+                borderRadius: radius.sm,
                 backgroundColor: c.warning + "1A",
                 borderWidth: 1,
                 borderColor: c.warning + "55",
@@ -379,7 +379,7 @@ export default function HomeScreen({ navigation }) {
               colors={["rgba(255,255,255,0.08)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 0.4 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
+              style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
               pointerEvents="none"
             />
 
@@ -421,7 +421,7 @@ export default function HomeScreen({ navigation }) {
                 marginTop: 14,
                 marginBottom: 4,
                 padding: 16,
-                borderRadius: 16,
+                borderRadius: radius.md,
                 backgroundColor: daily.completed ? c.success + "26" : (c.mint || c.cobalt) + "26",
                 borderWidth: 1.5,
                 borderColor: daily.completed ? c.success + "AA" : (c.mint || c.cobalt) + "AA",
@@ -451,12 +451,12 @@ export default function HomeScreen({ navigation }) {
                 </Text>
               </View>
               {/* Progress bar */}
-              <View style={{ height: 4, marginTop: 10, backgroundColor: c.bgSurface, borderRadius: 99, overflow: "hidden" }}>
+              <View style={{ height: 4, marginTop: 10, backgroundColor: c.bgSurface, borderRadius: radius.full, overflow: "hidden" }}>
                 <View style={{
                   width: `${daily.pct}%`,
                   height: "100%",
                   backgroundColor: daily.completed ? c.success : (c.mint || c.cobalt),
-                  borderRadius: 99,
+                  borderRadius: radius.full,
                 }} />
               </View>
             </View>
@@ -676,7 +676,7 @@ function makeStyles(c) {
     statsRow: { flexDirection: "row", gap: 12, marginTop: 20 },
     challengeCard: {
       marginTop: 16,
-      borderRadius: 20,
+      borderRadius: radius.lg,
       padding: 22,
       borderWidth: 1.5,
       borderColor: c.accent + "66",
@@ -704,7 +704,7 @@ function makeStyles(c) {
       backgroundColor: c.accentGlow,
       borderColor: c.borderAccent,
       borderWidth: 1,
-      borderRadius: 999,
+      borderRadius: radius.full,
       paddingVertical: 5,
       paddingHorizontal: 11,
     },
@@ -733,7 +733,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 8,
       backgroundColor: c.accent,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       paddingVertical: 12,
       paddingHorizontal: 24,
       marginTop: 18,
@@ -779,7 +779,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 14,
       padding: 16,
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.borderAccent,
       backgroundColor: c.bgElevated,
@@ -789,7 +789,7 @@ function makeStyles(c) {
     emptyCtaIcon: {
       width: 44,
       height: 44,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       alignItems: "center",
       justifyContent: "center",

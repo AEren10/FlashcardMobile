@@ -2,6 +2,7 @@
  * FlashcardCardArea — progress bar + flip card + sade chevron gezinme.
  * Son karta gelince sağ chevron yeşil "Çalışmaya Geç" CTA'ya dönüşür.
  */
+import { radius } from "../../../themes/tokens";
 import React from "react";
 import { View, Pressable, Text, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -149,10 +150,10 @@ const s = StyleSheet.create({
   track: {
     flex: 1,
     height: 5,
-    borderRadius: 99,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
-  fill: { height: "100%", borderRadius: 99 },
+  fill: { height: "100%", borderRadius: radius.full },
   counter: { fontSize: 12, minWidth: 36, textAlign: "right" },
 
   cardArea: { flex: 1, justifyContent: "center", paddingHorizontal: 28, paddingVertical: 18 },
@@ -168,7 +169,7 @@ const s = StyleSheet.create({
   chev: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",
@@ -183,7 +184,7 @@ const s = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1.5,
   },
   completeCta: {
@@ -192,7 +193,7 @@ const s = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 22,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 18,

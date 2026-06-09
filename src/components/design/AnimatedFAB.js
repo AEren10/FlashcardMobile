@@ -3,6 +3,7 @@
  * Idle: scale 1→1.05→1 every 4 seconds (subtle attention)
  * Press: scale 0.94, 200ms (haptic by parent)
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Pressable, Animated, StyleSheet, Easing } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -83,7 +84,7 @@ const s = StyleSheet.create({
     bottom: 104,
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     shadowOffset: { width: 0, height: 8 },
@@ -96,6 +97,6 @@ const s = StyleSheet.create({
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 18,
+    borderRadius: radius.md,
   },
 });

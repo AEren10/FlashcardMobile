@@ -10,6 +10,7 @@
  *   - Tap → StudyScreen(presetWords: [...random], presetMode: "review")
  *   - Şu an known word count düşükse modal "henüz yeterli kelime yok, devam et" mesajı
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -249,7 +250,7 @@ const s = StyleSheet.create({
   iconBox: {
     width: 50,
     height: 50,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -268,7 +269,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     padding: 14,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     marginBottom: 10,
     overflow: "hidden",
@@ -276,7 +277,7 @@ const s = StyleSheet.create({
   countBox: {
     width: 46,
     height: 46,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
   },

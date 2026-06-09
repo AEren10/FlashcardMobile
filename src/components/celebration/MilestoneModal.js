@@ -9,6 +9,7 @@
  *   visible: bool
  *   onDismiss(): kapatma + storage yazma
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import {
   Modal,
@@ -341,7 +342,7 @@ const s = StyleSheet.create({
     top: H / 2 - 220,
     width: 240,
     height: 240,
-    borderRadius: 120,
+    borderRadius: radius.sm0,
   },
   badgeWrap: {
     marginBottom: 36,
@@ -369,7 +370,7 @@ const s = StyleSheet.create({
   tagChip: {
     paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 14,
   },
@@ -394,7 +395,7 @@ const s = StyleSheet.create({
   nextHint: {
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
   },
   nextHintTxt: {
@@ -404,7 +405,7 @@ const s = StyleSheet.create({
   cta: {
     paddingHorizontal: 40,
     paddingVertical: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 22,

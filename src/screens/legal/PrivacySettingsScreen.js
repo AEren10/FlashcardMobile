@@ -3,6 +3,7 @@
  * App.js'teki initSentry sadece consent === true ise çalıştığı için
  * burada yapılan değişiklik bir sonraki açılışta etkili olur.
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -96,7 +97,7 @@ function makeStyles(c) {
     back: {
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -113,7 +114,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: c.bgElevated,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.border,
       padding: 16,

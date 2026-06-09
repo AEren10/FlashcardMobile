@@ -3,6 +3,7 @@
  * progress < 1: lime fill + shimmer
  * progress >= 1: yeşil success + checkmark + gentle pulse
  */
+import { radius } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -161,7 +162,7 @@ export default function DailyGoalCard({ done = 0, total = 10, onPress }) {
 
 const s = StyleSheet.create({
   wrap: {
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     padding: 14,
     overflow: "hidden",
@@ -177,13 +178,13 @@ const s = StyleSheet.create({
   num: { fontSize: 17 },
   track: {
     height: 9,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
     marginTop: 4,
   },
   fill: {
     height: "100%",
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
   shimmerBand: {

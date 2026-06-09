@@ -1,3 +1,4 @@
+import { radius } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -56,7 +57,7 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
         colors={["rgba(255,255,255,0.10)", "transparent"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 0.4 }}
-        style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
+        style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]}
         pointerEvents="none"
       />
 
@@ -106,7 +107,7 @@ export default function LevelMiniCard({ totalWords = 0, onPress }) {
 const s = StyleSheet.create({
   wrap: {
     marginTop: 12,
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1.5,
     padding: 14,
     overflow: "hidden",
@@ -135,16 +136,16 @@ const s = StyleSheet.create({
     letterSpacing: 0.5,
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
   titleTxt: { fontSize: 14 },
   track: {
     height: 5,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
-  fill: { height: "100%", borderRadius: 999 },
+  fill: { height: "100%", borderRadius: radius.full },
   next: {
     fontSize: 11,
     marginTop: 10,

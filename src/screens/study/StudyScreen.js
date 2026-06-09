@@ -6,7 +6,7 @@
  * Stack peek, verdict badges, ✓/✗ feedback pop, confetti (streak ≥5), shake
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -315,7 +315,7 @@ function GradeBtn({ label, sub, color, onPress, c }) {
         flex: 1,
         paddingVertical: 12,
         paddingHorizontal: 6,
-        borderRadius: 12,
+        borderRadius: radius.sm,
         borderWidth: 1.5,
         alignItems: "center",
         backgroundColor: pressed ? color + "22" : c.bgElevated,
@@ -487,7 +487,7 @@ function makeStyles(c) {
       left: 0,
       right: 0,
       bottom: 0,
-      borderRadius: 28,
+      borderRadius: radius.xl,
       borderWidth: 1,
     },
     cardPan: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
@@ -497,7 +497,7 @@ function makeStyles(c) {
       left: 0,
       right: 0,
       bottom: 0,
-      borderRadius: 28,
+      borderRadius: radius.xl,
       borderWidth: 2,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.5,
@@ -579,7 +579,7 @@ function makeStyles(c) {
       flex: 1,
       paddingVertical: 12,
       paddingHorizontal: 6,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1.5,
       alignItems: "center",
       backgroundColor: c.bgElevated,

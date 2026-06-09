@@ -11,6 +11,7 @@
  *   - Done node sonrası: solid colored line
  *   - Aktif node sonrası: dashed (henüz açılmadı)
  */
+import { radius } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -376,7 +377,7 @@ const s = StyleSheet.create({
     gap: 5,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: radius.full,
     marginBottom: 6,
     marginTop: 8,
   },
@@ -394,7 +395,7 @@ const s = StyleSheet.create({
   lvPill: {
     paddingHorizontal: 9,
     paddingVertical: 3,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 6,
     marginTop: 8,

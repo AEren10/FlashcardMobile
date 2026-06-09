@@ -13,6 +13,7 @@
  *   visible, nudge: { type, title, headline, sub, ctaLabel, secondaryLabel, icon, color }
  *   onAccept, onDismiss
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { Modal, View, Text, Pressable, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -75,7 +76,7 @@ export default function NudgeModal({ visible, nudge, onAccept, onDismiss }) {
             colors={[tint + "1F", "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 0.5 }}
-            style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
+            style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
             pointerEvents="none"
           />
 
@@ -90,7 +91,7 @@ export default function NudgeModal({ visible, nudge, onAccept, onDismiss }) {
               colors={["rgba(255,255,255,0.28)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 0.6 }}
-              style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
+              style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
               pointerEvents="none"
             />
             <Icon d={nudge.icon} size={26} stroke="#FFFDF7" fill="none" sw={2} />
@@ -174,7 +175,7 @@ const s = StyleSheet.create({
   card: {
     width: "100%",
     maxWidth: 360,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     padding: 22,
     alignItems: "center",
@@ -186,7 +187,7 @@ const s = StyleSheet.create({
   iconWrap: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
@@ -199,7 +200,7 @@ const s = StyleSheet.create({
   tag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
     marginBottom: 10,
   },
@@ -229,7 +230,7 @@ const s = StyleSheet.create({
   secondary: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
   },
@@ -240,7 +241,7 @@ const s = StyleSheet.create({
   primary: {
     flex: 1.3,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     alignItems: "center",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,

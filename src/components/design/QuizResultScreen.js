@@ -10,6 +10,7 @@
  *
  * Animation: counter tick + stagger entrance + confetti (≥80%)
  */
+import { radius } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -397,7 +398,7 @@ function makeStyles(c) {
     medalBox: {
       width: 96,
       height: 96,
-      borderRadius: 28,
+      borderRadius: radius.xl,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
@@ -442,7 +443,7 @@ function makeStyles(c) {
     statPill: {
       flex: 1,
       backgroundColor: c.bgElevated,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.border,
       padding: 10,
@@ -459,7 +460,7 @@ function makeStyles(c) {
     sectionCard: {
       marginTop: 18,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       padding: 16,
@@ -468,7 +469,7 @@ function makeStyles(c) {
     sectionIcon: {
       width: 24,
       height: 24,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -486,13 +487,13 @@ function makeStyles(c) {
     wordChip: {
       paddingHorizontal: 11,
       paddingVertical: 6,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
     },
     wordChipTxt: { fontFamily: c.fontBodySemi, fontSize: 13 },
     wrongRow: {
       padding: 12,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       borderWidth: 1,
       flexDirection: "row",
       gap: 10,
@@ -515,7 +516,7 @@ function makeStyles(c) {
       alignItems: "center",
       gap: 12,
       backgroundColor: c.accentGlow,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       borderColor: c.borderAccent,
       padding: 14,
@@ -524,7 +525,7 @@ function makeStyles(c) {
     infoIcon: {
       width: 36,
       height: 36,
-      borderRadius: 10,
+      borderRadius: radius.sm,
       backgroundColor: c.bgBase,
       alignItems: "center",
       justifyContent: "center",
@@ -541,7 +542,7 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: 12,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       borderWidth: 1,
       padding: 14,
       marginTop: 14,

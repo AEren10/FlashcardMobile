@@ -1,3 +1,4 @@
+import { radius } from "../../themes/tokens";
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import T from "../themes/tokens";
@@ -43,7 +44,7 @@ const s = StyleSheet.create({
     backgroundColor: T.accent,
     paddingHorizontal: 20,
     paddingVertical: 12,
-    borderRadius: 14,
+    borderRadius: radius.sm,
   },
   btnText: { color: T.textOnAccent, fontFamily: T.fontBodyBold, fontSize: 15 },
 });

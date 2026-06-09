@@ -3,7 +3,7 @@
  * Shimmer + sparkle vurgusu, normal liste kartlarından ayrılır.
  */
 import React, { useEffect, useRef } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -170,7 +170,7 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     padding: 14,
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     overflow: "hidden",
     marginBottom: 12,
@@ -184,7 +184,7 @@ const s = StyleSheet.create({
   iconBox: {
     width: 52,
     height: 52,
-    borderRadius: 14,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -194,7 +194,7 @@ const s = StyleSheet.create({
   aiBadge: {
     paddingHorizontal: 7,
     paddingVertical: 3,
-    borderRadius: 999,
+    borderRadius: radius.full,
     borderWidth: 1,
   },
   sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },

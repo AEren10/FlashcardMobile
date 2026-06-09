@@ -4,6 +4,7 @@
  * Liste kartları cover gradient + chip + social proof + Çalış CTA.
  * FAB sağ alt → CreateList.
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -477,7 +478,7 @@ function makeStyles(c) {
     sortChip: {
       paddingHorizontal: 14,
       paddingVertical: 6,
-      borderRadius: 999,
+      borderRadius: radius.full,
       borderWidth: 1,
     },
     sortChipTxt: {
@@ -492,7 +493,7 @@ function makeStyles(c) {
     },
     card: {
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       overflow: "hidden",
@@ -505,7 +506,7 @@ function makeStyles(c) {
       right: 10,
       paddingHorizontal: 9,
       paddingVertical: 4,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: "rgba(0,0,0,0.32)",
       borderWidth: 1,
       borderColor: "rgba(255,255,255,0.25)",
@@ -532,7 +533,7 @@ function makeStyles(c) {
       bottom: 104,
       width: 56,
       height: 56,
-      borderRadius: 18,
+      borderRadius: radius.md,
       alignItems: "center",
       justifyContent: "center",
       shadowOffset: { width: 0, height: 8 },

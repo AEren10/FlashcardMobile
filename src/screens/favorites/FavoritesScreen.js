@@ -6,6 +6,7 @@
  * Zor:      lapses ≥ 2 olan kelimeler — mini progress
  * Quiz:     2 kolon grid, liste cover'ları
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -181,7 +182,7 @@ function BugunTab({ dueCount, categories, c, s, navigation, lists }) {
           colors={["rgba(255,255,255,0.08)", "transparent"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 0, y: 0.4 }}
-          style={[StyleSheet.absoluteFill, { borderRadius: 20 }]}
+          style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
           pointerEvents="none"
         />
         <Text style={s.heroNum}>{totalReady}</Text>
@@ -404,7 +405,7 @@ function makeStyles(c) {
     },
 
     heroCard: {
-      borderRadius: 20,
+      borderRadius: radius.lg,
       padding: 24,
       borderWidth: 1,
       borderColor: c.borderAccent,
@@ -443,7 +444,7 @@ function makeStyles(c) {
       justifyContent: "center",
       gap: 8,
       backgroundColor: c.accent,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       paddingVertical: 14,
     },
     heroCTATxt: { fontFamily: c.fontBodyBold, fontSize: 15, color: c.textOnAccent },
@@ -462,7 +463,7 @@ function makeStyles(c) {
       gap: 14,
       padding: 14,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       marginBottom: 10,
@@ -470,7 +471,7 @@ function makeStyles(c) {
     dueIcon: {
       width: 40,
       height: 40,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -484,13 +485,13 @@ function makeStyles(c) {
       gap: 12,
       padding: 16,
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       marginBottom: 10,
     },
     emptyHelper: {
-      borderRadius: 18,
+      borderRadius: radius.md,
       borderWidth: 1,
       padding: 24,
       margin: 20,
@@ -509,7 +510,7 @@ function makeStyles(c) {
       marginTop: 18,
       alignSelf: "stretch",
       paddingVertical: 12,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       alignItems: "center",
     },
     emptyCtaTxt: {
@@ -518,7 +519,7 @@ function makeStyles(c) {
     },
     zorCta: {
       paddingVertical: 14,
-      borderRadius: 16,
+      borderRadius: radius.md,
       alignItems: "center",
       marginBottom: 14,
       shadowOffset: { width: 0, height: 0 },
@@ -539,7 +540,7 @@ function makeStyles(c) {
     quizCard: {
       width: "47.5%",
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       overflow: "hidden",

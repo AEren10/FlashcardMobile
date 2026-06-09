@@ -1,6 +1,7 @@
 /**
  * RoadmapHeader — kullanıcının mevcut seviye + XP progress bar + sonraki ünvan.
  */
+import { radius } from "../../../themes/tokens";
 import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -88,7 +89,7 @@ const s = StyleSheet.create({
   wrap: {
     margin: 20,
     padding: 20,
-    borderRadius: 22,
+    borderRadius: radius.lg,
     borderWidth: 1,
     overflow: "hidden",
   },
@@ -96,7 +97,7 @@ const s = StyleSheet.create({
   badge: {
     width: 56,
     height: 56,
-    borderRadius: 18,
+    borderRadius: radius.md,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
@@ -109,9 +110,9 @@ const s = StyleSheet.create({
   xpLbl: { fontSize: 10, letterSpacing: 0.5 },
   track: {
     height: 10,
-    borderRadius: 999,
+    borderRadius: radius.full,
     overflow: "hidden",
   },
-  fill: { height: "100%", borderRadius: 999 },
+  fill: { height: "100%", borderRadius: radius.full },
   next: { fontSize: 12, marginTop: 10, lineHeight: 18 },
 });

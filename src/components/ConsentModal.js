@@ -2,6 +2,7 @@
  * ConsentModal — Sentry/analytics için GDPR/KVKK consent prompt.
  * İlk açılışta gösterilir, AsyncStorage ile bir kez sorulur.
  */
+import { radius } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Modal, Pressable } from "react-native";
 import { useTheme } from "../contexts/ThemeContext";
@@ -51,7 +52,7 @@ function makeStyles(c) {
     },
     card: {
       backgroundColor: c.bgElevated,
-      borderRadius: 18,
+      borderRadius: radius.md,
       padding: 24,
       borderWidth: 1,
       borderColor: c.border,
@@ -75,7 +76,7 @@ function makeStyles(c) {
     },
     primaryBtn: {
       backgroundColor: c.accent,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       paddingVertical: 14,
       width: "100%",
       alignItems: "center",

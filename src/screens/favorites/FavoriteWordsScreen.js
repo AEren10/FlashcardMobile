@@ -3,6 +3,7 @@
  * Liste favorilerinden ayrı: tek tek kelimeler.
  * Kart: kelime + meaning + sağ üstte liste badge'i + bookmark.
  */
+import { radius } from "../../themes/tokens";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   View,
@@ -177,7 +178,7 @@ function makeStyles(c) {
     back: {
       width: 36,
       height: 36,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -198,7 +199,7 @@ function makeStyles(c) {
     },
     card: {
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       padding: 16,
@@ -208,7 +209,7 @@ function makeStyles(c) {
     speakerBtn: {
       width: 36,
       height: 36,
-      borderRadius: 12,
+      borderRadius: radius.sm,
       backgroundColor: c.cobalt + "18",
       alignItems: "center",
       justifyContent: "center",
@@ -231,7 +232,7 @@ function makeStyles(c) {
       gap: 5,
       paddingHorizontal: 9,
       paddingVertical: 5,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: c.cobaltDim,
       borderWidth: 1,
       borderColor: c.cobalt + "33",

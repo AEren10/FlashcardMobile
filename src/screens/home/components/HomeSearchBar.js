@@ -2,6 +2,7 @@
  * HomeSearchBar — Ana sayfada challenge altında "Listede ara…" bar.
  * Tap → ListExplorer'a search modunda gider.
  */
+import { radius } from "../../../themes/tokens";
 import React from "react";
 import { Text, Pressable, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -41,7 +42,7 @@ const s = StyleSheet.create({
     gap: 10,
     paddingHorizontal: 14,
     paddingVertical: 14,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     marginTop: 18,
   },

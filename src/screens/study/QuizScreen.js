@@ -7,7 +7,7 @@
  *          wrong → red shake + correct reveal in green + 1200ms hold
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { fontSize } from "../../themes/tokens";
+import { fontSize, radius } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -434,13 +434,13 @@ export default function QuizScreen({ route, navigation }) {
           <View style={{ flex: 1, gap: 4 }}>
             <ProgressBar progress={progress} height={6} />
             {timed && (
-              <View style={{ height: 3, backgroundColor: c.bgSurface, borderRadius: 99, overflow: "hidden" }}>
+              <View style={{ height: 3, backgroundColor: c.bgSurface, borderRadius: radius.full, overflow: "hidden" }}>
                 <Animated.View
                   style={{
                     height: "100%",
                     width: "100%",
                     backgroundColor: c.cobalt,
-                    borderRadius: 99,
+                    borderRadius: radius.full,
                     // ScaleX native driver — smooth 60fps, soldan kısalır
                     transform: [{ translateX: 0 }, { scaleX: timerAnim }],
                     transformOrigin: "left",
@@ -642,7 +642,7 @@ function makeStyles(c) {
       paddingHorizontal: 26,
       paddingVertical: 22,
       marginTop: 12,
-      borderRadius: 18,
+      borderRadius: radius.md,
       backgroundColor: c.bgElevated,
       borderWidth: 1.5,
       borderColor: c.accent + "55",
@@ -669,7 +669,7 @@ function makeStyles(c) {
     chipAccent: {
       paddingHorizontal: 12,
       paddingVertical: 6,
-      borderRadius: 999,
+      borderRadius: radius.full,
       backgroundColor: c.accentGlow,
       borderWidth: 1,
       borderColor: c.borderAccent,
@@ -710,7 +710,7 @@ function makeStyles(c) {
     },
     opt: {
       borderWidth: 1.5,
-      borderRadius: 16,
+      borderRadius: radius.md,
       paddingVertical: 22,
       paddingHorizontal: 14,
       alignItems: "center",

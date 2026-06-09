@@ -3,6 +3,7 @@
  * Variants: primary (accent fill + glow shadow), secondary (outline), ghost.
  * Premium feel: subtle inner highlight (top edge brighter).
  */
+import { radius } from "../../themes/tokens";
 import React, { useRef } from "react";
 import { Pressable, Animated, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -126,7 +127,7 @@ export default function PremiumButton({
             paddingVertical: sizeMap.py,
             paddingHorizontal: sizeMap.px,
             minHeight: sizeMap.h,
-            borderRadius: 14,
+            borderRadius: radius.sm,
           },
         ]}
       >
@@ -169,7 +170,7 @@ export default function PremiumButton({
 const s = StyleSheet.create({
   wrap: {
     alignSelf: "flex-start",
-    borderRadius: 14,
+    borderRadius: radius.sm,
   },
   btn: {
     alignItems: "center",

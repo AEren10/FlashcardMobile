@@ -6,6 +6,7 @@
  *
  * onGraduate ve onReport callback'leri opsiyonel — props olarak gelmezse o seçenek görünmez.
  */
+import { radius } from "../../themes/tokens";
 import React, { useState, useRef, useEffect } from "react";
 import { Pressable, View, Text, StyleSheet, Modal, Animated, Easing } from "react-native";
 import * as Haptics from "expo-haptics";
@@ -35,7 +36,7 @@ export default function WordCardMenu({ size = 38, onGraduate, onReport }) {
           {
             width: size,
             height: size,
-            borderRadius: 12,
+            borderRadius: radius.sm,
             borderColor: c.border,
             backgroundColor: c.bgSurface,
           },
@@ -187,12 +188,12 @@ const s = StyleSheet.create({
     alignItems: "center",
     gap: 14,
     padding: 14,
-    borderRadius: 14,
+    borderRadius: radius.sm,
   },
   itemIcon: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",

@@ -1,6 +1,7 @@
 /**
  * AppearanceScreen — Light / Dark / System tercih ekranı.
  */
+import { radius } from "../../themes/tokens";
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -115,7 +116,7 @@ function makeStyles(c) {
     back: {
       width: 34,
       height: 34,
-      borderRadius: 17,
+      borderRadius: radius.md,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
@@ -136,7 +137,7 @@ function makeStyles(c) {
     },
     list: {
       backgroundColor: c.bgElevated,
-      borderRadius: 16,
+      borderRadius: radius.md,
       borderWidth: 1,
       borderColor: c.border,
       overflow: "hidden",
@@ -151,7 +152,7 @@ function makeStyles(c) {
     checkWrap: {
       width: 28,
       height: 28,
-      borderRadius: 14,
+      borderRadius: radius.sm,
       backgroundColor: c.bgSurface,
       alignItems: "center",
       justifyContent: "center",
