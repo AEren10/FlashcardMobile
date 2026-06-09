@@ -13,9 +13,11 @@ import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProfile } from "../../contexts/ProfileContext";
-import { getStudyStats } from "../../supabase/progress";
+import { getStudyStats, getDailyActivity } from "../../supabase/progress";
 import { getLists } from "../../supabase/database";
 import Icon, { ICONS } from "../../components/design/Icon";
+import AnimatedFlame from "../../components/design/AnimatedFlame";
+import Last7DaysDots from "../../components/design/Last7DaysDots";
 import StaggerEnter from "../../components/design/StaggerEnter";
 import CategoryCover from "../../components/design/CategoryCover";
 import RatingChip from "../../components/design/RatingChip";
@@ -35,6 +37,7 @@ export default function ProfileScreen() {
   const { unlocked } = useAchievements();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
   const [statsError, setStatsError] = useState(false);
+  const [days, setDays] = useState([]);
   const [publicLists, setPublicLists] = useState([]);
   const [listsLoading, setListsLoading] = useState(true);
 
@@ -43,9 +46,10 @@ export default function ProfileScreen() {
   const loadStats = useCallback(() => {
     if (isGuestUser()) return;
     setStatsError(false);
-    getStudyStats()
-      .then((data) => { if (data) setStats(data); else setStatsError(true); })
-      .catch(() => setStatsError(true));
+    Promise.allSettled([getStudyStats(), getDailyActivity(7)]).then(([sr, dr]) => {
+      if (sr.status === "fulfilled" && sr.value) setStats(sr.value); else setStatsError(true);
+      if (dr.status === "fulfilled" && Array.isArray(dr.value)) setDays(dr.value);
+    });
   }, [isGuestUser]);
 
   useEffect(() => { loadStats(); }, []);
@@ -121,7 +125,7 @@ export default function ProfileScreen() {
             style={({ pressed }) => [s.gearBtn, pressed && { opacity: 0.6 }]}
             accessibilityLabel="Ayarlar"
           >
-            <Icon d={ICONS.bolt} size={20} stroke={c.textSec} sw={1.8} />
+            <Icon d={ICONS.gear} size={24} stroke={c.textSec} sw={1.8} />
           </Pressable>
         </View>
 
@@ -166,6 +170,35 @@ export default function ProfileScreen() {
             <StatItem icon={ICONS.books} value={stats.totalWords} label="kelime" color={c.cobalt} c={c} s={s} />
             <View style={s.statDivider} />
             <StatItem icon={ICONS.grid} value={publicLists.length} label="liste" color={c.accent} c={c} s={s} />
+          </View>
+
+          {/* Streak hero — flame + sayı + bu hafta */}
+          <Pressable
+            onPress={() => navigation.navigate("Streak")}
+            style={({ pressed }) => [s.streakHero, { transform: [{ scale: pressed ? 0.99 : 1 }] }]}
+          >
+            <AnimatedFlame size={48} streak={stats.streakDays} />
+            <View style={{ marginLeft: 14, flex: 1 }}>
+              <Text style={s.streakNum}>{stats.streakDays}</Text>
+              <Text style={s.streakCap}>
+                {stats.streakDays === 0 ? "henüz seri yok" : stats.streakDays === 1 ? "ilk gün — devam et" : "gün üst üste"}
+              </Text>
+            </View>
+            <Icon d={ICONS.arrow} size={16} stroke={c.textMuted} sw={1.8} />
+          </Pressable>
+
+          <Last7DaysDots days={days} />
+
+          {/* 3 stat tile — Kelime / Seans / Doğruluk */}
+          <View style={s.tileRow}>
+            <ProfileTile value={stats.totalWords} label="Kelime" accent={c.warning} c={c} s={s} />
+            <ProfileTile value={stats.totalSessions} label="Seans" accent={c.cobalt} c={c} s={s} />
+            <ProfileTile
+              value={`%${stats.totalSessions ? Math.round((stats.totalWords / Math.max(stats.totalSessions * 10, 1)) * 100) : 0}`}
+              label="Doğruluk"
+              accent={c.success}
+              c={c} s={s}
+            />
           </View>
 
           {statsError && (
@@ -290,6 +323,16 @@ function StatItem({ icon, value, label, color, c, s }) {
   );
 }
 
+function ProfileTile({ value, label, accent, c, s }) {
+  return (
+    <View style={[s.tile, { borderTopColor: accent, borderColor: accent + "44", shadowColor: accent }]}>
+      <View style={[s.tileHalo, { backgroundColor: accent + "55" }]} />
+      <Text style={[s.tileVal, { color: accent }]}>{value}</Text>
+      <Text style={s.tileLbl}>{label}</Text>
+    </View>
+  );
+}
+
 function BadgeCard({ title, iconPath, color, value, hint, locked, onPress, c, s }) {
   const bg = locked ? c.textMuted + "12" : color + "22";
   const border = locked ? c.border : color + "55";
@@ -312,7 +355,7 @@ function makeStyles(c) {
     topBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 8 },
     topBtn: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 999, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border },
     topBtnTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textSec },
-    gearBtn: { width: 38, height: 38, borderRadius: 12, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
+    gearBtn: { width: 42, height: 42, borderRadius: 14, backgroundColor: c.bgElevated, borderWidth: 1, borderColor: c.border, alignItems: "center", justifyContent: "center" },
     headerBlock: { alignItems: "center", paddingTop: 4, paddingBottom: 16 },
     avatarWrap: { shadowColor: c.accent, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.4, shadowRadius: 30, elevation: 8, marginBottom: 14 },
     avatarGrad: { width: 84, height: 84, borderRadius: 42, alignItems: "center", justifyContent: "center" },
@@ -330,6 +373,16 @@ function makeStyles(c) {
     statValue: { fontFamily: c.fontNum, fontSize: fontSize.xl },
     statLabel: { fontFamily: c.fontBody, fontSize: fontSize.xs },
     statDivider: { width: 1, height: 32, backgroundColor: c.border },
+    // streak hero
+    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 16, marginBottom: 14 },
+    streakNum: { fontFamily: c.fontNum, fontSize: fontSize["2xl"], color: c.textPrimary, lineHeight: 30 },
+    streakCap: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 2 },
+    // stat tiles
+    tileRow: { flexDirection: "row", gap: 10, marginBottom: 16 },
+    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: 16, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: 12, alignItems: "center", overflow: "hidden", shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.25, shadowRadius: 12, elevation: 3 },
+    tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: 99, opacity: 0.9 },
+    tileVal: { fontFamily: c.fontNum, fontSize: fontSize["2xl"] },
+    tileLbl: { fontFamily: c.fontBody, fontSize: fontSize.xs, color: c.textSec, marginTop: 2 },
     // error
     errorBanner: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 10, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
     errorTxt: { flex: 1, fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
