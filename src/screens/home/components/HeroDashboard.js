@@ -228,7 +228,6 @@ export default memo(HeroDashboard);
 /** DailyGoal — üstte büyük yüzde + altta 10 dot horizontal bar.
  *  Dolu dotlar cobalt (mavi), tamamlanınca success (yeşil). Pulse animasyonu.
  */
-import { spacing } from "../../../themes/tokens";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const RADIAL_SIZE = 100;
 const RADIAL_STROKE = 8;
