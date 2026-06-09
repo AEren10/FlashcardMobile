@@ -6,6 +6,7 @@
  * Stack peek, verdict badges, ✓/✗ feedback pop, confetti (streak ≥5), shake
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -323,10 +324,10 @@ function GradeBtn({ label, sub, color, onPress, c }) {
       })}
       accessibilityLabel={label}
     >
-      <Text style={{ fontSize: 13, fontFamily: c.fontBodyBold, color, letterSpacing: 0.2 }}>
+      <Text style={{ fontSize: fontSize.md, fontFamily: c.fontBodyBold, color, letterSpacing: 0.2 }}>
         {label}
       </Text>
-      <Text style={{ fontSize: 10, fontFamily: c.fontBody, color: c.textMuted, marginTop: 2 }}>
+      <Text style={{ fontSize: fontSize.xs, fontFamily: c.fontBody, color: c.textMuted, marginTop: 2 }}>
         {sub}
       </Text>
     </Pressable>
@@ -460,10 +461,10 @@ function makeStyles(c) {
       paddingTop: 6,
     },
     headerLeft: { flexDirection: "row", alignItems: "center", gap: 10, flex: 1 },
-    deckTitle: { fontFamily: c.fontBodySemi, fontSize: 16, color: c.textPrimary },
+    deckTitle: { fontFamily: c.fontBodySemi, fontSize: fontSize.lg, color: c.textPrimary },
     streakBox: { flexDirection: "row", alignItems: "center", gap: 6 },
-    flame: { fontSize: 16 },
-    streakNum: { fontFamily: c.fontNum, fontSize: 15, color: c.warning },
+    flame: { fontSize: fontSize.lg },
+    streakNum: { fontFamily: c.fontNum, fontSize: fontSize.lg, color: c.warning },
     progressRow: {
       flexDirection: "row",
       alignItems: "center",
@@ -471,7 +472,7 @@ function makeStyles(c) {
       paddingHorizontal: 18,
       paddingTop: 16,
     },
-    counter: { fontFamily: c.fontNum, fontSize: 13, color: c.textSec },
+    counter: { fontFamily: c.fontNum, fontSize: fontSize.md, color: c.textSec },
     stageWrap: { flex: 1, justifyContent: "center", paddingHorizontal: 18 },
     stage: {
       width: "84%",
@@ -516,7 +517,7 @@ function makeStyles(c) {
       shadowOpacity: 0.4,
       shadowRadius: 12,
     },
-    verdictIcon: { color: "#FFFFFF", fontSize: 26, fontWeight: "700" },
+    verdictIcon: { color: "#FFFFFF", fontSize: fontSize["2xl"], fontWeight: "700" },
     centerPop: {
       position: "absolute",
       top: "50%",
@@ -542,7 +543,7 @@ function makeStyles(c) {
       paddingTop: 8,
     },
     arrowBtn: { paddingVertical: 12, paddingHorizontal: 6 },
-    arrowTxt: { fontFamily: c.fontBodyBold, fontSize: 15, letterSpacing: 0.3 },
+    arrowTxt: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, letterSpacing: 0.3 },
     swipeGuide: {
       flexDirection: "row",
       alignItems: "center",
@@ -564,7 +565,7 @@ function makeStyles(c) {
       opacity: 0.55,
     },
     guideTxt: {
-      fontSize: 14,
+      fontSize: fontSize.md,
       letterSpacing: 0.3,
     },
     gradeRow: {
@@ -583,11 +584,11 @@ function makeStyles(c) {
       alignItems: "center",
       backgroundColor: c.bgElevated,
     },
-    gradeLbl: { fontSize: 12, fontFamily: c.fontBodyBold, letterSpacing: 0.2 },
-    gradeSub: { fontSize: 10, fontFamily: c.fontBody, marginTop: 2, opacity: 0.7 },
+    gradeLbl: { fontSize: fontSize.sm, fontFamily: c.fontBodyBold, letterSpacing: 0.2 },
+    gradeSub: { fontSize: fontSize.xs, fontFamily: c.fontBody, marginTop: 2, opacity: 0.7 },
     swipeHint: {
       textAlign: "center",
-      fontSize: 11,
+      fontSize: fontSize.sm,
       letterSpacing: 0.2,
       paddingHorizontal: 22,
       paddingBottom: 8,

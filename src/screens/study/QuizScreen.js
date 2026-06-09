@@ -7,6 +7,7 @@
  *          wrong → red shake + correct reveal in green + 1200ms hold
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -631,7 +632,7 @@ function makeStyles(c) {
     },
     counter: {
       fontFamily: c.fontNum,
-      fontSize: 13,
+      fontSize: fontSize.md,
       color: c.textSec,
       minWidth: 38,
       textAlign: "right",
@@ -675,21 +676,21 @@ function makeStyles(c) {
     },
     chipAccentTxt: {
       fontFamily: c.fontBodySemi,
-      fontSize: 12,
+      fontSize: fontSize.sm,
       color: c.accent,
       letterSpacing: 0.3,
     },
     wordRow: { marginTop: 22 },
     word: {
       fontFamily: c.fontDisplay,
-      fontSize: 52,
+      fontSize: fontSize["4xl"],
       lineHeight: 56,
       color: c.textPrimary,
       textAlign: "center",
     },
     sub: {
       fontFamily: c.fontBody,
-      fontSize: 13,
+      fontSize: fontSize.md,
       color: c.textSec,
       marginTop: 8,
     },
@@ -721,7 +722,7 @@ function makeStyles(c) {
     },
     optText: {
       fontFamily: c.fontBodyBold,
-      fontSize: 17,
+      fontSize: fontSize.lg,
       textAlign: "center",
     },
     optIcon: {

@@ -3,6 +3,7 @@
  * Tema-aware (useTheme).
  */
 import React, { useMemo } from "react";
+import { fontSize } from "../../../themes/tokens";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useTheme } from "../../../contexts/ThemeContext";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -109,7 +110,7 @@ function makeStyles(c) {
       gap: 12,
     },
     title: {
-      fontSize: 18,
+      fontSize: fontSize.lg,
       color: c.textPrimary,
       fontFamily: c.fontBodyBold,
       textAlign: "center",
@@ -122,7 +123,7 @@ function makeStyles(c) {
       borderWidth: 1,
     },
     tintTxt: {
-      fontSize: 10,
+      fontSize: fontSize.xs,
       letterSpacing: 0.4,
       textTransform: "uppercase",
     },
@@ -137,6 +138,6 @@ function makeStyles(c) {
       borderWidth: 1,
       borderColor: c.border,
     },
-    icon: { fontSize: 16 },
+    icon: { fontSize: fontSize.lg },
   });
 }

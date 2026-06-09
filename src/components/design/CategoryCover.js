@@ -4,6 +4,7 @@
  * cat → chip rengi (kategori kimliği) — dual color sistem
  */
 import React from "react";
+import { fontSize } from "../../themes/tokens";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { CATEGORIES, getCategoryAccent, getCategoryName } from "../../lib/categoryMeta";
@@ -103,7 +104,7 @@ const s = StyleSheet.create({
     marginRight: 6,
   },
   chipTxt: {
-    fontSize: 10.5,
+    fontSize: fontSize.xs,
     fontWeight: "600",
     color: "#fff",
     letterSpacing: 0.4,

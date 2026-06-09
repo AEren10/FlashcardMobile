@@ -3,6 +3,7 @@
  * Title + horizontal scroll + mini liste kartları.
  */
 import React, { memo } from "react";
+import { fontSize } from "../../../themes/tokens";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -118,14 +119,14 @@ const MiniCard = memo(function MiniCard({ item, c, onPress }) {
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text
             numberOfLines={1}
-            style={{ fontFamily: c.fontBodySemi, fontSize: 14, color: c.textPrimary, flex: 1 }}
+            style={{ fontFamily: c.fontBodySemi, fontSize: fontSize.md, color: c.textPrimary, flex: 1 }}
           >
             {item.title}
           </Text>
           <RatingChip avg={item.avg_rating} count={item.rating_count} c={c} />
         </View>
         <Text
-          style={{ fontFamily: c.fontBody, fontSize: 11.5, color: c.textSec, marginTop: 4 }}
+          style={{ fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 4 }}
         >
           {item.word_count ?? "?"} kelime
           {item.study_count > 0 ? ` · ${item.study_count}` : ""}
@@ -142,8 +143,8 @@ const s = StyleSheet.create({
     gap: 10,
     marginBottom: 14,
   },
-  title: { fontSize: 21, lineHeight: 24, letterSpacing: 0.1 },
-  sub: { fontSize: 12, marginTop: 3, lineHeight: 16 },
+  title: { fontSize: fontSize.xl, lineHeight: 24, letterSpacing: 0.1 },
+  sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },
   seeAll: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -151,7 +152,7 @@ const s = StyleSheet.create({
     borderWidth: 1,
   },
   seeAllTxt: {
-    fontSize: 11,
+    fontSize: fontSize.sm,
     letterSpacing: 0.3,
   },
   card: {

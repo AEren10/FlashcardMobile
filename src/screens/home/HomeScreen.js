@@ -3,6 +3,7 @@
  * Greeting + 2 stat box + glow challenge card + horizontal "Devam Et" carousel.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -336,10 +337,10 @@ export default function HomeScreen({ navigation }) {
                 marginBottom: 14,
               }}
             >
-              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: 12 }}>
+              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: fontSize.sm }}>
                 İstatistikler yüklenemedi — yenilemek için dokun
               </Text>
-              <Text style={{ color: c.warning, fontSize: 14 }}>↻</Text>
+              <Text style={{ color: c.warning, fontSize: fontSize.md }}>↻</Text>
             </Pressable>
           )}
 
@@ -428,19 +429,19 @@ export default function HomeScreen({ navigation }) {
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <Text style={{ fontSize: 16 }}>{daily.completed ? "✅" : "🎯"}</Text>
+                <Text style={{ fontSize: fontSize.lg }}>{daily.completed ? "✅" : "🎯"}</Text>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: c.textPrimary, fontFamily: c.fontBodyBold, fontSize: 13 }}>
+                  <Text style={{ color: c.textPrimary, fontFamily: c.fontBodyBold, fontSize: fontSize.md }}>
                     {daily.completed ? "Bugünün hedefi tamam!" : "Bugünün hedefi"}
                   </Text>
-                  <Text style={{ color: c.textSec, fontFamily: c.fontBody, fontSize: 11, marginTop: 2 }}>
+                  <Text style={{ color: c.textSec, fontFamily: c.fontBody, fontSize: fontSize.sm, marginTop: 2 }}>
                     {daily.done} / {daily.goal} kelime
                   </Text>
                 </View>
                 <Text style={{
                   color: daily.completed ? c.success : (c.mint || c.cobalt),
                   fontFamily: c.fontBodyBold,
-                  fontSize: 16,
+                  fontSize: fontSize.lg,
                 }}>
                   %{daily.pct}
                 </Text>
@@ -670,7 +671,7 @@ function makeStyles(c) {
     root: { flex: 1, backgroundColor: c.bgBase },
     greet: {
       fontFamily: c.fontBody,
-      fontSize: 13,
+      fontSize: fontSize.md,
       color: c.textSec,
       letterSpacing: 0.3,
     },
@@ -718,7 +719,7 @@ function makeStyles(c) {
     },
     chipAccentTxt: {
       fontFamily: c.fontBodyBold,
-      fontSize: 11,
+      fontSize: fontSize.sm,
       color: c.accent,
       letterSpacing: 0.5,
     },
@@ -731,7 +732,7 @@ function makeStyles(c) {
     },
     challengeSub: {
       fontFamily: c.fontBody,
-      fontSize: 13,
+      fontSize: fontSize.md,
       color: c.textSec,
       marginTop: 4,
     },
@@ -753,7 +754,7 @@ function makeStyles(c) {
     },
     primaryBtnTxt: {
       fontFamily: c.fontBodyBold,
-      fontSize: 15,
+      fontSize: fontSize.lg,
       color: c.textOnAccent,
     },
     sectionHead: {
@@ -765,14 +766,14 @@ function makeStyles(c) {
     },
     sectionTitle: {
       fontFamily: c.fontBodyBold,
-      fontSize: 22,
+      fontSize: fontSize.xl,
       lineHeight: 26,
       color: c.textPrimary,
       letterSpacing: 0.1,
     },
     sectionLink: {
       fontFamily: c.fontBodySemi,
-      fontSize: 12,
+      fontSize: fontSize.sm,
       color: c.cobalt,
     },
     empty: {
@@ -780,7 +781,7 @@ function makeStyles(c) {
       color: c.textMuted,
       fontFamily: c.fontBody,
       marginTop: 16,
-      fontSize: 13,
+      fontSize: fontSize.md,
     },
     emptyCta: {
       flexDirection: "row",
@@ -803,15 +804,15 @@ function makeStyles(c) {
       justifyContent: "center",
     },
     emptyCtaTitle: {
-      fontSize: 15,
+      fontSize: fontSize.lg,
     },
     emptyCtaSub: {
-      fontSize: 12,
+      fontSize: fontSize.sm,
       marginTop: 3,
     },
     discoveryHeader: {
       fontFamily: c.fontBodyBold,
-      fontSize: 13,
+      fontSize: fontSize.md,
       color: c.textSec,
       letterSpacing: 0.5,
       textTransform: "uppercase",

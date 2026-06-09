@@ -2,6 +2,7 @@
  * RegisterScreen — Claude Design v2.
  */
 import React, { useMemo, useRef, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -199,14 +200,14 @@ function makeStyles(c) {
     nameRow: { flexDirection: "row", gap: 10 },
     flex: { flex: 1 },
     title: {
-      fontSize: 32,
+      fontSize: fontSize["3xl"],
       fontFamily: c.fontDisplay,
       color: c.textPrimary,
       textAlign: "center",
       marginTop: 4,
     },
     sub: {
-      fontSize: 14,
+      fontSize: fontSize.md,
       color: c.textSec,
       textAlign: "center",
       fontFamily: c.fontBody,
@@ -226,9 +227,9 @@ function makeStyles(c) {
       shadowRadius: 24,
       elevation: 4,
     },
-    primaryText: { color: c.textOnAccent, fontSize: 16, fontFamily: c.fontBodyBold },
+    primaryText: { color: c.textOnAccent, fontSize: fontSize.lg, fontFamily: c.fontBodyBold },
     bottomRow: { flexDirection: "row", justifyContent: "center", marginTop: 22 },
-    bottomText: { color: c.textSec, fontFamily: c.fontBody, fontSize: 14 },
-    bottomLink: { color: c.accent, fontFamily: c.fontBodyBold, fontSize: 14 },
+    bottomText: { color: c.textSec, fontFamily: c.fontBody, fontSize: fontSize.md },
+    bottomLink: { color: c.accent, fontFamily: c.fontBodyBold, fontSize: fontSize.md },
   });
 }

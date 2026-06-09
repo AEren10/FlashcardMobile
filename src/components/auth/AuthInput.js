@@ -6,6 +6,7 @@
  * - returnKeyType + onSubmitEditing → klavye next/go davranışı
  */
 import React, { forwardRef, useState, useMemo } from "react";
+import { fontSize } from "../../themes/tokens";
 import { View, Text, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -82,7 +83,7 @@ function makeStyles(c) {
   return StyleSheet.create({
     field: { marginBottom: 14 },
     label: {
-      fontSize: 11,
+      fontSize: fontSize.sm,
       letterSpacing: 1.4,
       color: c.textMuted,
       fontFamily: c.fontBodyBold,
@@ -105,14 +106,14 @@ function makeStyles(c) {
       shadowRadius: 8,
     },
     inputText: {
-      fontSize: 15,
+      fontSize: fontSize.lg,
       color: c.textPrimary,
       fontFamily: c.fontBody,
       paddingVertical: Platform.OS === "ios" ? 12 : 10,
     },
     flex: { flex: 1 },
     eyeBtn: { paddingHorizontal: 6, paddingVertical: 4, marginLeft: 4 },
-    eyeTxt: { fontSize: 12, letterSpacing: 0.3 },
+    eyeTxt: { fontSize: fontSize.sm, letterSpacing: 0.3 },
   });
 }
 

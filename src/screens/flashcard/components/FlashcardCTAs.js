@@ -3,6 +3,7 @@
  * Liste zorluk seviyesi tint ile renklenir.
  */
 import React, { useRef } from "react";
+import { fontSize } from "../../../themes/tokens";
 import { View, Text, Pressable, Animated, StyleSheet } from "react-native";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
@@ -123,7 +124,7 @@ function MiniCta({ iconPath, label, accent, onAccent, onPress, c, primary = fals
         />
         <Text
           style={{
-            fontSize: 13,
+            fontSize: fontSize.md,
             fontFamily: c.fontBodyBold,
             color: primary ? onAccent : c.textPrimary,
             letterSpacing: 0.2,
@@ -290,6 +291,6 @@ const s = StyleSheet.create({
     elevation: 4,
   },
   iconBox: { width: 28, height: 28, alignItems: "center", justifyContent: "center" },
-  title: { fontSize: 15, letterSpacing: 0.2 },
-  sub: { fontSize: 11, marginTop: 2 },
+  title: { fontSize: fontSize.lg, letterSpacing: 0.2 },
+  sub: { fontSize: fontSize.sm, marginTop: 2 },
 });

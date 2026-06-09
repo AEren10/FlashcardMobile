@@ -3,6 +3,7 @@
  * Shimmer + sparkle vurgusu, normal liste kartlarından ayrılır.
  */
 import React, { useEffect, useRef } from "react";
+import { fontSize } from "../../themes/tokens";
 import { Pressable, Text, View, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -133,7 +134,7 @@ export default function SmartListCard({
         {iconPath ? (
           <Icon d={iconPath} size={20} stroke={fillColor} sw={1.8} />
         ) : (
-          <Text style={{ fontSize: 22 }}>{emoji || "📖"}</Text>
+          <Text style={{ fontSize: fontSize.xl }}>{emoji || "📖"}</Text>
         )}
       </View>
 
@@ -143,7 +144,7 @@ export default function SmartListCard({
             {title}
           </Text>
           <View style={[s.aiBadge, { backgroundColor: fillColor + "22", borderColor: fillColor + "55" }]}>
-            <Text style={{ fontSize: 9, color: fillColor, fontFamily: c.fontBodyBold, letterSpacing: 0.5 }}>
+            <Text style={{ fontSize: fontSize.xs, color: fillColor, fontFamily: c.fontBodyBold, letterSpacing: 0.5 }}>
               AKILLI
             </Text>
           </View>
@@ -189,15 +190,15 @@ const s = StyleSheet.create({
     justifyContent: "center",
   },
   titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  title: { fontSize: 15, flex: 1 },
+  title: { fontSize: fontSize.lg, flex: 1 },
   aiBadge: {
     paddingHorizontal: 7,
     paddingVertical: 3,
     borderRadius: 999,
     borderWidth: 1,
   },
-  sub: { fontSize: 12, marginTop: 3, lineHeight: 16 },
+  sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },
   footer: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8 },
-  count: { fontSize: 18 },
-  countLbl: { fontSize: 11 },
+  count: { fontSize: fontSize.lg },
+  countLbl: { fontSize: fontSize.sm },
 });

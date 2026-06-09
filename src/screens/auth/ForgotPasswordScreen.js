@@ -2,6 +2,7 @@
  * ForgotPasswordScreen — Claude Design v2.
  */
 import React, { useMemo, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import {
   View,
   Text,
@@ -141,14 +142,14 @@ function makeStyles(c) {
     },
     scroll: { padding: 24, paddingTop: 4, flexGrow: 1 },
     title: {
-      fontSize: 32,
+      fontSize: fontSize["3xl"],
       fontFamily: c.fontDisplay,
       color: c.textPrimary,
       textAlign: "center",
       marginTop: 8,
     },
     sub: {
-      fontSize: 14,
+      fontSize: fontSize.md,
       color: c.textSec,
       textAlign: "center",
       fontFamily: c.fontBody,
@@ -169,7 +170,7 @@ function makeStyles(c) {
       shadowRadius: 24,
       elevation: 4,
     },
-    primaryText: { color: c.textOnAccent, fontSize: 16, fontFamily: c.fontBodyBold },
+    primaryText: { color: c.textOnAccent, fontSize: fontSize.lg, fontFamily: c.fontBodyBold },
     successCard: {
       backgroundColor: c.bgElevated,
       borderRadius: 18,
@@ -180,13 +181,13 @@ function makeStyles(c) {
       gap: 8,
     },
     successTitle: {
-      fontSize: 18,
+      fontSize: fontSize.lg,
       fontFamily: c.fontBodyBold,
       color: c.textPrimary,
       marginTop: 4,
     },
     successSub: {
-      fontSize: 13,
+      fontSize: fontSize.md,
       fontFamily: c.fontBody,
       color: c.textSec,
       textAlign: "center",

@@ -3,6 +3,7 @@
  * Avatar gradient + level chip + motivation glow card + settings list.
  */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { fontSize } from "../../themes/tokens";
 import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -231,10 +232,10 @@ export default function ProfileScreen() {
                 marginBottom: 14,
               }}
             >
-              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: 12 }}>
+              <Text style={{ flex: 1, color: c.warning, fontFamily: c.fontBodySemi, fontSize: fontSize.sm }}>
                 İstatistikler yüklenemedi — dokun ve yenile
               </Text>
-              <Text style={{ color: c.warning, fontSize: 14 }}>↻</Text>
+              <Text style={{ color: c.warning, fontSize: fontSize.md }}>↻</Text>
             </Pressable>
           )}
 
@@ -569,13 +570,13 @@ function Row({ icon, iconPath, iconColor, label, detail, onPress, c, s, last }) 
           <Icon d={iconPath} size={17} stroke={iconColor || c.accent} sw={1.8} />
         </View>
       ) : (
-        <Text style={{ fontSize: 18, width: 24, textAlign: "center" }}>{icon}</Text>
+        <Text style={{ fontSize: fontSize.lg, width: 24, textAlign: "center" }}>{icon}</Text>
       )}
-      <Text style={{ flex: 1, fontFamily: c.fontBody, fontSize: 15, color: c.textPrimary, marginLeft: 4 }}>
+      <Text style={{ flex: 1, fontFamily: c.fontBody, fontSize: fontSize.lg, color: c.textPrimary, marginLeft: 4 }}>
         {label}
       </Text>
       {detail && (
-        <Text style={{ fontFamily: c.fontBody, fontSize: 13, color: c.textSec }}>
+        <Text style={{ fontFamily: c.fontBody, fontSize: fontSize.md, color: c.textSec }}>
           {detail}
         </Text>
       )}
@@ -636,8 +637,8 @@ function makeStyles(c) {
       alignItems: "center",
       justifyContent: "center",
     },
-    avatarTxt: { fontFamily: c.fontNum, fontSize: 30, color: "#FFFFFF" },
-    name: { fontFamily: c.fontBodyBold, fontSize: 22, color: c.textPrimary, marginTop: 14 },
+    avatarTxt: { fontFamily: c.fontNum, fontSize: fontSize["3xl"], color: "#FFFFFF" },
+    name: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 14 },
     levelChip: {
       marginTop: 10,
       paddingLeft: 6,
@@ -657,7 +658,7 @@ function makeStyles(c) {
       justifyContent: "center",
     },
     levelTitle: {
-      fontSize: 13,
+      fontSize: fontSize.md,
       letterSpacing: 0.3,
     },
     levelDot: {
@@ -666,14 +667,14 @@ function makeStyles(c) {
       borderRadius: 1.5,
     },
     levelSub: {
-      fontSize: 11,
+      fontSize: fontSize.sm,
       letterSpacing: 0.2,
       opacity: 0.85,
     },
     // legacy (henüz başka yerden referans varsa)
     levelTxt: {
       fontFamily: c.fontNum,
-      fontSize: 11,
+      fontSize: fontSize.sm,
       color: c.accent,
       letterSpacing: 0.5,
     },
@@ -700,8 +701,8 @@ function makeStyles(c) {
       borderRadius: 65,
       backgroundColor: c.accentGlow,
     },
-    motTitle: { fontFamily: c.fontBodyBold, fontSize: 17, color: c.textPrimary },
-    motSub: { fontFamily: c.fontBody, fontSize: 12, color: c.textSec, marginTop: 3 },
+    motTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, color: c.textPrimary },
+    motSub: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 3 },
     miniBadges: { flexDirection: "row", gap: 12, marginTop: 16 },
     miniBadgeBox: {
       width: 46,
@@ -713,13 +714,13 @@ function makeStyles(c) {
     },
     miniBadgeLbl: {
       fontFamily: c.fontBody,
-      fontSize: 10,
+      fontSize: fontSize.xs,
       color: c.textSec,
       marginTop: 6,
     },
     sectionLabel: {
       fontFamily: c.fontBodyBold,
-      fontSize: 12,
+      fontSize: fontSize.sm,
       color: c.textSec,
       letterSpacing: 1.2,
       marginTop: 24,
@@ -744,12 +745,12 @@ function makeStyles(c) {
     version: {
       textAlign: "center",
       marginTop: 16,
-      fontSize: 12,
+      fontSize: fontSize.sm,
       color: c.textMuted,
       fontFamily: c.fontBody,
     },
-    guestTitle: { fontFamily: c.fontBodyBold, fontSize: 22, color: c.textPrimary, marginTop: 12 },
-    guestSub: { fontFamily: c.fontBody, fontSize: 14, color: c.textSec, marginTop: 4 },
+    guestTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.xl, color: c.textPrimary, marginTop: 12 },
+    guestSub: { fontFamily: c.fontBody, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
     primaryBtn: {
       marginTop: 24,
       backgroundColor: c.accent,
@@ -757,26 +758,26 @@ function makeStyles(c) {
       paddingVertical: 14,
       paddingHorizontal: 32,
     },
-    primaryBtnTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: 15 },
+    primaryBtnTxt: { color: c.textOnAccent, fontFamily: c.fontBodyBold, fontSize: fontSize.lg },
 
     // Sections (Rozetlerim + Listeler)
     sectionHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 18, marginBottom: 10, paddingHorizontal: 2 },
-    sectionTitle: { fontFamily: c.fontBodyBold, fontSize: 15, color: c.textPrimary, letterSpacing: 0.2 },
-    sectionLink: { fontFamily: c.fontBodySemi, fontSize: 12, color: c.accent },
+    sectionTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.lg, color: c.textPrimary, letterSpacing: 0.2 },
+    sectionLink: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.accent },
     // Badge cards (A)
     badgeRow: { flexDirection: "row", gap: 12 },
     badgeCard: { flex: 1, borderRadius: 16, borderWidth: 1, padding: 14, alignItems: "flex-start", minHeight: 140 },
     badgeIconBox: { width: 42, height: 42, borderRadius: 12, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 10 },
-    badgeTitle: { fontSize: 14, letterSpacing: 0.2, marginBottom: 4 },
-    badgeValue: { fontSize: 13, marginBottom: 6 },
-    badgeHint: { fontSize: 11, lineHeight: 14 },
+    badgeTitle: { fontSize: fontSize.md, letterSpacing: 0.2, marginBottom: 4 },
+    badgeValue: { fontSize: fontSize.md, marginBottom: 6 },
+    badgeHint: { fontSize: fontSize.sm, lineHeight: 14 },
     recentBadges: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 10 },
     recentBadgePill: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 999, borderWidth: 1 },
-    recentBadgeTxt: { fontFamily: c.fontBodySemi, fontSize: 11 },
+    recentBadgeTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm },
     // Lists grid (B)
     listsEmpty: { borderRadius: 16, borderWidth: 1, borderColor: c.border, borderStyle: "dashed", backgroundColor: c.bgElevated, padding: 20, alignItems: "center", gap: 4 },
-    listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: 13, color: c.textSec, marginTop: 4 },
-    listsEmptyHint: { fontFamily: c.fontBody, fontSize: 11, color: c.textMuted },
+    listsEmptyTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.md, color: c.textSec, marginTop: 4 },
+    listsEmptyHint: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textMuted },
     listsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 }, // legacy (artık ScrollView)
     listCard: {
       width: 170, // horizontal scroll için sabit genişlik
@@ -792,10 +793,10 @@ function makeStyles(c) {
       elevation: 2,
     },
     listCardBody: { padding: 10, gap: 6 },
-    listCardTitle: { fontFamily: c.fontBodyBold, fontSize: 13, color: c.textPrimary },
+    listCardTitle: { fontFamily: c.fontBodyBold, fontSize: fontSize.md, color: c.textPrimary },
     listCardMeta: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 6 },
-    listCardCount: { fontFamily: c.fontBodySemi, fontSize: 11.5, color: c.textPrimary, opacity: 0.85 },
+    listCardCount: { fontFamily: c.fontBodySemi, fontSize: fontSize.sm, color: c.textPrimary, opacity: 0.85 },
     listCardChip: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 999, backgroundColor: c.accent + "1A", borderWidth: 1, borderColor: c.accent + "44" },
-    listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: 9.5, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
+    listCardChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent, letterSpacing: 0.3, textTransform: "uppercase" },
   });
 }
