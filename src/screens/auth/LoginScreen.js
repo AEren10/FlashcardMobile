@@ -2,11 +2,10 @@
  * LoginScreen — Claude Design v2.
  * Abstract geometric hero (network illustration) + accent CTA + dark/light parite.
  */
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   StyleSheet,
   Alert,
@@ -20,6 +19,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
 import AppleSignInButton from "../../components/auth/AppleSignInButton";
+import AuthInput from "../../components/auth/AuthInput";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,9 +28,9 @@ export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [focused, setFocused] = useState(null);
   const { signIn, signInAsGuest } = useAuth();
   const s = useMemo(() => makeStyles(c), [c]);
+  const pwRef = useRef(null);
 
   const handleLogin = async () => {
     if (!email.trim()) return Alert.alert("Eksik bilgi", "E-posta gerekli.");
@@ -49,52 +49,53 @@ export default function LoginScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }}>
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
           style={{ flex: 1 }}
         >
-          <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={s.scroll}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+          >
             <View style={{ alignItems: "center", marginBottom: 8 }}>
               <AbstractIllustration kind="network" size={140} />
             </View>
             <Text style={s.title}>Hoş geldin</Text>
             <Text style={s.sub}>Kaldığın yerden devam et</Text>
 
-            <View style={s.field}>
-              <Text style={s.label}>E-POSTA</Text>
-              <View style={[s.input, focused === "email" && s.inputFocus]}>
-                <TextInput
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="sen@ornek.com"
-                  placeholderTextColor={c.textMuted}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={s.inputText}
-                  selectionColor={c.accent}
-                  onFocus={() => setFocused("email")}
-                  onBlur={() => setFocused(null)}
-                  accessibilityLabel="E-posta alanı"
-                />
-              </View>
-            </View>
+            <AuthInput
+              label="E-POSTA"
+              value={email}
+              onChangeText={setEmail}
+              placeholder="sen@ornek.com"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              onSubmitEditing={() => pwRef.current?.focus()}
+              accessibilityLabel="E-posta alanı"
+            />
 
-            <View style={s.field}>
-              <Text style={s.label}>ŞİFRE</Text>
-              <View style={[s.input, focused === "pw" && s.inputFocus]}>
-                <TextInput
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="••••••••"
-                  placeholderTextColor={c.textMuted}
-                  secureTextEntry
-                  style={s.inputText}
-                  selectionColor={c.accent}
-                  onFocus={() => setFocused("pw")}
-                  onBlur={() => setFocused(null)}
-                  accessibilityLabel="Şifre alanı"
-                />
-              </View>
-            </View>
+            <AuthInput
+              ref={pwRef}
+              label="ŞİFRE"
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              secure
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="go"
+              blurOnSubmit
+              onSubmitEditing={handleLogin}
+              accessibilityLabel="Şifre alanı"
+            />
 
             <Pressable
               onPress={() => navigation.navigate("ForgotPassword")}
@@ -159,35 +160,6 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       marginTop: 4,
       marginBottom: 24,
-    },
-    field: { marginBottom: 14 },
-    label: {
-      fontSize: 11,
-      letterSpacing: 1.4,
-      color: c.textMuted,
-      fontFamily: c.fontBodyBold,
-      marginBottom: 8,
-    },
-    input: {
-      backgroundColor: c.bgElevated,
-      borderRadius: 12,
-      paddingHorizontal: 14,
-      paddingVertical: 4,
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-    inputFocus: {
-      borderColor: c.accent,
-      shadowColor: c.accent,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-    },
-    inputText: {
-      fontSize: 15,
-      color: c.textPrimary,
-      fontFamily: c.fontBody,
-      paddingVertical: 10,
     },
     forgot: { alignSelf: "flex-end", marginTop: 2, marginBottom: 18, padding: 4 },
     forgotText: { fontSize: 13, color: c.accent, fontFamily: c.fontBodySemi },

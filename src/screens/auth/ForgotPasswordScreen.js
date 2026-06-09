@@ -5,7 +5,6 @@ import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
   StyleSheet,
   Alert,
@@ -20,6 +19,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
+import AuthInput from "../../components/auth/AuthInput";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,7 +28,6 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [focused, setFocused] = useState(false);
   const { resetPassword } = useAuth();
   const s = useMemo(() => makeStyles(c), [c]);
 
@@ -63,10 +62,16 @@ export default function ForgotPasswordScreen({ navigation }) {
         </View>
 
         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 24}
           style={{ flex: 1 }}
         >
-          <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            contentContainerStyle={s.scroll}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+            showsVerticalScrollIndicator={false}
+          >
             <View style={{ alignItems: "center", marginBottom: 8 }}>
               <AbstractIllustration kind="graph" size={140} />
             </View>
@@ -86,23 +91,20 @@ export default function ForgotPasswordScreen({ navigation }) {
               </View>
             ) : (
               <>
-                <View style={s.field}>
-                  <Text style={s.label}>E-POSTA</Text>
-                  <View style={[s.input, focused && s.inputFocus]}>
-                    <TextInput
-                      value={email}
-                      onChangeText={setEmail}
-                      placeholder="sen@ornek.com"
-                      placeholderTextColor={c.textMuted}
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      style={s.inputText}
-                      selectionColor={c.accent}
-                      onFocus={() => setFocused(true)}
-                      onBlur={() => setFocused(false)}
-                    />
-                  </View>
-                </View>
+                <AuthInput
+                  label="E-POSTA"
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="sen@ornek.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  returnKeyType="go"
+                  blurOnSubmit
+                  onSubmitEditing={handleReset}
+                />
 
                 <Pressable
                   onPress={handleReset}
@@ -154,35 +156,6 @@ function makeStyles(c) {
       marginBottom: 28,
       paddingHorizontal: 12,
       lineHeight: 20,
-    },
-    field: { marginBottom: 18 },
-    label: {
-      fontSize: 11,
-      letterSpacing: 1.4,
-      color: c.textMuted,
-      fontFamily: c.fontBodyBold,
-      marginBottom: 8,
-    },
-    input: {
-      backgroundColor: c.bgElevated,
-      borderRadius: 12,
-      paddingHorizontal: 14,
-      paddingVertical: 4,
-      borderWidth: 1,
-      borderColor: c.border,
-    },
-    inputFocus: {
-      borderColor: c.accent,
-      shadowColor: c.accent,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-    },
-    inputText: {
-      fontSize: 15,
-      color: c.textPrimary,
-      fontFamily: c.fontBody,
-      paddingVertical: 10,
     },
     primaryBtn: {
       backgroundColor: c.accent,
