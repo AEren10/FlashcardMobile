@@ -1,6 +1,5 @@
 /**
- * FlashcardCardArea — progress bar + flip card + sade chevron gezinme.
- * Son karta gelince sağ chevron yeşil "Çalışmaya Geç" CTA'ya dönüşür.
+ * FlashcardCardArea — progress bar + flip card + swipe gezinme.
  */
 import { radius } from "../../../themes/tokens";
 import React from "react";
@@ -23,24 +22,7 @@ export default function FlashcardCardArea({
   if (!current) return null;
 
   const isLast = currentIndex === words.length - 1;
-  const isFirst = currentIndex === 0;
   const pct = ((currentIndex + 1) / words.length) * 100;
-
-  const goPrev = () => {
-    if (isFirst) return;
-    Haptics.selectionAsync();
-    setCurrentIndex(currentIndex - 1);
-  };
-
-  const goNext = () => {
-    if (isLast) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      onComplete?.();
-    } else {
-      Haptics.selectionAsync();
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
 
   return (
     <>
@@ -68,34 +50,13 @@ export default function FlashcardCardArea({
         />
       </View>
 
-      {/* Chevron gezinme + ortada "Biliyorum" mini-SRS chip */}
-      <View style={s.navRow}>
-        <Pressable
-          onPress={goPrev}
-          disabled={isFirst}
-          hitSlop={14}
-          style={({ pressed }) => [
-            s.chev,
-            {
-              backgroundColor: c.accent + "38",
-              borderColor: c.accent + "CC",
-              shadowColor: c.accent,
-              opacity: isFirst ? 0.3 : 1,
-              transform: [{ scale: pressed ? 0.94 : 1 }],
-            },
-          ]}
-          accessibilityLabel="Önceki kelime"
-        >
-          <Icon d="M15 6l-6 6 6 6" size={24} stroke={c.accent} sw={3} />
-        </Pressable>
-
-        {/* Mini-SRS: kelimeyi GRADE.GRADUATE et — 21 gün sonra döner */}
-        {onKnowCurrent && (
+      {/* Mini-SRS: kelimeyi GRADE.GRADUATE et — swipe ile gezin, chevron kaldırıldı */}
+      {onKnowCurrent && (
+        <View style={s.navRow}>
           <Pressable
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               onKnowCurrent(current);
-              // Sonraki karta otomatik geç (son kart değilse)
               if (!isLast) setCurrentIndex(currentIndex + 1);
             }}
             hitSlop={10}
@@ -114,27 +75,8 @@ export default function FlashcardCardArea({
               Biliyorum
             </Text>
           </Pressable>
-        )}
-
-        <Pressable
-          onPress={goNext}
-          disabled={isLast}
-          hitSlop={14}
-          style={({ pressed }) => [
-            s.chev,
-            {
-              backgroundColor: c.accent + "38",
-              borderColor: c.accent + "CC",
-              shadowColor: c.accent,
-              opacity: isLast ? 0.3 : 1,
-              transform: [{ scale: pressed ? 0.94 : 1 }],
-            },
-          ]}
-          accessibilityLabel="Sonraki kelime"
-        >
-          <Icon d="M9 6l6 6-6 6" size={24} stroke={c.accent} sw={3} />
-        </Pressable>
-      </View>
+        </View>
+      )}
     </>
   );
 }
@@ -159,24 +101,8 @@ const s = StyleSheet.create({
   cardArea: { flex: 1, justifyContent: "center", paddingHorizontal: 28, paddingVertical: 18 },
 
   navRow: {
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    paddingHorizontal: 22,
     marginTop: 12,
-  },
-  chev: {
-    width: 56,
-    height: 56,
-    borderRadius: radius.md,
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.55,
-    shadowRadius: 18,
-    elevation: 5,
   },
   knowChip: {
     flexDirection: "row",
