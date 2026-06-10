@@ -67,9 +67,11 @@ export default function useStudySwipe({ enabled = true, onTap, onSwipe }) {
   const panHandlers = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => enabledRef.current,
+        onStartShouldSetPanResponder: () => false,
+        onStartShouldSetPanResponderCapture: () => false,
         onMoveShouldSetPanResponder: (_, g) =>
-          enabledRef.current && Math.abs(g.dx) > 4,
+          enabledRef.current && Math.abs(g.dx) > 14,
+        onMoveShouldSetPanResponderCapture: () => false,
         onPanResponderMove: (_, g) => {
           if (!enabledRef.current) return;
           dx.setValue(g.dx);

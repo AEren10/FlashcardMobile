@@ -22,6 +22,8 @@ export default function StreakChip({ streak = 0, onPress }) {
   const glow = useRef(new Animated.Value(0.4)).current;
   const flameRot = useRef(new Animated.Value(0)).current;
   const press = useRef(new Animated.Value(1)).current;
+  const flamePulse = useRef(new Animated.Value(1)).current;
+  const numBump = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     if (!active) {
@@ -68,6 +70,45 @@ export default function StreakChip({ streak = 0, onPress }) {
       rotLoop.stop();
     };
   }, [active, glow, flameRot]);
+
+  // Flame pulse + number bump — sayaç bitince patlama efekti
+  useEffect(() => {
+    if (streak <= 0) return;
+    flamePulse.setValue(1);
+    numBump.setValue(1);
+    const t = setTimeout(() => {
+      Animated.sequence([
+        Animated.spring(flamePulse, {
+          toValue: 1.45,
+          useNativeDriver: true,
+          stiffness: 300,
+          damping: 6,
+        }),
+        Animated.spring(flamePulse, {
+          toValue: 1,
+          useNativeDriver: true,
+          stiffness: 180,
+          damping: 10,
+        }),
+      ]).start();
+      Animated.sequence([
+        Animated.timing(numBump, {
+          toValue: 1.3,
+          duration: 120,
+          easing: Easing.out(Easing.cubic),
+          useNativeDriver: true,
+        }),
+        Animated.spring(numBump, {
+          toValue: 1,
+          useNativeDriver: true,
+          stiffness: 250,
+          damping: 10,
+        }),
+      ]).start();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, 900);
+    return () => clearTimeout(t);
+  }, [streak, flamePulse, numBump]);
 
   const rotation = flameRot.interpolate({
     inputRange: [-1, 1],
@@ -121,17 +162,17 @@ export default function StreakChip({ streak = 0, onPress }) {
         />
 
         <View style={s.row}>
-          <Animated.View style={{ transform: [{ rotate: rotation }] }}>
+          <Animated.View style={{ transform: [{ rotate: rotation }, { scale: flamePulse }] }}>
             <Icon d={ICONS.flame} size={20} stroke={c.warning} fill={c.warning} sw={1.2} />
           </Animated.View>
-          <Text
+          <Animated.Text
             style={[
               s.num,
-              { color: c.textPrimary, fontFamily: c.fontNum },
+              { color: c.textPrimary, fontFamily: c.fontNum, transform: [{ scale: numBump }] },
             ]}
           >
             {animStreak}
-          </Text>
+          </Animated.Text>
         </View>
         <Text
           style={[

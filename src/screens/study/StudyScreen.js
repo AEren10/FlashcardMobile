@@ -21,6 +21,7 @@ import * as Haptics from "expo-haptics";
 import Svg, { Path } from "react-native-svg";
 import ConfettiCannon from "react-native-confetti-cannon";
 
+import { LinearGradient } from "expo-linear-gradient";
 import FlipCard from "../../components/design/FlipCard";
 import Icon, { ICONS } from "../../components/design/Icon";
 import EmptyState from "../../components/EmptyState";
@@ -214,8 +215,8 @@ export default function StudyScreen({ route, navigation }) {
 
         <View style={s.stageWrap}>
           <View style={s.stage}>
-            <View style={[s.peekCard, { transform: [{ scale: 0.84 }, { translateY: 22 }], opacity: 0.45, backgroundColor: c.bgElevated, borderColor: c.border }]} />
-            <View style={[s.peekCard, { transform: [{ scale: 0.92 }, { translateY: 12 }], opacity: 0.72, backgroundColor: c.bgElevated, borderColor: c.border }]} />
+            <View style={[s.peekCard, { transform: [{ scale: 0.93 }, { translateY: -16 }], opacity: 0.25, backgroundColor: c.bgElevated, borderColor: c.border }]} />
+            <View style={[s.peekCard, { transform: [{ scale: 0.965 }, { translateY: -8 }], opacity: 0.45, backgroundColor: c.bgElevated, borderColor: c.border }]} />
 
             <RNAnimated.View
               {...swipe.panHandlers}
@@ -232,7 +233,7 @@ export default function StudyScreen({ route, navigation }) {
                 exampleTr={engine.current.example_tr || engine.current.exampleTr}
                 pron={engine.current.pron}
                 flipped={flipped}
-                onPress={() => {}}
+                onPress={() => setFlipped((f) => !f)}
                 disabled={!!feedback}
                 onGraduate={() => engine.graduateCurrent?.()}
                 onReport={() => engine.reportCurrent?.()}
@@ -244,38 +245,25 @@ export default function StudyScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* Kart çevrildiyse 4-buton detaylı puanlama, değilse swipe rehberi */}
-        {flipped ? (
-          <View style={s.gradeRow}>
-            <GradeBtn label="Yeniden" sub="<1dk" color={c.error} onPress={() => handleAnswerGrade(GRADE.AGAIN)} c={c} />
-            <GradeBtn label="Zor" sub="<10dk" color={c.warning} onPress={() => handleAnswerGrade(GRADE.HARD)} c={c} />
-            <GradeBtn label="İyi" sub="~1gün" color={c.success} onPress={() => handleAnswerGrade(GRADE.GOOD)} c={c} />
-            <GradeBtn label="Kolay" sub="~3gün" color={c.cobalt} onPress={() => handleAnswerGrade(GRADE.EASY)} c={c} />
+        <View style={s.swipeGuide} pointerEvents="none">
+          <View style={s.guideSide}>
+            <Svg width={48} height={38} viewBox="0 0 30 24" fill="none">
+              <Path d="M24 20C24 11 18 7 9 7" stroke={c.error + "66"} strokeWidth={2} strokeLinecap="round" fill="none" />
+              <Path d="M13 3L8 7L13 11" stroke={c.error + "66"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </Svg>
           </View>
-        ) : (
-          <View style={s.swipeGuide} pointerEvents="none">
-            <View style={s.guideSide}>
-              <Icon d="M15 6l-6 6 6 6" size={18} stroke={c.error} sw={2.4} />
-              <Text style={[s.guideTxt, { color: c.error, fontFamily: c.fontBodySemi }]}>
-                Bilmiyorum
-              </Text>
-            </View>
-            <View style={s.guideCenter}>
-              <Icon
-                d="M9 11V6a3 3 0 0 1 6 0v8m-3 0v3m-5-4a5 5 0 0 0 10 0V8"
-                size={20}
-                stroke={c.textMuted}
-                sw={1.8}
-              />
-            </View>
-            <View style={s.guideSide}>
-              <Text style={[s.guideTxt, { color: c.success, fontFamily: c.fontBodySemi }]}>
-                Biliyorum
-              </Text>
-              <Icon d="M9 6l6 6-6 6" size={18} stroke={c.success} sw={2.4} />
-            </View>
+          <View style={s.guideCenter}>
+            <Svg width={32} height={38} viewBox="0 0 20 24" fill="none">
+              <Path d="M7 13V7a3 3 0 0 1 6 0v6M10 18v2M5 14a5 5 0 0 0 10 0V7" stroke={c.textMuted} strokeWidth={1.5} strokeLinecap="round" fill="none" />
+            </Svg>
           </View>
-        )}
+          <View style={s.guideSide}>
+            <Svg width={48} height={38} viewBox="0 0 30 24" fill="none">
+              <Path d="M6 20C6 11 12 7 21 7" stroke={c.success + "66"} strokeWidth={2} strokeLinecap="round" fill="none" />
+              <Path d="M17 3L22 7L17 11" stroke={c.success + "66"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </Svg>
+          </View>
+        </View>
 
         {showConfetti && (
           <ConfettiCannon
@@ -307,33 +295,6 @@ export default function StudyScreen({ route, navigation }) {
 
 /* —————— Sub-components —————— */
 
-function GradeBtn({ label, sub, color, onPress, c }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => ({
-        flex: 1,
-        paddingVertical: spacing.md,
-        paddingHorizontal: 6,
-        borderRadius: radius.sm,
-        borderWidth: 1.5,
-        alignItems: "center",
-        backgroundColor: pressed ? color + "22" : c.bgElevated,
-        borderColor: color + "88",
-        transform: [{ scale: pressed ? 0.96 : 1 }],
-      })}
-      accessibilityLabel={label}
-    >
-      <Text style={{ fontSize: fontSize.md, fontFamily: c.fontBodyBold, color, letterSpacing: 0.2 }}>
-        {label}
-      </Text>
-      <Text style={{ fontSize: fontSize.xs, fontFamily: c.fontBody, color: c.textMuted, marginTop: 2 }}>
-        {sub}
-      </Text>
-    </Pressable>
-  );
-}
-
 function Header({ c, s, title, streak, onBack }) {
   return (
     <View style={s.header}>
@@ -354,8 +315,24 @@ function Header({ c, s, title, streak, onBack }) {
 function GlowOverlays({ s, c, green, red }) {
   return (
     <>
-      <RNAnimated.View pointerEvents="none" style={[s.glowOverlay, { opacity: green, borderColor: c.success, shadowColor: c.success }]} />
-      <RNAnimated.View pointerEvents="none" style={[s.glowOverlay, { opacity: red, borderColor: c.error, shadowColor: c.error }]} />
+      {/* Sağa kaydırma — sağ kenardan yumuşak yeşil tint */}
+      <RNAnimated.View pointerEvents="none" style={[s.glowOverlay, { opacity: green }]}>
+        <LinearGradient
+          colors={["transparent", c.success + "30"]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </RNAnimated.View>
+      {/* Sola kaydırma — sol kenardan yumuşak kırmızı tint */}
+      <RNAnimated.View pointerEvents="none" style={[s.glowOverlay, { opacity: red }]}>
+        <LinearGradient
+          colors={[c.error + "30", "transparent"]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </RNAnimated.View>
     </>
   );
 }
@@ -473,12 +450,12 @@ function makeStyles(c) {
       paddingTop: spacing.lg,
     },
     counter: { fontFamily: c.fontNum, fontSize: fontSize.md, color: c.textSec },
-    stageWrap: { flex: 1, justifyContent: "center", paddingHorizontal: 18 },
+    stageWrap: { flex: 1, justifyContent: "center", paddingHorizontal: 14 },
     stage: {
-      width: "84%",
+      width: "92%",
       alignSelf: "center",
-      aspectRatio: 0.72,
-      maxHeight: 430,
+      aspectRatio: 0.68,
+      maxHeight: 500,
       position: "relative",
     },
     peekCard: {
@@ -498,10 +475,7 @@ function makeStyles(c) {
       right: 0,
       bottom: 0,
       borderRadius: radius.xl,
-      borderWidth: 2,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.5,
-      shadowRadius: 24,
+      overflow: "hidden",
       zIndex: 20,
     },
     verdict: {
@@ -547,9 +521,10 @@ function makeStyles(c) {
     swipeGuide: {
       flexDirection: "row",
       alignItems: "center",
-      paddingHorizontal: 28,
-      paddingBottom: 22,
-      marginTop: 6,
+      justifyContent: "center",
+      paddingHorizontal: 24,
+      paddingBottom: 18,
+      paddingTop: 10,
     },
     guideSide: {
       flex: 1,
@@ -559,41 +534,14 @@ function makeStyles(c) {
       gap: spacing.sm,
     },
     guideCenter: {
-      width: 36,
+      width: 48,
       alignItems: "center",
       justifyContent: "center",
-      opacity: 0.55,
+      opacity: 0.5,
     },
     guideTxt: {
       fontSize: fontSize.md,
       letterSpacing: 0.3,
-    },
-    gradeRow: {
-      flexDirection: "row",
-      gap: 6,
-      paddingHorizontal: 14,
-      paddingBottom: 18,
-      marginTop: 6,
-    },
-    gradeBtn: {
-      flex: 1,
-      paddingVertical: spacing.md,
-      paddingHorizontal: 6,
-      borderRadius: radius.sm,
-      borderWidth: 1.5,
-      alignItems: "center",
-      backgroundColor: c.bgElevated,
-    },
-    gradeLbl: { fontSize: fontSize.sm, fontFamily: c.fontBodyBold, letterSpacing: 0.2 },
-    gradeSub: { fontSize: fontSize.xs, fontFamily: c.fontBody, marginTop: 2, opacity: 0.7 },
-    swipeHint: {
-      textAlign: "center",
-      fontSize: fontSize.sm,
-      letterSpacing: 0.2,
-      paddingHorizontal: 22,
-      paddingBottom: spacing.sm,
-      marginTop: -4,
-      opacity: 0.7,
     },
   });
 }

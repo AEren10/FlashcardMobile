@@ -13,20 +13,20 @@
  *   - try/catch + console.warn ki Sentry yakalasın
  */
 import * as Speech from "expo-speech";
+import { Audio } from "expo-av";
 
-let _audioReady = false;
-
+/**
+ * Hot reload audio mode'u sıfırlar ama modül değişkeni kalır → sessizlik.
+ * Çözüm: her speak() öncesi DAIMA setAudioModeAsync çağır (idempotent, ~1ms).
+ */
 async function ensureAudioMode() {
-  if (_audioReady) return;
   try {
-    const { Audio } = require("expo-av");
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
       shouldDuckAndroid: true,
       interruptionModeAndroid: 1, // DUCK_OTHERS
     });
-    _audioReady = true;
   } catch (err) {
     console.warn("[tts] audio mode init failed", err?.message);
   }
@@ -34,6 +34,8 @@ async function ensureAudioMode() {
 
 /**
  * Kelime/cümle seslendir. Default: İngilizce, makul tempo.
+ * options.onStart — ses başladığında
+ * options.onDone  — ses bittiğinde (veya hata olursa)
  * @returns {Promise<boolean>} ses gerçekten başlatıldıysa true
  */
 export async function speak(text, options = {}) {
@@ -55,13 +57,24 @@ export async function speak(text, options = {}) {
       language: options.language || "en-US",
       pitch: options.pitch ?? 1.0,
       rate: options.rate ?? 0.92,
+      onStart: () => {
+        options.onStart?.();
+      },
+      onDone: () => {
+        options.onDone?.();
+      },
+      onStopped: () => {
+        options.onDone?.();
+      },
       onError: (err) => {
         console.warn("[tts] onError", err?.message || err);
+        options.onDone?.();
       },
     });
     return true;
   } catch (err) {
     console.warn("[tts] speak failed", err?.message);
+    options.onDone?.();
     return false;
   }
 }

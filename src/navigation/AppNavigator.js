@@ -106,6 +106,7 @@ import StreakScreen from "../screens/streak/StreakScreen";
 import WeeklyRecapScreen from "../screens/recap/WeeklyRecapScreen";
 import HardWordsScreen from "../screens/hard/HardWordsScreen";
 import RoadmapScreen from "../screens/roadmap/RoadmapScreen";
+import DailyPathScreen from "../screens/home/DailyPathScreen";
 
 // Auth Screens
 import LoginScreen from "../screens/auth/LoginScreen";
@@ -216,7 +217,7 @@ function HomeStackNavigator() {
       <HomeStack.Screen
         name="Study"
         component={StudyScreen}
-        options={{ presentation: "card", animation: "slide_from_right" }}
+        options={{ presentation: "card", animation: "slide_from_right", gestureEnabled: false }}
       />
       <HomeStack.Screen
         name="Quiz"
@@ -239,8 +240,18 @@ function HomeStackNavigator() {
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <HomeStack.Screen
+        name="DailyPath"
+        component={DailyPathScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
         name="HardWords"
         component={HardWordsScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
+        name="FavoriteWords"
+        component={FavoriteWordsScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <HomeStack.Screen
@@ -273,7 +284,7 @@ function MyListsStackNavigator() {
       <MyListsStack.Screen
         name="Study"
         component={StudyScreen}
-        options={{ presentation: "card", animation: "slide_from_right" }}
+        options={{ presentation: "card", animation: "slide_from_right", gestureEnabled: false }}
       />
       <MyListsStack.Screen
         name="Quiz"
@@ -302,7 +313,7 @@ function FavoritesStackNavigator() {
       <FavoritesStack.Screen
         name="Study"
         component={StudyScreen}
-        options={{ presentation: "card", animation: "slide_from_right" }}
+        options={{ presentation: "card", animation: "slide_from_right", gestureEnabled: false }}
       />
       <FavoritesStack.Screen
         name="Quiz"
@@ -333,7 +344,7 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen
         name="Study"
         component={StudyScreen}
-        options={{ presentation: "card", animation: "slide_from_right" }}
+        options={{ presentation: "card", animation: "slide_from_right", gestureEnabled: false }}
       />
       <ProfileStack.Screen
         name="Quiz"
@@ -363,6 +374,11 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen
         name="Roadmap"
         component={RoadmapScreen}
+        options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="DailyPath"
+        component={DailyPathScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
       />
       <ProfileStack.Screen
@@ -422,8 +438,8 @@ function BottomTabNavigator() {
         name="Favorites"
         component={FavoritesStackNavigator}
         options={({ route }) => ({
-          tabBarLabel: "Çalış",
-          tabBarAccessibilityLabel: "Çalış sekmesi",
+          tabBarLabel: "Öğren",
+          tabBarAccessibilityLabel: "Öğren sekmesi",
           tabBarStyle: getTabBarStyle(route),
         })}
       />

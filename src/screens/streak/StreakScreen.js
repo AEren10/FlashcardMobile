@@ -3,8 +3,9 @@
  * Hero flame (animated float) + 3 stat tiles with trends + 35-day grid + badges.
  */
 import { radius, spacing } from "../../themes/tokens";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Alert } from "react-native";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable, Animated, Easing } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -15,11 +16,13 @@ import { STREAK_BADGES, WORDS_BADGES, getStreakBadge } from "../../lib/badges";
 import Icon, { ICONS } from "../../components/design/Icon";
 import AnimatedFlame from "../../components/design/AnimatedFlame";
 import AchievementModal from "../../components/design/AchievementModal";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
 import Last30BarChart from "../../components/design/Last30BarChart";
 import Last7DaysDots from "../../components/design/Last7DaysDots";
 import useBadgeWatcher from "../../hooks/useBadgeWatcher";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import { getFreezeStatus, consumeStreakFreeze } from "../../supabase/streakFreeze";
+import { getCached, setCache } from "../../lib/dataCache";
 
 export default function StreakScreen({ navigation }) {
   const { c } = useTheme();
@@ -28,12 +31,20 @@ export default function StreakScreen({ navigation }) {
   const [days, setDays] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [freeze, setFreeze] = useState({ canUse: false, nextResetAt: null });
+  const [showFreezeConfirm, setShowFreezeConfirm] = useState(false);
   const toast = useToast();
+  const heroNumScale = useRef(new Animated.Value(1)).current;
+  const heroFlameScale = useRef(new Animated.Value(1)).current;
 
   const { newBadge, dismiss } = useBadgeWatcher({
     streakDays: stats.streakDays,
     totalWords: stats.totalWords,
   });
+
+  useEffect(() => {
+    getCached("streakStats").then((v) => v && setStats(v));
+    getCached("streakDays").then((v) => Array.isArray(v) && setDays(v));
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -42,8 +53,14 @@ export default function StreakScreen({ navigation }) {
         getDailyActivity(35),
         getFreezeStatus(),
       ]);
-      if (statsRes.status === "fulfilled" && statsRes.value) setStats(statsRes.value);
-      if (daysRes.status === "fulfilled" && Array.isArray(daysRes.value)) setDays(daysRes.value);
+      if (statsRes.status === "fulfilled" && statsRes.value) {
+        setStats(statsRes.value);
+        setCache("streakStats", statsRes.value);
+      }
+      if (daysRes.status === "fulfilled" && Array.isArray(daysRes.value)) {
+        setDays(daysRes.value);
+        setCache("streakDays", daysRes.value);
+      }
       if (freezeRes.status === "fulfilled" && freezeRes.value?.success) {
         setFreeze({
           canUse: freezeRes.value.canUse,
@@ -67,26 +84,7 @@ export default function StreakScreen({ navigation }) {
       });
       return;
     }
-    Alert.alert(
-      "Donuk Kalkan",
-      "Bugün çalışmasan bile serini koruyacak. Bu hakkın haftada bir yenileniyor.",
-      [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Kullan",
-          onPress: async () => {
-            const r = await consumeStreakFreeze();
-            if (r.success) {
-              setFreeze({ canUse: false, nextResetAt: r.nextResetAt });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              toast?.show?.({ message: "❄️ Serin korunuyor", type: "success" });
-            } else {
-              toast?.show?.({ message: "Kullanılamadı: " + (r.message || r.error), type: "error" });
-            }
-          },
-        },
-      ]
-    );
+    setShowFreezeConfirm(true);
   }, [freeze, toast]);
 
   const onRefresh = useCallback(() => {
@@ -97,6 +95,37 @@ export default function StreakScreen({ navigation }) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Hero flame pulse + number bump
+  useEffect(() => {
+    if (stats.streakDays <= 0) return;
+    heroNumScale.setValue(0.7);
+    heroFlameScale.setValue(0.8);
+    const t = setTimeout(() => {
+      Animated.spring(heroFlameScale, {
+        toValue: 1,
+        useNativeDriver: true,
+        stiffness: 120,
+        damping: 8,
+      }).start();
+      Animated.sequence([
+        Animated.spring(heroNumScale, {
+          toValue: 1.15,
+          useNativeDriver: true,
+          stiffness: 280,
+          damping: 7,
+        }),
+        Animated.spring(heroNumScale, {
+          toValue: 1,
+          useNativeDriver: true,
+          stiffness: 200,
+          damping: 12,
+        }),
+      ]).start();
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    }, 400);
+    return () => clearTimeout(t);
+  }, [stats.streakDays, heroNumScale, heroFlameScale]);
 
   const accuracy = stats.totalSessions
     ? Math.round((stats.totalWords / Math.max(stats.totalSessions * 10, 1)) * 100)
@@ -132,8 +161,10 @@ export default function StreakScreen({ navigation }) {
 
           {/* Hero flame */}
           <View style={s.hero}>
-            <AnimatedFlame size={64} streak={stats.streakDays} />
-            <Text style={s.heroNum}>{stats.streakDays}</Text>
+            <Animated.View style={{ transform: [{ scale: heroFlameScale }] }}>
+              <AnimatedFlame size={64} streak={stats.streakDays} />
+            </Animated.View>
+            <Animated.Text style={[s.heroNum, { transform: [{ scale: heroNumScale }] }]}>{stats.streakDays}</Animated.Text>
             <Text style={s.heroCap}>
               {stats.streakDays === 0
                 ? "henüz seri yok — bugün başla"
@@ -207,24 +238,24 @@ export default function StreakScreen({ navigation }) {
             <StatTile
               value={stats.totalWords}
               label="Kelime"
-              trend="12% bu hafta"
               accent={c.warning}
+              icon={ICONS.books}
               c={c}
               s={s}
             />
             <StatTile
               value={stats.totalSessions}
               label="Seans"
-              trend={`${Math.min(7, stats.totalSessions)} bu hafta`}
               accent={c.cobalt}
+              icon={ICONS.bolt}
               c={c}
               s={s}
             />
             <StatTile
               value={`%${accuracy}`}
               label="Doğruluk"
-              trend="%3"
               accent={c.success}
+              icon={ICONS.check}
               c={c}
               s={s}
             />
@@ -265,34 +296,46 @@ export default function StreakScreen({ navigation }) {
       </SafeAreaView>
 
       <AchievementModal visible={!!newBadge} badge={newBadge} onClose={dismiss} />
+
+      <ConfirmDialog
+        visible={showFreezeConfirm}
+        title="Donuk Kalkan"
+        message={`Bugün çalışmasan bile serini koruyacak. Bu hakkın haftada bir yenileniyor. (Kalan: ${freeze?.available ?? (freeze?.canUse ? 1 : 0)})`}
+        confirmText="Kullan"
+        cancelText="Vazgeç"
+        onConfirm={async () => {
+          setShowFreezeConfirm(false);
+          const r = await consumeStreakFreeze();
+          if (r.success) {
+            setFreeze({ canUse: false, nextResetAt: r.nextResetAt });
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            toast?.show?.({ message: "Serin korunuyor", type: "success" });
+          } else {
+            toast?.show?.({ message: "Kullanılamadı: " + (r.message || r.error), type: "error" });
+          }
+        }}
+        onCancel={() => setShowFreezeConfirm(false)}
+      />
     </View>
   );
 }
 
-function StatTile({ value, label, trend, accent, c, s }) {
+function StatTile({ value, label, trend, accent, icon, c, s }) {
   return (
-    <View style={[
-      s.tile,
-      {
-        borderTopColor: accent,
-        borderTopWidth: 3,
-        borderColor: accent + "44",
-        shadowColor: accent,
-      },
-    ]}>
-      <View
-        style={[
-          s.tileHalo,
-          {
-            backgroundColor: accent + "55",
-          },
-        ]}
+    <View style={[s.tile, { shadowColor: accent }]}>
+      <LinearGradient
+        colors={[accent, accent + "CC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={[StyleSheet.absoluteFill, { borderRadius: radius.md }]}
       />
-      <Text style={[s.tileVal, { color: accent }]}>{value}</Text>
+      {icon && (
+        <View style={s.tileIcon}>
+          <Icon d={icon} size={16} stroke="#fff" fill="none" sw={2} />
+        </View>
+      )}
+      <Text style={s.tileVal}>{value}</Text>
       <Text style={s.tileLbl}>{label}</Text>
-      <View style={[s.trendChip, { backgroundColor: c.successDim }]}>
-        <Text style={[s.trendTxt, { color: c.success }]}>↑ {trend}</Text>
-      </View>
     </View>
   );
 }
@@ -449,36 +492,28 @@ function makeStyles(c) {
     freezeSub: { fontSize: 11, marginTop: 2, lineHeight: 14 },
     tile: {
       flex: 1,
-      backgroundColor: c.bgElevated,
       borderRadius: radius.md,
-      borderWidth: 1.5,
-      borderColor: c.border,
       padding: spacing.lg,
       paddingTop: 14,
+      paddingBottom: 16,
       alignItems: "center",
       overflow: "hidden",
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.25,
-      shadowRadius: 12,
-      elevation: 3,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+      elevation: 4,
     },
-    tileHalo: {
-      position: "absolute",
-      top: -22,
-      width: 90,
-      height: 46,
-      borderRadius: radius.full,
-      opacity: 0.9,
+    tileIcon: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 6,
     },
-    tileVal: { fontFamily: c.fontNum, fontSize: 28, color: c.textPrimary },
-    tileLbl: { fontFamily: c.fontBody, fontSize: 11, color: c.textSec, marginTop: 2 },
-    trendChip: {
-      marginTop: 9,
-      paddingHorizontal: spacing.sm,
-      paddingVertical: 3,
-      borderRadius: radius.full,
-    },
-    trendTxt: { fontFamily: c.fontBodyBold, fontSize: 10 },
+    tileVal: { fontFamily: c.fontNum, fontSize: 28, color: "#fff" },
+    tileLbl: { fontFamily: c.fontBodySemi, fontSize: 11, color: "rgba(255,255,255,0.8)", marginTop: 2 },
 
     gridCard: {
       marginTop: 18,

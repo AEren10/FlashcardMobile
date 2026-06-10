@@ -105,11 +105,11 @@ export default function FlipCard({
 
   const frontStyle = useAnimatedStyle(() => ({
     transform: [{ perspective: 1400 }, { rotateY: `${rot.value}deg` }],
-    opacity: rot.value > 90 ? 0 : 1,
+    opacity: interpolate(rot.value, [0, 82, 98], [1, 1, 0], Extrapolation.CLAMP),
   }));
   const backStyle = useAnimatedStyle(() => ({
     transform: [{ perspective: 1400 }, { rotateY: `${rot.value - 180}deg` }],
-    opacity: rot.value > 90 ? 1 : 0,
+    opacity: interpolate(rot.value, [82, 98, 180], [0, 1, 1], Extrapolation.CLAMP),
   }));
   const frontGlintStyle = useAnimatedStyle(() => ({
     opacity: interpolate(glintFront.value, [0, 0.38, 1], [0, 0.5, 0], Extrapolation.CLAMP),
@@ -125,12 +125,12 @@ export default function FlipCard({
       {/* FRONT — purely visual, pointerEvents="none" */}
       <Animated.View style={[s.face, { borderColor: c.borderAccent, shadowColor: c.accent }, frontStyle]} pointerEvents="none">
         <LinearGradient colors={[c.bgElevated, c.bgSurface]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
-        {/* Premium gradient blob — accent → cobalt yumuşak geçiş */}
-        <View style={[s.radial, { top: -40, left: -30, overflow: "hidden" }]}>
+        {/* Köşeden gelen ince diagonal ışık — sol üst */}
+        <View style={s.cornerGlow}>
           <LinearGradient
-            colors={[c.accent + "55", c.cobalt + "33", "transparent"]}
-            start={{ x: 0.3, y: 0.2 }}
-            end={{ x: 0.9, y: 1 }}
+            colors={[c.cobalt + "20", "transparent"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0.6, y: 0.7 }}
             style={StyleSheet.absoluteFill}
           />
         </View>
@@ -172,12 +172,12 @@ export default function FlipCard({
       {/* BACK — purely visual, pointerEvents="none" */}
       <Animated.View style={[s.face, { borderColor: c.cobaltGlow, shadowColor: c.cobalt }, backStyle]} pointerEvents="none">
         <LinearGradient colors={[c.bgSurface, c.bgElevated]} start={{ x: 0.15, y: 1 }} end={{ x: 0.85, y: 0 }} style={StyleSheet.absoluteFill} />
-        {/* Premium gradient blob — cobalt → accent geçiş */}
-        <View style={[s.radial, { bottom: -40, right: -30, overflow: "hidden" }]}>
+        {/* Köşeden gelen ince diagonal ışık — sağ alt */}
+        <View style={s.cornerGlowBack}>
           <LinearGradient
-            colors={[c.cobalt + "55", c.accent + "33", "transparent"]}
-            start={{ x: 0.3, y: 0.2 }}
-            end={{ x: 0.9, y: 1 }}
+            colors={["transparent", c.cobalt + "20"]}
+            start={{ x: 0.4, y: 0.3 }}
+            end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
           />
         </View>
@@ -248,11 +248,19 @@ export default function FlipCard({
     liftShadow.value = withTiming(0, { duration: 260, easing: Easing.bezier(0.4, 0, 0.2, 1) });
   };
 
-  // Controlled mode: plain View — parent PanResponder handles taps
-  // Uncontrolled mode: Pressable — handles taps directly
+  // Controlled mode: background Pressable catches taps for flip,
+  // overlay buttons (sound/bookmark) sit above it via z-order.
+  // Parent PanResponder only claims on move (swipe), NOT on start,
+  // so these Pressables actually receive touches.
   if (isControlled) {
     return (
       <Animated.View style={[s.stage, liftStyle, { shadowColor: c.accent }]} accessibilityLabel="Kartı çevir">
+        <Pressable
+          onPress={handleFlip}
+          onPressIn={onPressIn}
+          onPressOut={onPressOut}
+          style={StyleSheet.absoluteFill}
+        />
         {content}
       </Animated.View>
     );
@@ -276,9 +284,11 @@ function makeStyles(c) {
   return StyleSheet.create({
     stage: {
       width: "100%",
-      aspectRatio: 0.72,
-      maxHeight: 430,
+      aspectRatio: 0.68,
+      maxHeight: 500,
       alignSelf: "center",
+      backgroundColor: "transparent",
+      borderRadius: radius.xl,
     },
     face: {
       position: "absolute",
@@ -286,18 +296,30 @@ function makeStyles(c) {
       borderRadius: radius.xl,
       overflow: "hidden",
       padding: 22,
-      borderWidth: 1,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.5,
-      shadowRadius: 40,
-      elevation: 12,
+      borderWidth: 1.2,
+      backfaceVisibility: "hidden",
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.18,
+      shadowRadius: 20,
+      elevation: 6,
     },
-    radial: {
+    cornerGlow: {
       position: "absolute",
-      width: 280,
-      height: 220,
-      borderRadius: radius.lg0,
-      opacity: 0.8,
+      top: 0,
+      left: 0,
+      width: "65%",
+      height: "55%",
+      borderBottomRightRadius: 200,
+      overflow: "hidden",
+    },
+    cornerGlowBack: {
+      position: "absolute",
+      bottom: 0,
+      right: 0,
+      width: "65%",
+      height: "55%",
+      borderTopLeftRadius: 200,
+      overflow: "hidden",
     },
     glint: {
       position: "absolute",
@@ -317,7 +339,8 @@ function makeStyles(c) {
       flexDirection: "row",
       alignItems: "center",
       gap: spacing.sm,
-      zIndex: 10,
+      zIndex: 999,
+      elevation: 999,
     },
     chip: {
       paddingHorizontal: spacing.md,
