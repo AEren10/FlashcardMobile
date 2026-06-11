@@ -2,7 +2,7 @@
  * HomeScreen — Claude Design v2 spec.
  * Greeting + 2 stat box + glow challenge card + horizontal "Devam Et" carousel.
  */
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fontSize, radius, spacing } from "../../themes/tokens";
 import {
   View,
@@ -21,6 +21,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useAchievements } from "../../contexts/AchievementsContext";
 import supabaseApiService from "../../services/supabaseApi";
 import { getStudyStats } from "../../supabase/progress";
+import { fetchWithCache, getCached, setCache, isFresh } from "../../lib/dataCache";
 import { getMistakesList } from "../../supabase/mistakesList";
 import { getTopLikedLists } from "../../supabase/social";
 import { getDailyGoal } from "../../lib/dailyGoal";
@@ -45,6 +46,8 @@ import { getKnownWordsCount } from "../../supabase/progress";
 import HomeSearchBar from "./components/HomeSearchBar";
 import RandomReviewModal from "../../components/design/RandomReviewModal";
 import ModeSegment from "../../components/design/ModeSegment";
+import useUserLevel from "../../hooks/useUserLevel";
+import { useToast } from "../../contexts/ToastContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SkeletonContinueCard, SkeletonStatRow } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
@@ -61,7 +64,7 @@ const DAILY_TOTAL = 10;
 
 
 export default function HomeScreen({ navigation }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const { isAuthenticated, getUserEmail } = useAuth();
   const { lists, loading: listsLoading, refreshing, refresh } = usePublicLists();
   const [stats, setStats] = useState({ totalSessions: 0, totalWords: 0, streakDays: 0 });
@@ -70,6 +73,16 @@ export default function HomeScreen({ navigation }) {
   const [randomReviewOpen, setRandomReviewOpen] = useState(false);
   const [trendingLists, setTrendingLists] = useState([]);
   const [daily, setDaily] = useState({ goal: 10, done: 0, pct: 0, completed: false });
+  const [mode, setMode] = useState("normal");
+  const scrollRef = useRef(null);
+  const modeSegmentY = useRef(0);
+  const listsAreaY = useRef(0);
+
+  // Anında cache'den geri yükle — Supabase beklemeden veri göster
+  useEffect(() => {
+    getCached("homeStats").then((c) => c && setStats(c));
+    getCached("homeDaily").then((c) => c && setDaily(c));
+  }, []);
   const favoriteWordIds = useSelector(selectFavoriteWordIds);
   const { syncStats: syncAchievements } = useAchievements();
   const loading = listsLoading || authLoading;
@@ -97,6 +110,7 @@ export default function HomeScreen({ navigation }) {
 
       if (statsOk) {
         setStats(statsRes.value);
+        setCache("homeStats", statsRes.value);
         const accuracy = statsRes.value.totalSessions
           ? Math.round((statsRes.value.totalWords / Math.max(statsRes.value.totalSessions * 10, 1)) * 100)
           : 0;
@@ -109,6 +123,7 @@ export default function HomeScreen({ navigation }) {
         });
       }
       if (mistakesOk && mistakesRes.value?.success) setMistakesList(mistakesRes.value.data);
+      setCache("home_data", true);
     } finally {
       setAuthLoading(false);
     }
@@ -117,7 +132,9 @@ export default function HomeScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      loadUserData();
+      if (!isFresh("home_data", 60000)) {
+        loadUserData();
+      }
     }, [loadUserData])
   );
 
@@ -137,9 +154,10 @@ export default function HomeScreen({ navigation }) {
   // Daily goal — focus geldiğinde yenile (oturum sonrası güncel kalsın)
   useFocusEffect(
     useCallback(() => {
-      getDailyGoal(10).then(setDaily).catch(() => {});
+      getDailyGoal(10).then((d) => { setDaily(d); setCache("homeDaily", d); }).catch(() => {});
     }, [])
   );
+
 
   const { profile } = useProfile();
   // Önce display_name (EditProfile'da yazdığı isim), yoksa email'den ilk parça
@@ -173,6 +191,21 @@ export default function HomeScreen({ navigation }) {
     streakDays: stats.streakDays || 0,
     totalWords: stats.totalWords || 0,
   });
+
+  // Level-up algılama — seviye atlayınca kutlama toast
+  const toast = useToast();
+  const userLevel = useUserLevel(stats.totalWords || 0);
+  const prevLevelRef = useRef(userLevel.lv);
+  useEffect(() => {
+    if (userLevel.lv > prevLevelRef.current && prevLevelRef.current > 0) {
+      toast?.show?.({
+        message: `Seviye ${userLevel.lv}: ${userLevel.title}`,
+        type: "success",
+        duration: 3500,
+      });
+    }
+    prevLevelRef.current = userLevel.lv;
+  }, [userLevel.lv, userLevel.title, toast]);
 
   // Bilinen kelime sayısı — Nudge için
   const [knownWordsCount, setKnownWordsCount] = useState(0);
@@ -223,10 +256,17 @@ export default function HomeScreen({ navigation }) {
   };
 
   const recentLists = useMemo(() => lists.slice(0, 5), [lists]);
-  const popularLists = useMemo(
-    () => [...lists].sort((a, b) => (b.study_count ?? 0) - (a.study_count ?? 0)).slice(0, 8),
-    [lists]
-  );
+
+  const isExamCategory = useCallback((item) => {
+    const slug = normalizeCategorySlug(item.category);
+    return slug === "exam" || slug === "academic";
+  }, []);
+
+  const popularLists = useMemo(() => {
+    const pool = mode === "exam" ? lists.filter(isExamCategory) : lists;
+    return [...pool].sort((a, b) => (b.study_count ?? 0) - (a.study_count ?? 0)).slice(0, 8);
+  }, [lists, mode, isExamCategory]);
+
   const newestLists = useMemo(
     () =>
       [...lists]
@@ -251,6 +291,39 @@ export default function HomeScreen({ navigation }) {
   // Az dolu kategoriler (1 liste) "Karışık" sliderına havuzlanır — sayfa boş hissetmesin.
   const DENSE_MIN = 2;
   const discoverySections = useMemo(() => {
+    if (mode === "exam") {
+      const examAll = [...(categoryMap.exam || []), ...(categoryMap.academic || [])];
+      const EXAM_GROUPS = [
+        { key: "toefl", label: "TOEFL", pattern: /toefl/i, accent: "#E8A425" },
+        { key: "ielts", label: "IELTS", pattern: /ielts/i, accent: "#4A90D8" },
+        { key: "yds", label: "YDS", pattern: /yds/i, accent: "#34B878" },
+        { key: "yokdil", label: "YÖKDİL", pattern: /y[öo]kdil/i, accent: "#8B5CF6" },
+        { key: "yks", label: "YKS-DİL", pattern: /yks/i, accent: "#F06050" },
+      ];
+      const used = new Set();
+      const sections = [];
+      for (const g of EXAM_GROUPS) {
+        const matched = examAll.filter((l) => g.pattern.test(l.title));
+        matched.forEach((l) => used.add(l.id));
+        if (matched.length > 0) {
+          sections.push({
+            slug: `exam-${g.key}`,
+            meta: { name: g.label, subtitle: `${g.label} kelime listeleri`, accent: g.accent },
+            items: matched.slice(0, 8),
+          });
+        }
+      }
+      const rest = examAll.filter((l) => !used.has(l.id));
+      if (rest.length > 0) {
+        sections.push({
+          slug: "exam-general",
+          meta: { name: "Genel Sınav", subtitle: "Akademik ve genel sınav kelimeleri", accent: "#C8A96E" },
+          items: rest.slice(0, 8),
+        });
+      }
+      return sections;
+    }
+
     const candidates = DISCOVERY_CATEGORIES.filter((slug) => slug !== "exam");
     const dense = [];
     const sparseItems = [];
@@ -263,7 +336,6 @@ export default function HomeScreen({ navigation }) {
           items: arr.slice(0, 8),
         });
       } else if (arr.length > 0) {
-        // 1 listesi olan kategorilerin tek listesi "Karışık" havuzuna gider
         sparseItems.push(...arr);
       }
     }
@@ -281,7 +353,7 @@ export default function HomeScreen({ navigation }) {
       });
     }
     return sections;
-  }, [categoryMap]);
+  }, [categoryMap, mode]);
 
   // ModeSegment'in "Sınav" badge'i için: exam kategorisindeki liste sayısı
   const examCount = useMemo(() => (categoryMap.exam || []).length, [categoryMap]);
@@ -306,6 +378,7 @@ export default function HomeScreen({ navigation }) {
     <View style={s.root}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={{ padding: spacing.xl, paddingBottom: 160 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -354,50 +427,52 @@ export default function HomeScreen({ navigation }) {
               greetingSub={greetingPair.subline}
               userName={userName}
               streak={streak}
-              dailyDone={dailyDone}
-              dailyTotal={DAILY_TOTAL}
               onStreakPress={() => navigation.navigate("Streak")}
-              onGoalPress={startChallenge}
             />
           )}
 
-          {/* ModeSegment (Normal/Sınav toggle) askıya alındı — kullanıcı tasarım eleştirisinde
-              "üst kalabalık" dedi. Exam modu Profile menüsünden veya ayrı bir entry'den
-              erişilebilir hale getirilebilir. ModeSegment component kalıyor. */}
+          <View onLayout={(e) => { modeSegmentY.current = e.nativeEvent.layout.y; }}>
+            <ModeSegment mode={mode} onChange={(m) => {
+              setMode(m);
+              setTimeout(() => {
+                const target = m === "exam" ? listsAreaY.current : modeSegmentY.current;
+                scrollRef.current?.scrollTo({ y: target, animated: true });
+              }, 80);
+            }} examCount={examCount} />
+          </View>
 
-          {/* Challenge hero card */}
-          <PressableScale onPress={startChallenge} style={s.challengeCard}>
+          {/* Challenge hero card — coral/red both modes */}
+          <PressableScale onPress={startChallenge} style={[s.challengeCard, { borderColor: c.coral + "66", shadowColor: c.coral }]}>
             <LinearGradient
-              colors={[c.bgElevated, c.bgSurface]}
+              colors={isDark ? [c.coral + "35", c.bgElevated] : [c.coral, "#B82E22"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
-            <View style={s.challengeGlow} />
-            {/* Top edge inner highlight - premium depth */}
+            <View style={[s.challengeGlow, { backgroundColor: isDark ? "rgba(255,107,92,0.10)" : "rgba(255,255,255,0.15)" }]} />
             <LinearGradient
-              colors={["rgba(255,255,255,0.08)", "transparent"]}
+              colors={isDark ? ["rgba(255,107,92,0.08)", "transparent"] : ["rgba(255,255,255,0.18)", "transparent"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 0.4 }}
               style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
               pointerEvents="none"
             />
 
-            <View style={s.chipAccent}>
-              <Icon d={ICONS.bolt} size={13} fill={c.accent} stroke={c.accent} sw={1.5} />
-              <Text style={s.chipAccentTxt}>BUGÜN</Text>
+            <View style={[s.chipAccent, { backgroundColor: isDark ? "rgba(255,107,92,0.18)" : "rgba(255,255,255,0.22)", borderColor: isDark ? "rgba(255,107,92,0.30)" : "rgba(255,255,255,0.35)" }]}>
+              <Icon d={ICONS.bolt} size={13} fill={isDark ? c.coral : "#fff"} stroke={isDark ? c.coral : "#fff"} sw={1.5} />
+              <Text style={[s.chipAccentTxt, { color: isDark ? c.coral : "#fff" }]}>BUGÜN</Text>
             </View>
-            <Text style={s.challengeTitle}>
+            <Text style={[s.challengeTitle, { color: isDark ? c.textPrimary : "#fff" }]}>
               {recentLists.length > 0 ? "Hemen Çalış" : "5 Yeni Kelime Öğren"}
             </Text>
-            <Text style={s.challengeSub} numberOfLines={1}>
+            <Text style={[s.challengeSub, { color: isDark ? c.textSec : "rgba(255,255,255,0.85)" }]} numberOfLines={1}>
               {recentLists.length > 0
-                ? `📚 ${recentLists[0]?.title || "Devam Et"}`
+                ? recentLists[0]?.title || "Devam Et"
                 : "~2 dakika · kolay tempo"}
             </Text>
-            <View style={s.primaryBtn}>
-              <Text style={s.primaryBtnTxt}>Başla</Text>
-              <Icon d={ICONS.arrow} size={17} stroke={c.textOnAccent} sw={2.2} />
+            <View style={[s.primaryBtn, { backgroundColor: isDark ? c.coral + "22" : "#fff" }]}>
+              <Text style={[s.primaryBtnTxt, { color: c.coral }]}>Başla</Text>
+              <Icon d={ICONS.arrow} size={17} stroke={c.coral} sw={2.2} />
             </View>
           </PressableScale>
 
@@ -414,52 +489,48 @@ export default function HomeScreen({ navigation }) {
             />
           )}
 
-          {/* Daily goal chip — mint glow (canlı renk, accent overload'dan kaçınma) */}
+          {/* Daily goal — vivid gradient card → taps to DailyPath */}
           {!loading && isAuthenticated() && (
-            <View
-              style={{
-                marginTop: 14,
-                marginBottom: spacing.xs,
-                padding: spacing.lg,
-                borderRadius: radius.md,
-                backgroundColor: daily.completed ? c.success + "26" : (c.mint || c.cobalt) + "26",
-                borderWidth: 1.5,
-                borderColor: daily.completed ? c.success + "AA" : (c.mint || c.cobalt) + "AA",
-                shadowColor: daily.completed ? c.success : (c.mint || c.cobalt),
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
+            <PressableScale
+              onPress={() => navigation.navigate("DailyPath")}
+              style={[s.dailyCard, {
+                borderColor: daily.completed ? c.success + "66" : c.cobalt + "66",
+                shadowColor: daily.completed ? c.success : c.cobalt,
+                shadowOpacity: 0.25,
+                shadowRadius: 10,
                 shadowOffset: { width: 0, height: 2 },
-                elevation: 2,
-              }}
+              }]}
             >
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                <Text style={{ fontSize: fontSize.lg }}>{daily.completed ? "✅" : "🎯"}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: c.textPrimary, fontFamily: c.fontBodyBold, fontSize: fontSize.md }}>
-                    {daily.completed ? "Bugünün hedefi tamam!" : "Bugünün hedefi"}
+              <LinearGradient
+                colors={daily.completed ? [c.success, c.success + "CC"] : [c.cobalt, c.cobalt + "CC"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={s.dailyInner}>
+                <View style={s.dailyRow}>
+                  <View style={s.dailyIconCircle}>
+                    <Icon d={daily.completed ? ICONS.check : ICONS.target} size={18}
+                      stroke={c.textOnAccent} sw={2} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.dailyTitle}>
+                      {daily.completed ? "Hedef tamam!" : "Bugünün hedefi"}
+                    </Text>
+                    <Text style={s.dailySub}>
+                      {daily.done} / {daily.goal} kelime
+                    </Text>
+                  </View>
+                  <Text style={s.dailyPct}>
+                    %{daily.pct}
                   </Text>
-                  <Text style={{ color: c.textSec, fontFamily: c.fontBody, fontSize: fontSize.sm, marginTop: 2 }}>
-                    {daily.done} / {daily.goal} kelime
-                  </Text>
+                  <Icon d={ICONS.arrow} size={16} stroke={c.textOnAccent + "B3"} sw={2} />
                 </View>
-                <Text style={{
-                  color: daily.completed ? c.success : (c.mint || c.cobalt),
-                  fontFamily: c.fontBodyBold,
-                  fontSize: fontSize.lg,
-                }}>
-                  %{daily.pct}
-                </Text>
+                <View style={s.dailyTrack}>
+                  <View style={[s.dailyFill, { width: `${daily.pct}%` }]} />
+                </View>
               </View>
-              {/* Progress bar */}
-              <View style={{ height: 4, marginTop: 10, backgroundColor: c.bgSurface, borderRadius: radius.full, overflow: "hidden" }}>
-                <View style={{
-                  width: `${daily.pct}%`,
-                  height: "100%",
-                  backgroundColor: daily.completed ? c.success : (c.mint || c.cobalt),
-                  borderRadius: radius.full,
-                }} />
-              </View>
-            </View>
+            </PressableScale>
           )}
 
           {/* Continue Et */}
@@ -526,7 +597,6 @@ export default function HomeScreen({ navigation }) {
                     count={item.word_count ?? 0}
                     pct={Math.min(100, (item.study_count ?? 0) * 5)}
                     level={item.level}
-                    imageUrl={item.image_url}
                     c={c}
                     onPress={() => openList(item)}
                   />
@@ -568,25 +638,31 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
 
+          {/* Sınav modunda scroll buraya gelir */}
+          <View onLayout={(e) => { listsAreaY.current = e.nativeEvent.layout.y; }} />
+
           {/* Trending — en çok beğenilen listeler (sosyal proof) */}
-          {trendingLists.length > 0 && (
-            <DiscoveryRow
-              title="🔥 Trend"
-              subtitle="Topluluğun en çok beğendiği listeler"
-              items={trendingLists}
-              accent={c.rose || c.coral}
-              loading={false}
-              onItemPress={openList}
-              onSeeAll={() =>
-                openExplorer("popular", { title: "Trend", accent: c.rose || c.coral })
-              }
-            />
-          )}
+          {(() => {
+            const items = mode === "exam" ? trendingLists.filter(isExamCategory) : trendingLists;
+            return items.length > 0 ? (
+              <DiscoveryRow
+                title={mode === "exam" ? "🔥 Sınav Trendi" : "🔥 Trend"}
+                subtitle={mode === "exam" ? "En beğenilen sınav listeleri" : "Topluluğun en çok beğendiği listeler"}
+                items={items}
+                accent={c.rose || c.coral}
+                loading={false}
+                onItemPress={openList}
+                onSeeAll={() =>
+                  openExplorer("popular", { title: "Trend", accent: c.rose || c.coral })
+                }
+              />
+            ) : null;
+          })()}
 
           {/* Popüler listeler */}
           <DiscoveryRow
-            title="Popüler"
-            subtitle="En çok çalışılan listeler"
+            title={mode === "exam" ? "Sınav Popüler" : "Popüler"}
+            subtitle={mode === "exam" ? "En çok çalışılan sınav listeleri" : "En çok çalışılan listeler"}
             items={popularLists}
             accent={c.warning}
             loading={loading}
@@ -808,6 +884,58 @@ function makeStyles(c) {
       letterSpacing: 0.5,
       textTransform: "uppercase",
       marginBottom: spacing.md,
+    },
+    dailyCard: {
+      marginTop: 14,
+      marginBottom: spacing.xs,
+      borderRadius: radius.md,
+      overflow: "hidden",
+      borderWidth: 1.5,
+      elevation: 3,
+    },
+    dailyInner: {
+      padding: spacing.lg,
+    },
+    dailyRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    dailyIconCircle: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: "rgba(255,255,255,0.2)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    dailyTitle: {
+      color: c.textOnAccent,
+      fontFamily: c.fontBodyBold,
+      fontSize: fontSize.md,
+    },
+    dailySub: {
+      color: c.textOnAccent + "CC",
+      fontFamily: c.fontBody,
+      fontSize: fontSize.sm,
+      marginTop: 2,
+    },
+    dailyPct: {
+      color: c.textOnAccent,
+      fontFamily: c.fontNum,
+      fontSize: fontSize.xl,
+    },
+    dailyTrack: {
+      height: 4,
+      marginTop: 10,
+      backgroundColor: "rgba(255,255,255,0.25)",
+      borderRadius: radius.full,
+      overflow: "hidden",
+    },
+    dailyFill: {
+      height: "100%",
+      backgroundColor: c.textOnAccent,
+      borderRadius: radius.full,
     },
   });
 }

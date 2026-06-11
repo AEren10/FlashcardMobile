@@ -16,7 +16,7 @@ export default function CategoryCover({
   imageUrl,
   height = 72,
   children,
-  showLabel = true,
+  showLabel = false,
 }) {
   const diff = difficulty ? getDifficulty(difficulty) : null;
   const catMeta = CATEGORIES[cat] || CATEGORIES.other;
@@ -60,7 +60,6 @@ export default function CategoryCover({
           style={StyleSheet.absoluteFill}
         />
       )}
-      {!imageUrl && <View style={s.shine} pointerEvents="none" />}
       {showLabel && (
         <View style={s.chipWrap}>
           <View style={[s.chip, { borderColor: chipAccent + "AA", backgroundColor: chipAccent + "33" }]}>
@@ -78,11 +77,11 @@ const s = StyleSheet.create({
   wrap: { width: "100%", overflow: "hidden" },
   shine: {
     position: "absolute",
-    top: 0,
-    right: 0,
-    width: "70%",
-    height: "100%",
-    opacity: 0.25,
+    top: -10,
+    bottom: -10,
+    width: 50,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderRadius: 25,
   },
   chipWrap: {
     position: "absolute",

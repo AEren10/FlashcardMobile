@@ -20,7 +20,6 @@ import {
   Animated,
   Easing,
   Dimensions,
-  Alert,
   Pressable,
   Share,
 } from "react-native";
@@ -34,6 +33,7 @@ import Icon, { ICONS } from "./Icon";
 import PremiumButton from "./PremiumButton";
 import StaggerEnter from "./StaggerEnter";
 import LottieSuccess from "./LottieSuccess";
+import { useToast } from "../../contexts/ToastContext";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
 import PerfectScoreOverlay from "../celebration/PerfectScoreOverlay";
 
@@ -52,6 +52,7 @@ export default function QuizResultScreen({
 }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
+  const toast = useToast();
   const [displayScore, setDisplayScore] = useState(0);
   const [favorited, setFavorited] = useState(false);
   const scoreScale = useRef(new Animated.Value(0)).current;
@@ -62,7 +63,7 @@ export default function QuizResultScreen({
     await Promise.all(
       wrongWords.map((w) => addFavoriteWord(w.id, listId || w.list_id))
     );
-    Alert.alert("Eklendi", `${wrongWords.length} kelime favorilerine eklendi.`);
+    toast?.show?.({ message: `${wrongWords.length} kelime favorilerine eklendi.`, type: "success" });
   };
 
   const handleShare = async () => {

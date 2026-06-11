@@ -15,8 +15,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
-import * as Speech from "expo-speech";
 import { speak as ttsSpeak } from "../../lib/tts";
+import { isFresh, setCache } from "../../lib/dataCache";
 
 import { useTheme } from "../../contexts/ThemeContext";
 import { getFavoriteWords } from "../../supabase/wordFavorites";
@@ -39,8 +39,10 @@ export default function FavoriteWordsScreen({ navigation }) {
     try {
       setError(null);
       const res = await getFavoriteWords();
-      if (res.success) setItems(res.data || []);
-      else setError(res.error || "Favoriler yüklenemedi");
+      if (res.success) {
+        setItems(res.data || []);
+        setCache("fav_words", res.data || []);
+      } else setError(res.error || "Favoriler yüklenemedi");
     } catch (e) {
       setError("Favoriler yüklenemedi — internet bağlantını kontrol et");
     } finally {
@@ -55,8 +57,10 @@ export default function FavoriteWordsScreen({ navigation }) {
   }, [load]);
 
   useFocusEffect(useCallback(() => {
-    setLoading(true);
-    load();
+    if (!isFresh("fav_words", 30000)) {
+      setLoading(true);
+      load();
+    }
   }, [load]));
 
   return (

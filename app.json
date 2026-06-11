@@ -51,7 +51,7 @@
         "RECORD_AUDIO"
       ]
     },
-    "platforms": ["ios", "android"],
+    "platforms": ["ios", "android", "web"],
     "plugins": [
       "expo-apple-authentication",
       [

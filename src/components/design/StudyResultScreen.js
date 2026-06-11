@@ -14,10 +14,8 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as Speech from "expo-speech";
 import { speak as ttsSpeak } from "../../lib/tts";
 import * as Haptics from "expo-haptics";
 import ConfettiCannon from "react-native-confetti-cannon";
@@ -29,6 +27,7 @@ const STAT_ICONS = { clock: ICONS.clock, brain: ICONS.lightbulb, books: ICONS.bo
 import DonutChart from "./DonutChart";
 import StaggerEnter from "./StaggerEnter";
 import LottieSuccess from "./LottieSuccess";
+import { useToast } from "../../contexts/ToastContext";
 import { addFavoriteWord } from "../../supabase/wordFavorites";
 import PerfectScoreOverlay from "../celebration/PerfectScoreOverlay";
 
@@ -46,6 +45,7 @@ export default function StudyResultScreen({
 }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
+  const toast = useToast();
   const [favorited, setFavorited] = useState(false);
   const ratio = total ? correct / total : 0;
   const pct = Math.round(ratio * 100);
@@ -62,7 +62,7 @@ export default function StudyResultScreen({
     await Promise.all(
       wrongWords.map((w) => addFavoriteWord(w.id, w.list_id))
     );
-    Alert.alert("Eklendi", `${wrongWords.length} kelime favorilerine eklendi.`);
+    toast?.show?.({ message: `${wrongWords.length} kelime favorilerine eklendi.`, type: "success" });
   };
 
   return (

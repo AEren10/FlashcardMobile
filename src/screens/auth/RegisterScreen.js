@@ -8,7 +8,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -19,6 +18,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
 import AuthInput from "../../components/auth/AuthInput";
+import Icon, { ICONS } from "../../components/design/Icon";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,6 +30,7 @@ export default function RegisterScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { signUp } = useAuth();
   const s = useMemo(() => makeStyles(c), [c]);
 
@@ -47,9 +48,12 @@ export default function RegisterScreen({ navigation }) {
     return null;
   };
 
+  const clearError = () => error && setError("");
+
   const handleRegister = async () => {
+    setError("");
     const err = validate();
-    if (err) return Alert.alert("Eksik bilgi", err);
+    if (err) return setError(err);
     try {
       setLoading(true);
       const res = await signUp(email.trim().toLowerCase(), password, {
@@ -58,11 +62,9 @@ export default function RegisterScreen({ navigation }) {
         full_name: `${firstName.trim()} ${lastName.trim()}`,
       });
       if (!res.success) {
-        Alert.alert("Kayıt Hatası", res.error || "Kayıt yapılamadı.");
+        setError(res.error || "Kayıt yapılamadı.");
       } else if (res.needsConfirmation) {
-        Alert.alert("E-posta Onayı", res.message || "Lütfen e-postanı onayla.", [
-          { text: "Tamam", onPress: () => navigation.navigate("Login") },
-        ]);
+        navigation.navigate("Login");
       }
     } finally {
       setLoading(false);
@@ -94,7 +96,7 @@ export default function RegisterScreen({ navigation }) {
                 <AuthInput
                   label="AD"
                   value={firstName}
-                  onChangeText={setFirstName}
+                  onChangeText={(v) => { setFirstName(v); clearError(); }}
                   placeholder="Ahmet"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -109,7 +111,7 @@ export default function RegisterScreen({ navigation }) {
                   ref={lastRef}
                   label="SOYAD"
                   value={lastName}
-                  onChangeText={setLastName}
+                  onChangeText={(v) => { setLastName(v); clearError(); }}
                   placeholder="Eren"
                   autoCapitalize="words"
                   autoCorrect={false}
@@ -125,7 +127,7 @@ export default function RegisterScreen({ navigation }) {
               ref={emailRef}
               label="E-POSTA"
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(v) => { setEmail(v); clearError(); }}
               placeholder="sen@ornek.com"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -140,7 +142,7 @@ export default function RegisterScreen({ navigation }) {
               ref={pwRef}
               label="ŞİFRE"
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(v) => { setPassword(v); clearError(); }}
               placeholder="En az 8 karakter"
               secure
               autoCapitalize="none"
@@ -155,7 +157,7 @@ export default function RegisterScreen({ navigation }) {
               ref={pw2Ref}
               label="ŞİFRE TEKRAR"
               value={confirmPassword}
-              onChangeText={setConfirmPassword}
+              onChangeText={(v) => { setConfirmPassword(v); clearError(); }}
               placeholder="••••••••"
               secure
               autoCapitalize="none"
@@ -166,6 +168,13 @@ export default function RegisterScreen({ navigation }) {
               blurOnSubmit
               onSubmitEditing={handleRegister}
             />
+
+            {!!error && (
+              <View style={s.errorBox}>
+                <Icon d={ICONS.x} size={16} stroke={c.error} sw={2} />
+                <Text style={s.errorText}>{error}</Text>
+              </View>
+            )}
 
             <Pressable
               onPress={handleRegister}
@@ -213,6 +222,25 @@ function makeStyles(c) {
       fontFamily: c.fontBody,
       marginTop: spacing.xs,
       marginBottom: spacing.xl,
+    },
+    errorBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: c.error + "14",
+      borderWidth: 1,
+      borderColor: c.error + "44",
+      borderRadius: radius.sm,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      marginBottom: 12,
+    },
+    errorText: {
+      flex: 1,
+      fontSize: fontSize.md,
+      color: c.error,
+      fontFamily: c.fontBodySemi,
+      lineHeight: 18,
     },
     primaryBtn: {
       backgroundColor: c.accent,

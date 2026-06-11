@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getHardWords } from "../../supabase/views";
+import { isFresh, setCache } from "../../lib/dataCache";
 import { SkeletonWordCard } from "../../components/design/Skeleton";
 import Icon, { ICONS } from "../../components/design/Icon";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
@@ -24,7 +25,9 @@ export default function HardWordsScreen({ navigation }) {
     try {
       setError(null);
       const data = await getHardWords();
-      setWords(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setWords(list);
+      setCache("hard_words", list);
     } catch (e) {
       setError("Kelimeler yüklenemedi — internet bağlantını kontrol et");
     } finally {
@@ -39,8 +42,10 @@ export default function HardWordsScreen({ navigation }) {
   }, [load]);
 
   useFocusEffect(useCallback(() => {
-    setLoading(true);
-    load();
+    if (!isFresh("hard_words", 30000)) {
+      setLoading(true);
+      load();
+    }
   }, [load]));
 
   if (loading) {

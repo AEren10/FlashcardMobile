@@ -1,11 +1,11 @@
 /**
  * AuthInput — Login/Register/ForgotPassword ortak input.
  * - forwardRef → field-to-field focus chain
+ * - Pressable wrapper → tap anywhere to focus (keyboard fix)
  * - secure entry için Göster/Gizle toggle
  * - autoComplete + textContentType → iOS/Android autofill
- * - returnKeyType + onSubmitEditing → klavye next/go davranışı
  */
-import React, { forwardRef, useState, useMemo } from "react";
+import React, { forwardRef, useRef, useState, useMemo } from "react";
 import { fontSize, radius, spacing } from "../../themes/tokens";
 import { View, Text, TextInput, Pressable, StyleSheet, Platform } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -34,13 +34,25 @@ const AuthInput = forwardRef(function AuthInput(
   const [show, setShow] = useState(false);
   const s = useMemo(() => makeStyles(c), [c]);
   const hide = secure && !show;
+  const localRef = useRef(null);
+
+  const setRefs = (el) => {
+    localRef.current = el;
+    if (typeof ref === "function") ref(el);
+    else if (ref) ref.current = el;
+  };
+
+  const forceFocus = () => localRef.current?.focus();
 
   return (
     <View style={s.field}>
-      <Text style={s.label}>{label}</Text>
-      <View style={[s.input, s.row, focused && s.inputFocus]}>
+      {label && <Text style={s.label}>{label}</Text>}
+      <Pressable
+        onPress={forceFocus}
+        style={[s.input, s.row, focused && s.inputFocus]}
+      >
         <TextInput
-          ref={ref}
+          ref={setRefs}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
@@ -59,6 +71,7 @@ const AuthInput = forwardRef(function AuthInput(
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           selectionColor={c.accent}
+          editable
           style={[s.inputText, s.flex]}
           accessibilityLabel={accessibilityLabel || label}
         />
@@ -74,27 +87,27 @@ const AuthInput = forwardRef(function AuthInput(
             </Text>
           </Pressable>
         )}
-      </View>
+      </Pressable>
     </View>
   );
 });
 
 function makeStyles(c) {
   return StyleSheet.create({
-    field: { marginBottom: 14 },
+    field: { marginBottom: 16 },
     label: {
       fontSize: fontSize.sm,
-      letterSpacing: 1.4,
+      letterSpacing: 1.2,
       color: c.textMuted,
       fontFamily: c.fontBodyBold,
-      marginBottom: spacing.sm,
+      marginBottom: 6,
     },
     input: {
       backgroundColor: c.bgElevated,
       borderRadius: radius.sm,
-      paddingHorizontal: 14,
-      paddingVertical: spacing.xs,
-      borderWidth: 1,
+      paddingHorizontal: 16,
+      minHeight: 54,
+      borderWidth: 1.5,
       borderColor: c.border,
     },
     row: { flexDirection: "row", alignItems: "center" },
@@ -103,16 +116,17 @@ function makeStyles(c) {
       shadowColor: c.accent,
       shadowOffset: { width: 0, height: 0 },
       shadowOpacity: 0.3,
-      shadowRadius: 8,
+      shadowRadius: 10,
+      elevation: 2,
     },
     inputText: {
       fontSize: fontSize.lg,
       color: c.textPrimary,
       fontFamily: c.fontBody,
-      paddingVertical: Platform.OS === "ios" ? 12 : 10,
+      paddingVertical: Platform.OS === "ios" ? 14 : 12,
     },
     flex: { flex: 1 },
-    eyeBtn: { paddingHorizontal: 6, paddingVertical: spacing.xs, marginLeft: spacing.xs },
+    eyeBtn: { paddingHorizontal: 8, paddingVertical: spacing.sm, marginLeft: spacing.xs },
     eyeTxt: { fontSize: fontSize.sm, letterSpacing: 0.3 },
   });
 }

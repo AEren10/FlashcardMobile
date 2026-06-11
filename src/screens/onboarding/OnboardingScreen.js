@@ -4,20 +4,19 @@
  */
 import { radius, spacing } from "../../themes/tokens";
 import React, { useRef, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  Dimensions,
-  FlatList,
-  Animated,
-} from "react-native";
+import { View, Text, StyleSheet, Pressable, Dimensions, Animated } from "react-native";
+import RAnimated, {
+  useSharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  interpolate,
+  interpolateColor,
+  Extrapolation,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import LottieView from "lottie-react-native";
-import { Alert } from "react-native";
 import { useTheme } from "../../contexts/ThemeContext";
 import AbstractIllustration from "../../components/design/AbstractIllustration";
 import { activateRemindersWithPrompt } from "../../lib/notifications";
@@ -197,6 +196,43 @@ export async function getOnboardingGoalLevel() {
   }
 }
 
+function SlideWrap({ index, scrollX, children }) {
+  const style = useAnimatedStyle(() => {
+    const input = [(index - 1) * width, index * width, (index + 1) * width];
+    return {
+      opacity: interpolate(scrollX.value, input, [0, 1, 0], Extrapolation.CLAMP),
+      transform: [
+        { scale: interpolate(scrollX.value, input, [0.85, 1, 0.85], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+  return <RAnimated.View style={style}>{children}</RAnimated.View>;
+}
+
+function SlideText({ index, scrollX, style, children }) {
+  const animStyle = useAnimatedStyle(() => {
+    const input = [(index - 1) * width, index * width, (index + 1) * width];
+    return {
+      opacity: interpolate(scrollX.value, input, [0, 1, 0], Extrapolation.CLAMP),
+      transform: [
+        { translateY: interpolate(scrollX.value, input, [20, 0, 20], Extrapolation.CLAMP) },
+      ],
+    };
+  });
+  return <RAnimated.Text style={[style, animStyle]}>{children}</RAnimated.Text>;
+}
+
+function Dot({ index, scrollX, bgInactive, bgActive }) {
+  const dotStyle = useAnimatedStyle(() => {
+    const input = [(index - 1) * width, index * width, (index + 1) * width];
+    return {
+      width: interpolate(scrollX.value, input, [6, 26, 6], Extrapolation.CLAMP),
+      backgroundColor: interpolateColor(scrollX.value, input, [bgInactive, bgActive, bgInactive]),
+    };
+  });
+  return <RAnimated.View style={[styles.dot, dotStyle]} />;
+}
+
 export default function OnboardingScreen({ onFinish }) {
   const { c } = useTheme();
   const { user } = useAuth() || {};
@@ -204,7 +240,10 @@ export default function OnboardingScreen({ onFinish }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedLevel, setSelectedLevel] = useState(null);
-  const scrollX = useRef(new Animated.Value(0)).current;
+  const scrollX = useSharedValue(0);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (e) => { scrollX.value = e.contentOffset.x; },
+  });
 
   const persistGoalLevel = async () => {
     try {
@@ -255,57 +294,39 @@ export default function OnboardingScreen({ onFinish }) {
   const isLast = activeIndex === SLIDES.length - 1;
 
   const renderSlide = ({ item, index }) => {
-    const inputRange = [(index - 1) * width, index * width, (index + 1) * width];
-    const opacity = scrollX.interpolate({
-      inputRange,
-      outputRange: [0, 1, 0],
-      extrapolate: "clamp",
-    });
-    const scale = scrollX.interpolate({
-      inputRange,
-      outputRange: [0.85, 1, 0.85],
-      extrapolate: "clamp",
-    });
-    const translateY = scrollX.interpolate({
-      inputRange,
-      outputRange: [20, 0, 20],
-      extrapolate: "clamp",
-    });
-
     const lottieSrc = LOTTIE_SOURCES[item.kind];
 
-    // Goal + Level slide'ları kendi layout'una sahip — title/body kullanmaz
     if (item.kind === "goal") {
       return (
         <View style={[styles.slide, { width, justifyContent: "center" }]}>
-          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+          <SlideWrap index={index} scrollX={scrollX}>
             <GoalSlide c={c} selected={selectedGoal} onSelect={setSelectedGoal} />
-          </Animated.View>
+          </SlideWrap>
         </View>
       );
     }
     if (item.kind === "level") {
       return (
         <View style={[styles.slide, { width, justifyContent: "center" }]}>
-          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+          <SlideWrap index={index} scrollX={scrollX}>
             <LevelSlide c={c} selected={selectedLevel} onSelect={setSelectedLevel} />
-          </Animated.View>
+          </SlideWrap>
         </View>
       );
     }
     if (item.kind === "demo") {
       return (
         <View style={[styles.slide, { width, justifyContent: "center" }]}>
-          <Animated.View style={{ opacity, transform: [{ scale }] }}>
+          <SlideWrap index={index} scrollX={scrollX}>
             <TasteDeck c={c} onComplete={finishWithReminders} />
-          </Animated.View>
+          </SlideWrap>
         </View>
       );
     }
 
     return (
       <View style={[styles.slide, { width }]}>
-        <Animated.View style={{ opacity, transform: [{ scale }] }}>
+        <SlideWrap index={index} scrollX={scrollX}>
           {lottieSrc ? (
             <LottieView
               source={lottieSrc}
@@ -317,23 +338,13 @@ export default function OnboardingScreen({ onFinish }) {
           ) : (
             <AbstractIllustration kind={item.kind} size={220} />
           )}
-        </Animated.View>
-        <Animated.Text
-          style={[
-            styles.title,
-            { color: c.textPrimary, fontFamily: c.fontDisplay, transform: [{ translateY }], opacity },
-          ]}
-        >
+        </SlideWrap>
+        <SlideText index={index} scrollX={scrollX} style={[styles.title, { color: c.textPrimary, fontFamily: c.fontDisplay }]}>
           {item.title}
-        </Animated.Text>
-        <Animated.Text
-          style={[
-            styles.body,
-            { color: c.textSec, fontFamily: c.fontBody, transform: [{ translateY }], opacity },
-          ]}
-        >
+        </SlideText>
+        <SlideText index={index} scrollX={scrollX} style={[styles.body, { color: c.textSec, fontFamily: c.fontBody }]}>
           {item.body}
-        </Animated.Text>
+        </SlideText>
       </View>
     );
   };
@@ -345,24 +356,9 @@ export default function OnboardingScreen({ onFinish }) {
         <View style={styles.topBar}>
           <View style={{ width: 60 }} />
           <View style={styles.dots}>
-            {SLIDES.map((_, i) => {
-              const w = scrollX.interpolate({
-                inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-                outputRange: [6, 26, 6],
-                extrapolate: "clamp",
-              });
-              const bg = scrollX.interpolate({
-                inputRange: [(i - 1) * width, i * width, (i + 1) * width],
-                outputRange: [c.bgSurface, c.accent, c.bgSurface],
-                extrapolate: "clamp",
-              });
-              return (
-                <Animated.View
-                  key={i}
-                  style={[styles.dot, { width: w, backgroundColor: bg }]}
-                />
-              );
-            })}
+            {SLIDES.map((_, i) => (
+              <Dot key={i} index={i} scrollX={scrollX} bgInactive={c.bgSurface} bgActive={c.accent} />
+            ))}
           </View>
           {!isLast ? (
             <Pressable onPress={handleSkip} hitSlop={12} style={styles.skipBtn}>
@@ -375,7 +371,7 @@ export default function OnboardingScreen({ onFinish }) {
           )}
         </View>
 
-        <Animated.FlatList
+        <RAnimated.FlatList
           ref={flatRef}
           data={SLIDES}
           renderItem={renderSlide}
@@ -383,9 +379,7 @@ export default function OnboardingScreen({ onFinish }) {
           horizontal
           pagingEnabled
           showsHorizontalScrollIndicator={false}
-          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
-            useNativeDriver: false,
-          })}
+          onScroll={scrollHandler}
           onMomentumScrollEnd={(e) => {
             const idx = Math.round(e.nativeEvent.contentOffset.x / width);
             setActiveIndex(idx);

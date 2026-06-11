@@ -22,8 +22,8 @@ const TAB_ICONS = {
 
 const LABELS = {
   Home: "Ana Sayfa",
-  Favorites: "Çalış",
-  Study: "Çalış",
+  Favorites: "Öğren",
+  Study: "Öğren",
   MyLists: "Kütüphane",
   Library: "Kütüphane",
   Profile: "Profil",
@@ -63,7 +63,7 @@ export default function TabBar({ state, navigation, descriptors }) {
         style={[
           s.bar,
           {
-            backgroundColor: isDark ? "rgba(14,23,38,0.72)" : "rgba(255,255,255,0.72)",
+            backgroundColor: isDark ? "rgba(19,19,20,0.78)" : "rgba(255,255,255,0.78)",
             borderColor: c.border,
             shadowColor: isDark ? "#000" : "rgba(15,25,37,0.18)",
           },
@@ -240,14 +240,14 @@ function TabButton({ isFocused, label, iconPath, onPress, c }) {
         <Icon
           d={iconPath}
           size={23}
-          stroke={isFocused ? c.accent : c.textMuted}
-          fill={isFocused ? c.accentGlow : "none"}
-          sw={isFocused ? 1.6 : 1.7}
+          stroke={isFocused ? c.accent : c.textSec}
+          fill={isFocused ? c.accentGlow : c.accent + "08"}
+          sw={isFocused ? 1.6 : 1.5}
         />
         <Text
           style={[
             s.label,
-            { color: isFocused ? c.accent : c.textMuted, fontFamily: c.fontBodySemi },
+            { color: isFocused ? c.accent : c.textSec, fontFamily: c.fontBodySemi },
           ]}
         >
           {label}

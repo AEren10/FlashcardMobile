@@ -4,7 +4,7 @@
  */
 import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 
@@ -20,15 +20,21 @@ import {
   getPermissionStatus,
 } from "../../lib/notifications";
 import TimePickerModal from "../../components/design/TimePickerModal";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
+import { useToast } from "../../contexts/ToastContext";
 
 export default function SettingsScreen({ navigation }) {
   const { c, preference } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const { signOut, deleteAccount, isGuestUser } = useAuth();
   const { isPro } = usePremium();
+  const toast = useToast();
   const [permStatus, setPermStatus] = useState(null);
   const [extras, setExtras] = useState([]);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [showRemoveExtra, setShowRemoveExtra] = useState(null);
 
   const refresh = async () => {
     setPermStatus(await getPermissionStatus());
@@ -43,12 +49,9 @@ export default function SettingsScreen({ navigation }) {
     Haptics.selectionAsync();
     const r = await activateRemindersWithPrompt();
     if (!r.success) {
-      Alert.alert(
-        "İzin gerekli",
-        "Bildirimleri açabilmek için cihaz ayarlarından FlashcardMobile'a izin vermen gerek."
-      );
+      toast?.show?.({ message: "Bildirimleri açabilmek için cihaz ayarlarından FlashcardMobile'a izin vermen gerek.", type: "error" });
     } else {
-      Alert.alert("Aktif", "Sabah 09:00 ve akşam 20:00'da hatırlatma alacaksın.");
+      toast?.show?.({ message: "Sabah 09:00 ve akşam 20:00'da hatırlatma alacaksın.", type: "success" });
     }
     refresh();
   };
@@ -56,7 +59,7 @@ export default function SettingsScreen({ navigation }) {
   const handleOpenPicker = () => {
     Haptics.selectionAsync();
     if (extras.length >= 4) {
-      Alert.alert("Limit", "En fazla 4 ek hatırlatıcı eklenebilir. Bir tanesini sil.");
+      toast?.show?.({ message: "En fazla 4 ek hatırlatıcı eklenebilir. Bir tanesini sil.", type: "info" });
       return;
     }
     setPickerOpen(true);
@@ -72,7 +75,7 @@ export default function SettingsScreen({ navigation }) {
         duplicate: "Bu saatte zaten bir hatırlatıcı var.",
         base_clash: "Bu saat sabit hatırlatma ile çakışıyor — başka saat seç.",
       }[r.reason] || "Eklenemedi.";
-      Alert.alert("Hata", msg);
+      toast?.show?.({ message: msg, type: "error" });
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -80,21 +83,7 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const handleRemoveExtra = (index, time) => {
-    Alert.alert(
-      "Hatırlatıcıyı kaldır",
-      `${String(time.hour).padStart(2, "0")}:${String(time.minute).padStart(2, "0")} hatırlatıcısı silinsin mi?`,
-      [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            await removeExtraReminder(index);
-            refresh();
-          },
-        },
-      ]
-    );
+    setShowRemoveExtra({ index, time });
   };
 
   const permDetail = (() => {
@@ -111,28 +100,11 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      "Hesabını sil",
-      "Tüm verilerin kalıcı olarak silinecek. Bu işlem geri alınamaz.",
-      [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            const r = await deleteAccount();
-            if (!r.success) Alert.alert("Hata", r.error);
-          },
-        },
-      ]
-    );
+    setShowDelete(true);
   };
 
   const confirmLogout = () => {
-    Alert.alert("Çıkış yap", "Oturumdan çıkmak istediğine emin misin?", [
-      { text: "Vazgeç", style: "cancel" },
-      { text: "Çıkış", style: "destructive", onPress: signOut },
-    ]);
+    setShowLogout(true);
   };
 
   return (
@@ -278,6 +250,44 @@ export default function SettingsScreen({ navigation }) {
           onConfirm={handlePickerConfirm}
           onClose={() => setPickerOpen(false)}
           title="Ek hatırlatma saati"
+        />
+
+        <ConfirmDialog
+          visible={showLogout}
+          title="Çıkış yap"
+          message="Oturumdan çıkmak istediğine emin misin?"
+          confirmText="Çıkış"
+          destructive
+          onConfirm={() => { setShowLogout(false); signOut(); }}
+          onCancel={() => setShowLogout(false)}
+        />
+
+        <ConfirmDialog
+          visible={showDelete}
+          title="Hesabını sil"
+          message="Tüm verilerin kalıcı olarak silinecek. Bu işlem geri alınamaz."
+          confirmText="Sil"
+          destructive
+          onConfirm={async () => {
+            setShowDelete(false);
+            const r = await deleteAccount();
+            if (!r.success) toast?.show?.({ message: r.error, type: "error" });
+          }}
+          onCancel={() => setShowDelete(false)}
+        />
+
+        <ConfirmDialog
+          visible={!!showRemoveExtra}
+          title="Hatırlatıcıyı kaldır"
+          message={showRemoveExtra ? `${String(showRemoveExtra.time.hour).padStart(2, "0")}:${String(showRemoveExtra.time.minute).padStart(2, "0")} hatırlatıcısı silinsin mi?` : ""}
+          confirmText="Sil"
+          destructive
+          onConfirm={async () => {
+            if (showRemoveExtra) await removeExtraReminder(showRemoveExtra.index);
+            setShowRemoveExtra(null);
+            refresh();
+          }}
+          onCancel={() => setShowRemoveExtra(null)}
         />
       </SafeAreaView>
     </View>

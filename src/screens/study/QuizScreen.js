@@ -18,7 +18,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
-import * as Speech from "expo-speech";
 import { speak as ttsSpeak } from "../../lib/tts";
 
 import { useTheme } from "../../contexts/ThemeContext";
@@ -42,6 +41,7 @@ import {
   resetMistakesStreak,
 } from "../../supabase/mistakesList";
 import { useToast } from "../../contexts/ToastContext";
+import { useAchievements } from "../../contexts/AchievementsContext";
 
 const MISTAKES_MODAL_THRESHOLD = 5;
 const TIME_LIMIT = 10; // saniye
@@ -64,6 +64,7 @@ export default function QuizScreen({ route, navigation }) {
   const { c } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const toast = useToast();
+  const { trigger: triggerAchievement } = useAchievements();
 
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -79,6 +80,8 @@ export default function QuizScreen({ route, navigation }) {
   const [mistakesListId, setMistakesListId] = useState(null);
   const [showMistakesModal, setShowMistakesModal] = useState(false);
   const timerAnim = useRef(new Animated.Value(1)).current;
+  const blankBoxScale = useRef(new Animated.Value(1)).current;
+  const [filledBlank, setFilledBlank] = useState(null);
   const sessionRef = useRef(null);
   const startedAt = useRef(Date.now());
   const title = presetTitle ?? listTitle ?? "Quiz";
@@ -118,13 +121,8 @@ export default function QuizScreen({ route, navigation }) {
     if (mode === "blank") {
       const withExample = finalList.filter((w) => w.example && w.example.trim());
       if (withExample.length < 4) {
-        // Fallback: tüm liste ile classic
         setMode("classic");
-        Alert.alert(
-          "Boşluk Doldurma kullanılamaz",
-          "Bu listedeki kelimelerin yeterli örnek cümlesi yok. Klasik moda geçildi.",
-          [{ text: "Tamam" }]
-        );
+        toast?.show?.({ message: "Yeterli örnek cümle yok, klasik moda geçildi.", type: "info", duration: 3500 });
       } else {
         finalList = withExample;
       }
@@ -214,10 +212,12 @@ export default function QuizScreen({ route, navigation }) {
   const pickingRef = useRef(false);
   const advanceTimerRef = useRef(null);
   const mistakesTimerRef = useRef(null);
+  const fillTimerRef = useRef(null);
   useEffect(() => () => {
     unmountedRef.current = true;
     if (advanceTimerRef.current) clearTimeout(advanceTimerRef.current);
     if (mistakesTimerRef.current) clearTimeout(mistakesTimerRef.current);
+    if (fillTimerRef.current) clearTimeout(fillTimerRef.current);
   }, []);
 
   const pick = async (opt, i) => {
@@ -237,6 +237,18 @@ export default function QuizScreen({ route, navigation }) {
     }
     safeRecordReview(current.id, isCorrect ? GRADE.GOOD : GRADE.AGAIN).catch(() => {});
 
+    // Blank fill: şık uçuşu yarılandığında boşluğa "iniş" yap
+    if (isCorrect && isBlank) {
+      fillTimerRef.current = setTimeout(() => {
+        if (unmountedRef.current) return;
+        setFilledBlank(current.word);
+        Animated.sequence([
+          Animated.timing(blankBoxScale, { toValue: 1.08, duration: 140, useNativeDriver: true }),
+          Animated.spring(blankBoxScale, { toValue: 1, friction: 4, tension: 300, useNativeDriver: true }),
+        ]).start();
+      }, 600);
+    }
+
     // Mistakes streak: doğru ise artır (3 = listeden çık), yanlışsa sıfırla
     if (isCorrect) {
       bumpMistakesStreak(current.id, current.word, current.meaning).catch(() => {});
@@ -244,7 +256,7 @@ export default function QuizScreen({ route, navigation }) {
       resetMistakesStreak(current.id).catch(() => {});
     }
 
-    const wait = isCorrect ? 650 : 1250;
+    const wait = isCorrect ? (isBlank ? 1200 : 650) : 1250;
     advanceTimerRef.current = setTimeout(async () => {
       advanceTimerRef.current = null;
       if (unmountedRef.current) return; // unmount → state update yapma
@@ -270,6 +282,8 @@ export default function QuizScreen({ route, navigation }) {
           accuracy: words.length ? Math.round((finalCorrect / words.length) * 100) : 0,
         });
         maybeRequestReview();
+        triggerAchievement?.("quiz_completed");
+        if (finalCorrect === words.length) triggerAchievement?.("perfect_quiz");
 
         // Yanlışları mistakes listesine push et
         const allWrongIds = isCorrect ? wrongIds : [...wrongIds, current.id];
@@ -295,6 +309,8 @@ export default function QuizScreen({ route, navigation }) {
         }
       } else {
         setPicked(null);
+        setFilledBlank(null);
+        blankBoxScale.setValue(1);
         setIndex((ix) => ix + 1);
       }
       pickingRef.current = false; // Lock'u serbest bırak, sonraki tap kabul edilir
@@ -305,6 +321,8 @@ export default function QuizScreen({ route, navigation }) {
     setIndex(0);
     setCorrect(0);
     setPicked(null);
+    setFilledBlank(null);
+    blankBoxScale.setValue(1);
     setDone(false);
     setMistakesAdded(0);
     setMistakesListId(null);
@@ -463,9 +481,30 @@ export default function QuizScreen({ route, navigation }) {
           </View>
           {isBlank ? (
             <>
-              <View style={s.blankSentenceBox}>
-                <Text style={s.blankSentence}>"{blankedSentence}"</Text>
-              </View>
+              <Animated.View style={[s.blankSentenceBox, {
+                transform: [{ scale: blankBoxScale }],
+                borderColor: filledBlank ? c.success + "66" : c.accent + "55",
+                shadowColor: filledBlank ? c.success : c.accent,
+              }]}>
+                <Text style={s.blankSentence}>
+                  {filledBlank ? (
+                    <>
+                      {"“"}
+                      {blankedSentence.split("_____").map((part, idx, arr) => (
+                        <React.Fragment key={idx}>
+                          {part}
+                          {idx < arr.length - 1 && (
+                            <Text style={{ color: c.success, fontFamily: c.fontBodyBold }}>{filledBlank}</Text>
+                          )}
+                        </React.Fragment>
+                      ))}
+                      {"”"}
+                    </>
+                  ) : (
+                    `“${blankedSentence}”`
+                  )}
+                </Text>
+              </Animated.View>
               <Text style={s.sub}>
                 Boşluğa hangi kelime gelir? · Anlam: <Text style={{ color: c.accent, fontFamily: c.fontBodyBold }}>{current.meaning}</Text>
               </Text>
@@ -488,7 +527,7 @@ export default function QuizScreen({ route, navigation }) {
         <View style={s.grid}>
           {options.map((opt, i) => (
             <OptionButton
-              key={opt + i}
+              key={`${index}-${i}`}
               opt={opt}
               i={i}
               picked={picked}
@@ -496,6 +535,7 @@ export default function QuizScreen({ route, navigation }) {
               onPress={() => pick(opt, i)}
               c={c}
               s={s}
+              isBlankMode={isBlank}
             />
           ))}
         </View>
@@ -504,33 +544,71 @@ export default function QuizScreen({ route, navigation }) {
   );
 }
 
-function OptionButton({ opt, i, picked, correctAnswer, onPress, c, s }) {
+function OptionButton({ opt, i, picked, correctAnswer, onPress, c, s, isBlankMode }) {
   const scale = useRef(new Animated.Value(1)).current;
   const shakeX = useRef(new Animated.Value(0)).current;
+  const flyY = useRef(new Animated.Value(0)).current;
+  const flyOpacity = useRef(new Animated.Value(1)).current;
 
   const isCorrectOpt = opt === correctAnswer;
   const lockedState = picked ? (isCorrectOpt ? "right" : picked.i === i ? "wrong" : "dim") : "idle";
 
   useEffect(() => {
     if (lockedState === "right") {
-      // qz-pop: scale 1→0.97→1.06→1, 420ms cubic-bezier(.2,.8,.2,1)
-      Animated.sequence([
-        Animated.timing(scale, { toValue: 0.97, duration: 110, useNativeDriver: true }),
-        Animated.timing(scale, {
-          toValue: 1.06,
-          duration: 180,
-          easing: Easing.bezier(0.2, 0.8, 0.2, 1),
-          useNativeDriver: true,
-        }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 180,
-          easing: Easing.bezier(0.2, 0.8, 0.2, 1),
-          useNativeDriver: true,
-        }),
-      ]).start();
+      if (isBlankMode) {
+        // Pop → hold (yeşil state görünsün) → boşluğa doğru uç
+        Animated.sequence([
+          Animated.timing(scale, { toValue: 0.93, duration: 100, useNativeDriver: true }),
+          Animated.timing(scale, {
+            toValue: 1.12,
+            duration: 200,
+            easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            useNativeDriver: true,
+          }),
+          Animated.delay(180),
+          Animated.parallel([
+            Animated.timing(flyY, {
+              toValue: -320,
+              duration: 520,
+              easing: Easing.bezier(0.32, 0, 0.15, 1),
+              useNativeDriver: true,
+            }),
+            Animated.timing(scale, {
+              toValue: 0.5,
+              duration: 520,
+              easing: Easing.bezier(0.32, 0, 0.15, 1),
+              useNativeDriver: true,
+            }),
+            Animated.sequence([
+              Animated.delay(340),
+              Animated.timing(flyOpacity, {
+                toValue: 0,
+                duration: 180,
+                easing: Easing.out(Easing.cubic),
+                useNativeDriver: true,
+              }),
+            ]),
+          ]),
+        ]).start();
+      } else {
+        // Classic mode: pop
+        Animated.sequence([
+          Animated.timing(scale, { toValue: 0.97, duration: 110, useNativeDriver: true }),
+          Animated.timing(scale, {
+            toValue: 1.06,
+            duration: 180,
+            easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: 180,
+            easing: Easing.bezier(0.2, 0.8, 0.2, 1),
+            useNativeDriver: true,
+          }),
+        ]).start();
+      }
     } else if (lockedState === "wrong") {
-      // fm-shake
       Animated.sequence([
         Animated.timing(shakeX, { toValue: -8, duration: 60, useNativeDriver: true }),
         Animated.timing(shakeX, { toValue: 8, duration: 60, useNativeDriver: true }),
@@ -539,7 +617,7 @@ function OptionButton({ opt, i, picked, correctAnswer, onPress, c, s }) {
         Animated.timing(shakeX, { toValue: 0, duration: 60, useNativeDriver: true }),
       ]).start();
     }
-  }, [lockedState, scale, shakeX]);
+  }, [lockedState, scale, shakeX, flyY, flyOpacity, isBlankMode]);
 
   const bg =
     lockedState === "right"
@@ -555,10 +633,9 @@ function OptionButton({ opt, i, picked, correctAnswer, onPress, c, s }) {
       : lockedState === "wrong"
         ? c.error
         : c.border;
-  const opacity = lockedState === "dim" ? 0.25 : 1;
+  const dimOpacity = lockedState === "dim" ? 0.25 : 1;
   const shadowOpacity = lockedState === "right" ? 0.5 : 0;
 
-  // dim olduğunda hafif aşağı kay (fade-down)
   const dimY = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (lockedState === "dim") {
@@ -577,8 +654,8 @@ function OptionButton({ opt, i, picked, correctAnswer, onPress, c, s }) {
       style={[
         s.optWrap,
         {
-          transform: [{ scale }, { translateX: shakeX }, { translateY: dimY }],
-          opacity,
+          transform: [{ scale }, { translateX: shakeX }, { translateY: dimY }, { translateY: flyY }],
+          opacity: lockedState === "right" && isBlankMode ? flyOpacity : dimOpacity,
         },
       ]}
     >
@@ -639,8 +716,8 @@ function makeStyles(c) {
     },
 
     blankSentenceBox: {
-      paddingHorizontal: 26,
-      paddingVertical: 22,
+      paddingHorizontal: 28,
+      paddingVertical: 24,
       marginTop: spacing.md,
       borderRadius: radius.md,
       backgroundColor: c.bgElevated,
@@ -654,8 +731,8 @@ function makeStyles(c) {
     },
     blankSentence: {
       fontFamily: c.fontDisplay,
-      fontSize: 24,
-      lineHeight: 32,
+      fontSize: 28,
+      lineHeight: 38,
       color: c.textPrimary,
       textAlign: "center",
       fontStyle: "italic",
@@ -663,8 +740,8 @@ function makeStyles(c) {
     prompt: {
       alignItems: "center",
       paddingHorizontal: spacing.xxl,
-      paddingTop: 50,
-      paddingBottom: 30,
+      paddingTop: 36,
+      paddingBottom: 24,
     },
     chipAccent: {
       paddingHorizontal: spacing.md,
@@ -683,14 +760,14 @@ function makeStyles(c) {
     wordRow: { marginTop: 22 },
     word: {
       fontFamily: c.fontDisplay,
-      fontSize: fontSize["4xl"],
-      lineHeight: 56,
+      fontSize: 56,
+      lineHeight: 66,
       color: c.textPrimary,
       textAlign: "center",
     },
     sub: {
       fontFamily: c.fontBody,
-      fontSize: fontSize.md,
+      fontSize: fontSize.lg,
       color: c.textSec,
       marginTop: spacing.sm,
     },

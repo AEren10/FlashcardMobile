@@ -8,7 +8,6 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -29,16 +28,18 @@ export default function ForgotPasswordScreen({ navigation }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
   const { resetPassword } = useAuth();
   const s = useMemo(() => makeStyles(c), [c]);
 
   const handleReset = async () => {
-    if (!EMAIL_RE.test(email)) return Alert.alert("Geçersiz e-posta", "Lütfen doğru bir e-posta gir.");
+    setError("");
+    if (!EMAIL_RE.test(email)) return setError("Lütfen doğru bir e-posta gir.");
     try {
       setLoading(true);
       const res = await resetPassword(email.trim().toLowerCase());
       if (res.success) setSent(true);
-      else Alert.alert("Hata", res.error || "Şifre sıfırlama maili gönderilemedi.");
+      else setError(res.error || "Şifre sıfırlama maili gönderilemedi.");
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ export default function ForgotPasswordScreen({ navigation }) {
                 <AuthInput
                   label="E-POSTA"
                   value={email}
-                  onChangeText={setEmail}
+                  onChangeText={(v) => { setEmail(v); setError(""); }}
                   placeholder="sen@ornek.com"
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -106,6 +107,13 @@ export default function ForgotPasswordScreen({ navigation }) {
                   blurOnSubmit
                   onSubmitEditing={handleReset}
                 />
+
+                {!!error && (
+                  <View style={s.errorBox}>
+                    <Icon d={ICONS.x} size={16} stroke={c.error} sw={2} />
+                    <Text style={s.errorText}>{error}</Text>
+                  </View>
+                )}
 
                 <Pressable
                   onPress={handleReset}
@@ -157,6 +165,25 @@ function makeStyles(c) {
       marginBottom: 28,
       paddingHorizontal: spacing.md,
       lineHeight: 20,
+    },
+    errorBox: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      backgroundColor: c.error + "14",
+      borderWidth: 1,
+      borderColor: c.error + "44",
+      borderRadius: radius.sm,
+      paddingHorizontal: 14,
+      paddingVertical: 11,
+      marginBottom: 12,
+    },
+    errorText: {
+      flex: 1,
+      fontSize: fontSize.md,
+      color: c.error,
+      fontFamily: c.fontBodySemi,
+      lineHeight: 18,
     },
     primaryBtn: {
       backgroundColor: c.accent,

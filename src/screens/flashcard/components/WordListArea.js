@@ -15,7 +15,7 @@ import Icon, { ICONS } from "../../../components/design/Icon";
 import SpeakToast from "../../../components/design/SpeakToast";
 import { speak } from "../../../lib/tts";
 
-function WordRow({ item, index, c, tint, onSpeak, isSpeaking }) {
+function WordRow({ item, index, c, isDark, tint, onSpeak, isSpeaking }) {
   const [flipped, setFlipped] = useState(false);
   const flipAnim = useRef(new Animated.Value(0)).current;
   const [backH, setBackH] = useState(0);
@@ -75,15 +75,17 @@ function WordRow({ item, index, c, tint, onSpeak, isSpeaking }) {
             style={[
               s.row,
               {
-                backgroundColor: c.bgElevated,
-                borderColor: c.border,
+                backgroundColor: isDark ? c.bgElevated : tint + "08",
+                borderColor: isDark ? tint + "18" : tint + "22",
+                borderLeftWidth: 3,
+                borderLeftColor: tint + (isDark ? "55" : "66"),
                 transform: [{ perspective: 800 }, { rotateX: frontRotate }],
                 opacity: frontOpacity,
                 backfaceVisibility: "hidden",
               },
             ]}
           >
-            <Text style={[s.indexTxt, { color: c.textMuted, fontFamily: c.fontNum }]}>
+            <Text style={[s.indexTxt, { color: tint + "88", fontFamily: c.fontNum }]}>
               {index + 1}
             </Text>
 
@@ -108,8 +110,8 @@ function WordRow({ item, index, c, tint, onSpeak, isSpeaking }) {
               style={({ pressed }) => [
                 s.speakerBtn,
                 {
-                  backgroundColor: isSpeaking ? tint + "28" : c.bgSurface,
-                  borderColor: isSpeaking ? tint + "55" : c.border,
+                  backgroundColor: isSpeaking ? tint + "28" : (isDark ? tint + "10" : tint + "0C"),
+                  borderColor: isSpeaking ? tint + "55" : tint + "22",
                   transform: [{ scale: pressed ? 0.88 : 1 }],
                 },
               ]}
@@ -127,7 +129,7 @@ function WordRow({ item, index, c, tint, onSpeak, isSpeaking }) {
               s.backFace,
               {
                 backgroundColor: tint + "0C",
-                borderColor: tint + "30",
+                borderColor: isDark ? tint + "18" : tint + "30",
                 transform: [{ perspective: 800 }, { rotateX: backRotate }],
                 opacity: backOpacity,
                 backfaceVisibility: "hidden",
@@ -168,7 +170,7 @@ function WordRow({ item, index, c, tint, onSpeak, isSpeaking }) {
 }
 
 export default function WordListArea({ words, tint, listId }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const accentColor = tint?.color || c.accent;
   const [speakingWord, setSpeakingWord] = useState(null);
 
@@ -185,12 +187,13 @@ export default function WordListArea({ words, tint, listId }) {
         item={item}
         index={index}
         c={c}
+        isDark={isDark}
         tint={accentColor}
         onSpeak={handleSpeak}
         isSpeaking={speakingWord === item.word}
       />
     ),
-    [c, accentColor, handleSpeak, speakingWord]
+    [c, isDark, accentColor, handleSpeak, speakingWord]
   );
 
   const keyExtractor = useCallback((item) => String(item.id), []);

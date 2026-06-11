@@ -7,7 +7,7 @@
  * Quiz:     2 kolon grid, liste cover'ları
  */
 import { radius, spacing } from "../../themes/tokens";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -31,6 +31,8 @@ import EmptyState from "../../components/EmptyState";
 import { Skeleton, SkeletonListItem } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import StaggerEnter from "../../components/design/StaggerEnter";
+import CardShimmer from "../../components/design/CardShimmer";
+import { getCached, setCache, isFresh } from "../../lib/dataCache";
 
 const TABS = ["Bugün", "Zor Kelimeler", "Quiz"];
 
@@ -53,6 +55,12 @@ export default function FavoritesScreen() {
 
   const s = useMemo(() => makeStyles(c), [c]);
 
+  useEffect(() => {
+    getCached("favDue").then((v) => v != null && setDueCount(v));
+    getCached("favCats").then((v) => v && setCategories(v));
+    getCached("favHard").then((v) => Array.isArray(v) && setHardWords(v));
+  }, []);
+
   const load = useCallback(async () => {
     try {
       const [due, hard, cats] = await Promise.all([
@@ -63,6 +71,10 @@ export default function FavoritesScreen() {
       setDueCount(due || 0);
       setHardWords(Array.isArray(hard) ? hard : []);
       setCategories(cats);
+      setCache("favDue", due || 0);
+      setCache("favCats", cats);
+      setCache("favHard", Array.isArray(hard) ? hard : []);
+      setCache("favorites_main", true);
     } finally {
       setOtherLoading(false);
       setRefreshing(false);
@@ -76,7 +88,9 @@ export default function FavoritesScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      load();
+      if (!isFresh("favorites_main", 30000)) {
+        load();
+      }
     }, [load])
   );
 
@@ -88,7 +102,7 @@ export default function FavoritesScreen() {
           showsVerticalScrollIndicator={false}
           refreshControl={<FlameRefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
-          <Text style={s.title}>Çalış</Text>
+          <Text style={s.title}>Öğren</Text>
 
           <Segmented
             items={TABS}
@@ -169,31 +183,25 @@ function BugunTab({ dueCount, categories, c, s, navigation, lists }) {
 
   return (
     <>
-      {/* Hero card */}
+      {/* Hero card — vivid gradient */}
       <Pressable onPress={startMixed} style={s.heroCard}>
         <LinearGradient
-          colors={[c.bgElevated, c.bgSurface]}
+          colors={[c.accent, c.accent + "CC"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
-        <View style={s.heroGlow} />
-        <LinearGradient
-          colors={["rgba(255,255,255,0.08)", "transparent"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 0.4 }}
-          style={[StyleSheet.absoluteFill, { borderRadius: radius.lg }]}
-          pointerEvents="none"
-        />
-        <Text style={s.heroNum}>{totalReady}</Text>
-        <Text style={s.heroLabel}>
-          {totalReady === 0
-            ? "henüz kelime yok — listeden başla"
-            : "kelime bugün hazır"}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 8 }}>
+          <Text style={s.heroNum}>{totalReady}</Text>
+          <Text style={s.heroLabel}>
+            {totalReady === 0
+              ? "henüz kelime yok\nlisteden başla"
+              : "kelime\nbugün hazır"}
+          </Text>
+        </View>
         <View style={s.heroCTA}>
           <Text style={s.heroCTATxt}>Çalışmaya Başla</Text>
-          <Icon d={ICONS.arrow} size={18} stroke={c.textOnAccent} sw={2.2} />
+          <Icon d={ICONS.arrow} size={18} stroke="#FFFFFF" sw={2.2} />
         </View>
       </Pressable>
 
@@ -349,7 +357,7 @@ function QuizTab({ lists, c, s, navigation }) {
           style={s.quizCard}
           onPress={() => navigation.navigate("Quiz", { listId: l.id, listTitle: l.title })}
         >
-          <CategoryCover difficulty={l.level} imageUrl={l.image_url} height={70} />
+          <CategoryCover difficulty={l.level} height={70} showLabel={false} />
           <View style={{ padding: 14 }}>
             <Text style={s.quizTitle} numberOfLines={1}>
               {l.title}
@@ -364,7 +372,7 @@ function QuizTab({ lists, c, s, navigation }) {
 
 function DueRow({ label, sub, count, color, icon, c, s, onPress }) {
   const disabled = count === 0;
-  return (
+  const inner = (
     <Pressable
       onPress={onPress}
       disabled={disabled}
@@ -372,17 +380,29 @@ function DueRow({ label, sub, count, color, icon, c, s, onPress }) {
         s.dueRow,
         {
           opacity: disabled ? 0.55 : 1,
-          transform: [{ scale: pressed ? 0.98 : 1 }],
-          borderColor: pressed ? color + "55" : c.border,
+          transform: [{ scale: pressed ? 0.97 : 1 }],
+          borderColor: color + "66",
+          backgroundColor: color + "1A",
+          shadowColor: color,
+          shadowOpacity: disabled ? 0 : 0.22,
+          shadowRadius: 10,
+          shadowOffset: { width: 0, height: 3 },
+          elevation: disabled ? 0 : 3,
         },
       ]}
     >
-      <View style={[s.dueIcon, { backgroundColor: color + "22" }]}>
-        <Icon d={icon} size={20} stroke={color} />
+      <LinearGradient
+        colors={[color + "14", color + "08", "transparent"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={[s.dueIcon, { backgroundColor: color + "30", borderWidth: 1, borderColor: color + "44" }]}>
+        <Icon d={icon} size={20} stroke={color} fill={color + "22"} sw={2} />
       </View>
       <View style={{ flex: 1 }}>
-        <Text style={s.dueLabel}>{label}</Text>
-        {!!sub && <Text style={[s.dueSub, { color: c.textMuted }]}>{sub}</Text>}
+        <Text style={[s.dueLabel, { color: disabled ? c.textMuted : c.textPrimary }]}>{label}</Text>
+        {!!sub && <Text style={[s.dueSub, { color: c.textSec }]}>{sub}</Text>}
       </View>
       <Text style={[s.dueCount, { color: disabled ? c.textMuted : color }]}>
         {count}
@@ -391,6 +411,12 @@ function DueRow({ label, sub, count, color, icon, c, s, onPress }) {
         <Icon d={ICONS.arrow} size={16} stroke={color} sw={2} />
       )}
     </Pressable>
+  );
+  if (disabled) return inner;
+  return (
+    <CardShimmer color={color} pulse shimmer style={{ borderRadius: 14, overflow: "hidden" }}>
+      {inner}
+    </CardShimmer>
   );
 }
 
@@ -406,36 +432,26 @@ function makeStyles(c) {
 
     heroCard: {
       borderRadius: radius.lg,
-      padding: spacing.xxl,
-      borderWidth: 1,
-      borderColor: c.borderAccent,
+      padding: 22,
       overflow: "hidden",
       shadowColor: c.accent,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.4,
-      shadowRadius: 40,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 14,
       elevation: 6,
     },
-    heroGlow: {
-      position: "absolute",
-      top: -50,
-      right: -40,
-      width: 170,
-      height: 170,
-      borderRadius: 85,
-      backgroundColor: c.accentGlow,
-    },
     heroNum: {
-      fontFamily: c.fontNum,
-      fontSize: 46,
-      lineHeight: 50,
-      color: c.accent,
+      fontFamily: c.fontBodyBold,
+      fontSize: 56,
+      lineHeight: 60,
+      color: "#FFFFFF",
     },
     heroLabel: {
-      fontFamily: c.fontBodyBold,
-      fontSize: 20,
-      color: c.textPrimary,
-      marginTop: 2,
+      fontFamily: c.fontBodySemi,
+      fontSize: 17,
+      color: "rgba(255,255,255,0.85)",
+      lineHeight: 22,
+      marginBottom: 6,
     },
     heroCTA: {
       marginTop: 18,
@@ -443,11 +459,11 @@ function makeStyles(c) {
       alignItems: "center",
       justifyContent: "center",
       gap: spacing.sm,
-      backgroundColor: c.accent,
+      backgroundColor: "rgba(255,255,255,0.2)",
       borderRadius: radius.sm,
       paddingVertical: 14,
     },
-    heroCTATxt: { fontFamily: c.fontBodyBold, fontSize: 15, color: c.textOnAccent },
+    heroCTATxt: { fontFamily: c.fontBodyBold, fontSize: 15, color: "#FFFFFF" },
 
     sectionTitle: {
       fontFamily: c.fontBodyBold,

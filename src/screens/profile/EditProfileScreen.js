@@ -11,7 +11,6 @@ import {
   TextInput,
   StyleSheet,
   Image,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -59,7 +58,7 @@ export default function EditProfileScreen({ navigation }) {
   const pickAvatar = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Alert.alert("İzin gerekli", "Fotoğraf seçmek için izin ver.");
+      toast?.show?.({ message: "Fotoğraf seçmek için izin ver.", type: "error" });
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -85,7 +84,7 @@ export default function EditProfileScreen({ navigation }) {
   const save = () => {
     const trimmedName = displayName.trim();
     if (!trimmedName) {
-      Alert.alert("İsim gerekli", "Lütfen bir görünen isim gir.");
+      toast?.show?.({ message: "Lütfen bir görünen isim gir.", type: "error" });
       return;
     }
 

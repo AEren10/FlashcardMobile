@@ -14,22 +14,35 @@
  */
 import * as Speech from "expo-speech";
 import { Audio } from "expo-av";
+import { Platform } from "react-native";
 
-/**
- * Hot reload audio mode'u sıfırlar ama modül değişkeni kalır → sessizlik.
- * Çözüm: her speak() öncesi DAIMA setAudioModeAsync çağır (idempotent, ~1ms).
- */
+const AUDIO_MODE = {
+  playsInSilentModeIOS: true,
+  allowsRecordingIOS: false,
+  staysActiveInBackground: false,
+  shouldDuckAndroid: true,
+};
+
 async function ensureAudioMode() {
   try {
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
-      interruptionModeAndroid: 1, // DUCK_OTHERS
-    });
+    await Audio.setAudioModeAsync(AUDIO_MODE);
   } catch (err) {
     console.warn("[tts] audio mode init failed", err?.message);
   }
+}
+
+let _warmedUp = false;
+export async function warmUp() {
+  if (_warmedUp) return;
+  _warmedUp = true;
+  try {
+    await ensureAudioMode();
+    if (Platform.OS === "ios") {
+      Speech.speak(" ", { volume: 0, rate: 4, language: "en-US" });
+      await new Promise((r) => setTimeout(r, 100));
+      await Speech.stop();
+    }
+  } catch {}
 }
 
 /**

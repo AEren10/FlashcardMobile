@@ -29,19 +29,10 @@ export default function BookmarkButton({ wordId, listId, size = 38 }) {
     wordId ? selectIsWordFavorite(s, wordId) : false
   );
   const scale = useRef(new Animated.Value(1)).current;
-  const fillProgress = useRef(new Animated.Value(isFavorite ? 1 : 0)).current;
 
   // Uçan ghost — favorile eklenince hareket eder
   const ghostAnim = useRef(new Animated.Value(0)).current;
   const [ghostKey, setGhostKey] = useState(0);
-
-  useEffect(() => {
-    Animated.timing(fillProgress, {
-      toValue: isFavorite ? 1 : 0,
-      duration: 220,
-      useNativeDriver: false,
-    }).start();
-  }, [isFavorite, fillProgress]);
 
   if (!wordId) return null;
 

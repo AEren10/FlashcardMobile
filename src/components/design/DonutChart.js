@@ -1,13 +1,16 @@
-/**
- * DonutChart — SVG ile animasyonlu donut.
- * Center: yüzde + label.
- */
-import React, { useEffect, useRef } from "react";
-import { Animated, View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, G } from "react-native-svg";
+import RAnimated, {
+  useSharedValue,
+  useAnimatedProps,
+  withTiming,
+  useAnimatedReaction,
+  runOnJS,
+} from "react-native-reanimated";
 import { useTheme } from "../../contexts/ThemeContext";
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const AnimatedCircle = RAnimated.createAnimatedComponent(Circle);
 
 export default function DonutChart({
   percent = 0,
@@ -18,7 +21,7 @@ export default function DonutChart({
   label = "doğru",
 }) {
   const { c } = useTheme();
-  const progress = useRef(new Animated.Value(0)).current;
+  const progress = useSharedValue(0);
   const fillColor = color || c.accent;
   const trk = trackColor || c.bgSurface;
 
@@ -26,19 +29,19 @@ export default function DonutChart({
   const circumference = 2 * Math.PI * radius;
 
   useEffect(() => {
-    Animated.timing(progress, {
-      toValue: percent / 100,
-      duration: 1400,
-      useNativeDriver: false,
-    }).start();
-  }, [percent, progress]);
+    progress.value = withTiming(percent / 100, { duration: 1400 });
+  }, [percent]);
 
-  const strokeDashoffset = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [circumference, 0],
-  });
+  const circleProps = useAnimatedProps(() => ({
+    strokeDashoffset: circumference * (1 - progress.value),
+  }));
 
-  const displayPct = useAnimatedValue(progress, percent);
+  const [displayPct, setDisplayPct] = useState(0);
+  useAnimatedReaction(
+    () => Math.round(progress.value * percent),
+    (val) => runOnJS(setDisplayPct)(val),
+    [percent]
+  );
 
   return (
     <View style={[s.wrap, { width: size, height: size }]}>
@@ -61,7 +64,7 @@ export default function DonutChart({
             fill="none"
             strokeLinecap="round"
             strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
+            animatedProps={circleProps}
           />
         </G>
       </Svg>
@@ -73,18 +76,6 @@ export default function DonutChart({
       </View>
     </View>
   );
-}
-
-// Animated value'yu Text'e çevirmek için hook
-function useAnimatedValue(animated, target) {
-  const [val, setVal] = React.useState(0);
-  useEffect(() => {
-    const id = animated.addListener(({ value }) => {
-      setVal(Math.round(value * target));
-    });
-    return () => animated.removeListener(id);
-  }, [animated, target]);
-  return val;
 }
 
 const s = StyleSheet.create({

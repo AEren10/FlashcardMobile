@@ -3,7 +3,7 @@
  * Kategoriye göre gruplanmış, tier rengiyle renklendirilmiş.
  */
 import { radius, spacing } from "../../themes/tokens";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,11 +17,20 @@ import {
 } from "../../lib/achievements";
 import Icon, { ICONS } from "../../components/design/Icon";
 import StaggerEnter from "../../components/design/StaggerEnter";
+import { getStudyStats } from "../../supabase/progress";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function AchievementsScreen({ navigation }) {
   const { c } = useTheme();
   const { unlocked } = useAchievements();
+  const { isAuthenticated } = useAuth();
   const s = useMemo(() => makeStyles(c), [c]);
+  const [stats, setStats] = useState({});
+
+  useEffect(() => {
+    if (!isAuthenticated()) return;
+    getStudyStats().then((r) => r && setStats(r)).catch(() => {});
+  }, [isAuthenticated]);
 
   const grouped = useMemo(() => groupByCategory(ACHIEVEMENTS), []);
   const totalCount = ACHIEVEMENTS.length;
@@ -108,15 +117,21 @@ export default function AchievementsScreen({ navigation }) {
                           s.card,
                           {
                             width: "100%",
-                            backgroundColor: c.bgElevated,
-                            borderColor: isUnlocked ? tier.color : c.border,
-                            opacity: isUnlocked ? 1 : 0.55,
+                            backgroundColor: isUnlocked ? c.bgElevated : c.bgSurface,
+                            borderColor: isUnlocked ? tier.color + "88" : c.border,
+                            borderWidth: isUnlocked ? 1.5 : 1,
+                            opacity: isUnlocked ? 1 : 0.45,
+                            shadowColor: isUnlocked ? tier.color : "transparent",
+                            shadowOpacity: isUnlocked ? 0.3 : 0,
+                            shadowOffset: { width: 0, height: 4 },
+                            shadowRadius: 10,
+                            elevation: isUnlocked ? 4 : 0,
                           },
                         ]}
                       >
                         {isUnlocked && (
                           <LinearGradient
-                            colors={[tier.color + "22", "transparent"]}
+                            colors={[tier.color + "33", tier.color + "0A"]}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
                             style={StyleSheet.absoluteFill}
@@ -126,13 +141,13 @@ export default function AchievementsScreen({ navigation }) {
                           style={[
                             s.iconBox,
                             {
-                              backgroundColor: isUnlocked ? tier.color + "22" : c.bgSurface,
-                              borderColor: isUnlocked ? tier.color + "55" : c.border,
+                              backgroundColor: isUnlocked ? tier.color + "33" : c.bgSurface,
+                              borderColor: isUnlocked ? tier.color + "77" : c.border,
                             },
                           ]}
                         >
                           {isUnlocked ? (
-                            <Icon d={ach.icon} size={22} stroke={tier.color} fill={tier.color + "33"} sw={1.6} />
+                            <Icon d={ach.icon} size={22} stroke={tier.color} fill={tier.color + "44"} sw={1.8} />
                           ) : (
                             <Icon d={ICONS.lock} size={18} stroke={c.textMuted} sw={1.6} />
                           )}
@@ -155,8 +170,26 @@ export default function AchievementsScreen({ navigation }) {
                         >
                           {ach.description}
                         </Text>
-                        <View style={[s.tierBadge, { backgroundColor: tier.color + "1A", borderColor: tier.color + "44" }]}>
-                          <Text style={[s.tierBadgeTxt, { color: tier.color, fontFamily: c.fontBodyBold }]}>
+                        {!isUnlocked && ach.type === "threshold" && ach.value && (
+                          <View style={s.progressWrap}>
+                            <View style={[s.progressTrackSmall, { backgroundColor: c.bgSurface }]}>
+                              <View
+                                style={[
+                                  s.progressFillSmall,
+                                  {
+                                    width: `${Math.min(100, Math.round(((stats?.[ach.field] ?? 0) / ach.value) * 100))}%`,
+                                    backgroundColor: tier.color,
+                                  },
+                                ]}
+                              />
+                            </View>
+                            <Text style={[s.progressTxt, { color: c.textMuted, fontFamily: c.fontNum }]}>
+                              {stats?.[ach.field] ?? 0}/{ach.value}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={[s.tierBadge, { backgroundColor: isUnlocked ? tier.color + "2A" : tier.color + "0D", borderColor: isUnlocked ? tier.color + "66" : tier.color + "22" }]}>
+                          <Text style={[s.tierBadgeTxt, { color: isUnlocked ? tier.color : c.textMuted, fontFamily: c.fontBodyBold }]}>
                             {tier.label}
                           </Text>
                         </View>
@@ -271,6 +304,23 @@ function makeStyles(c) {
       lineHeight: 14,
       marginTop: 3,
       minHeight: 28,
+    },
+    progressWrap: {
+      gap: 4,
+      marginTop: 6,
+    },
+    progressTrackSmall: {
+      height: 4,
+      borderRadius: radius.full,
+      overflow: "hidden",
+    },
+    progressFillSmall: {
+      height: "100%",
+      borderRadius: radius.full,
+    },
+    progressTxt: {
+      fontSize: 9,
+      textAlign: "right",
     },
     tierBadge: {
       alignSelf: "flex-start",

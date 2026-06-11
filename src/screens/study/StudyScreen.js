@@ -39,7 +39,7 @@ const { width: SCREEN_W } = Dimensions.get("window");
 
 export default function StudyScreen({ route, navigation }) {
   const { listId, listTitle, presetWords, presetTitle, presetMode } = route.params ?? {};
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const s = useMemo(() => makeStyles(c), [c]);
   const title = presetTitle ?? listTitle ?? "Çalış";
 
@@ -215,8 +215,8 @@ export default function StudyScreen({ route, navigation }) {
 
         <View style={s.stageWrap}>
           <View style={s.stage}>
-            <View style={[s.peekCard, { transform: [{ scale: 0.93 }, { translateY: -16 }], opacity: 0.25, backgroundColor: c.bgElevated, borderColor: c.border }]} />
-            <View style={[s.peekCard, { transform: [{ scale: 0.965 }, { translateY: -8 }], opacity: 0.45, backgroundColor: c.bgElevated, borderColor: c.border }]} />
+            <View style={[s.peekCard, { transform: [{ scale: 0.93 }, { translateY: -16 }], opacity: 0.25, backgroundColor: c.bgElevated, borderColor: isDark ? "transparent" : c.border }]} />
+            <View style={[s.peekCard, { transform: [{ scale: 0.965 }, { translateY: -8 }], opacity: 0.45, backgroundColor: c.bgElevated, borderColor: isDark ? "transparent" : c.border }]} />
 
             <RNAnimated.View
               {...swipe.panHandlers}

@@ -11,9 +11,9 @@ const SIZE = 200;
 
 export default function AbstractIllustration({ kind = "network", size = 200 }) {
   const { isDark } = useTheme();
-  const lime = isDark ? "#B4FF4F" : "#4A8E1F";
-  const blue = isDark ? "#5B7FFF" : "#3B5BDB";
-  const dim = isDark ? "rgba(180,255,79,0.10)" : "rgba(74,142,31,0.08)";
+  const lime = isDark ? "#B4FF4F" : "#3ECF2B";
+  const blue = isDark ? "#5B7FFF" : "#4A6AFF";
+  const dim = isDark ? "rgba(180,255,79,0.10)" : "rgba(62,207,43,0.12)";
 
   // fm-blob 6s ease-in-out infinite — breathe loop
   const breathe = useRef(new Animated.Value(0)).current;
@@ -91,8 +91,8 @@ function NetworkArt({ lime, blue }) {
           x2={nodes[b][0]}
           y2={nodes[b][1]}
           stroke={lime}
-          strokeWidth="1.5"
-          strokeOpacity="0.35"
+          strokeWidth="2"
+          strokeOpacity="0.5"
         />
       ))}
       {nodes.map(([x, y], i) => (
@@ -100,9 +100,9 @@ function NetworkArt({ lime, blue }) {
           key={i}
           cx={x}
           cy={y}
-          r={i === 5 ? 11 : 7}
+          r={i === 5 ? 14 : 9}
           fill={i === 5 ? lime : i % 2 ? blue : lime}
-          opacity={i === 5 ? 1 : 0.85}
+          opacity={i === 5 ? 1 : 0.9}
         />
       ))}
     </G>

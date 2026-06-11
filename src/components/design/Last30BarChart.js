@@ -7,12 +7,13 @@ import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import RAnimated, { useSharedValue, useAnimatedStyle, withTiming, withDelay, Easing as REasing } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
 
-const BAR_WIDTH = 14;
-const BAR_GAP = 6;
-const CHART_HEIGHT = 130;
+const BAR_WIDTH = 16;
+const BAR_GAP = 5;
+const CHART_HEIGHT = 150;
 
 export default function Last30BarChart({ days = [] }) {
   const { c } = useTheme();
@@ -79,20 +80,21 @@ export default function Last30BarChart({ days = [] }) {
 }
 
 function Bar({ sessions, maxSessions, index, isToday, isSelected, onPress, c }) {
-  const heightAnim = useRef(new Animated.Value(0)).current;
+  const heightVal = useSharedValue(0);
   const pulse = useRef(new Animated.Value(1)).current;
   const ratio = Math.min(1, sessions / maxSessions);
   const targetHeight = Math.max(4, ratio * (CHART_HEIGHT - 16));
 
   useEffect(() => {
-    Animated.timing(heightAnim, {
-      toValue: targetHeight,
-      duration: 800,
-      delay: index * 20,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
-  }, [targetHeight, index, heightAnim]);
+    heightVal.value = withDelay(
+      index * 20,
+      withTiming(targetHeight, { duration: 800, easing: REasing.out(REasing.cubic) })
+    );
+  }, [targetHeight, index]);
+
+  const barHeightStyle = useAnimatedStyle(() => ({
+    height: heightVal.value,
+  }));
 
   useEffect(() => {
     if (!isToday) return;
@@ -120,12 +122,14 @@ function Bar({ sessions, maxSessions, index, isToday, isSelected, onPress, c }) 
     sessions === 0
       ? [c.bgSurface, c.bgSurface]
       : isToday
-        ? [c.warning, c.accent]
+        ? [c.coral || c.warning, c.accent]
         : ratio > 0.7
-          ? [c.accent, "#8FE03A"]
+          ? [c.accent, c.cobalt]
           : ratio > 0.3
-            ? [c.cobalt, "#4F70E0"]
-            : [c.bgSurface, c.bgCardHover];
+            ? [c.cobalt, c.lavender || c.cobalt]
+            : [c.textMuted + "44", c.textMuted + "22"];
+
+  const hasData = sessions > 0;
 
   return (
     <Animated.View
@@ -144,15 +148,18 @@ function Bar({ sessions, maxSessions, index, isToday, isSelected, onPress, c }) 
           justifyContent: "flex-end",
         }}
       >
-        <Animated.View
-          style={{
+        <RAnimated.View
+          style={[barHeightStyle, {
             width: BAR_WIDTH,
-            height: heightAnim,
-            borderRadius: 4,
+            borderRadius: 5,
             overflow: "hidden",
             borderWidth: isSelected ? 1.5 : 0,
             borderColor: c.accent,
-          }}
+            shadowColor: hasData && !isToday ? colors[0] : "transparent",
+            shadowOpacity: 0.25,
+            shadowOffset: { width: 0, height: 2 },
+            shadowRadius: 4,
+          }]}
         >
           <LinearGradient
             colors={colors}
@@ -160,9 +167,9 @@ function Bar({ sessions, maxSessions, index, isToday, isSelected, onPress, c }) 
             end={{ x: 0, y: 0 }}
             style={StyleSheet.absoluteFill}
           />
-        </Animated.View>
+        </RAnimated.View>
       </Pressable>
-      {isToday && <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: c.accent, marginTop: spacing.xs }} />}
+      {isToday && <View style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: c.accent, marginTop: spacing.xs }} />}
     </Animated.View>
   );
 }
@@ -184,8 +191,9 @@ function makeStyles(c) {
     },
     title: {
       fontFamily: c.fontBodyBold,
-      fontSize: 15,
+      fontSize: 16,
       color: c.textPrimary,
+      letterSpacing: 0.2,
     },
     selectedTxt: {
       fontFamily: c.fontBody,

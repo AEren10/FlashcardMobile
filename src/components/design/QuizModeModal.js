@@ -108,62 +108,6 @@ export default function QuizModeModal({ visible, onPick, onClose, blankReadyCoun
             </View>
           </Pressable>
 
-          {/* Boşluk Doldurma — cümleden eksik kelime tahmin
-              Yeterince örnek cümle yoksa disabled — kullanıcıya neden olduğunu söyle */}
-          {(() => {
-            const enough = blankReadyCount === null || blankReadyCount >= 4;
-            return (
-              <Pressable
-                onPress={() => {
-                  if (!enough) {
-                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-                    return;
-                  }
-                  pick(false, "blank");
-                }}
-                style={({ pressed }) => [
-                  s.mode,
-                  {
-                    marginTop: 10,
-                    borderColor: enough ? c.cobalt + "55" : c.border,
-                    backgroundColor: c.bgSurface,
-                    opacity: enough ? 1 : 0.6,
-                    transform: [{ scale: pressed && enough ? 0.97 : 1 }],
-                  },
-                ]}
-              >
-                <View style={s.modeRow}>
-                  <Text style={s.modeEmoji}>🧠</Text>
-                  <View style={{ flex: 1 }}>
-                    <Text style={[s.modeTitle, { color: c.textPrimary, fontFamily: c.fontBodyBold }]}>
-                      Boşluk Doldurma
-                    </Text>
-                    <Text style={[s.modeDesc, { color: c.textSec, fontFamily: c.fontBody }]}>
-                      {enough
-                        ? "Cümledeki boşluğu tamamla"
-                        : `Bu liste için yetersiz cümle (${blankReadyCount}/4)`}
-                    </Text>
-                  </View>
-                  <View
-                    style={[
-                      s.badge,
-                      { backgroundColor: enough ? c.cobalt + "22" : c.warningDim },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        s.badgeTxt,
-                        { color: enough ? c.cobalt : c.warning, fontFamily: c.fontBodyBold },
-                      ]}
-                    >
-                      {enough ? "Yeni" : "Cümle yok"}
-                    </Text>
-                  </View>
-                </View>
-              </Pressable>
-            );
-          })()}
-
           <Pressable onPress={onClose} style={s.cancel} hitSlop={8}>
             <Text style={[s.cancelTxt, { color: c.textMuted, fontFamily: c.fontBodySemi }]}>
               Vazgeç

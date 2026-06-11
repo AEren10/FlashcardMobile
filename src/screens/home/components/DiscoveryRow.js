@@ -23,7 +23,7 @@ export default function DiscoveryRow({
   loading = false,
   skeletonCount = 4,
 }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   if (!loading && !items.length) return null;
   const tint = accent || c.cobalt;
 
@@ -47,21 +47,10 @@ export default function DiscoveryRow({
               onSeeAll();
             }}
             hitSlop={10}
-            style={({ pressed }) => [
-              s.seeAll,
-              {
-                borderColor: tint + "88",
-                backgroundColor: tint + "1F",
-                shadowColor: tint,
-                shadowOpacity: 0.15,
-                shadowRadius: 8,
-                shadowOffset: { width: 0, height: 0 },
-              },
-              pressed && { opacity: 0.6 },
-            ]}
+            style={({ pressed }) => [pressed && { opacity: 0.6 }]}
           >
             <Text style={[s.seeAllTxt, { color: tint, fontFamily: c.fontBodySemi }]}>
-              Tümü →
+              Tümü
             </Text>
           </Pressable>
         )}
@@ -76,11 +65,11 @@ export default function DiscoveryRow({
       >
         {loading
           ? Array.from({ length: skeletonCount }).map((_, i) => (
-              <SkelCard key={`sk-${i}`} c={c} />
+              <SkelCard key={`sk-${i}`} c={c} isDark={isDark} />
             ))
           : items.map((item, i) => (
               <StaggerEnter key={String(item.id)} index={i} delay={70}>
-                <MiniCard item={item} c={c} onPress={() => onItemPress(item)} />
+                <MiniCard item={item} c={c} isDark={isDark} onPress={() => onItemPress(item)} />
               </StaggerEnter>
             ))}
       </ScrollView>
@@ -88,9 +77,9 @@ export default function DiscoveryRow({
   );
 }
 
-const SkelCard = memo(function SkelCard({ c }) {
+const SkelCard = memo(function SkelCard({ c, isDark }) {
   return (
-    <View style={[s.card, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
+    <View style={[s.card, { backgroundColor: isDark ? "transparent" : c.bgElevated, borderColor: isDark ? "transparent" : c.border }]}>
       <Skeleton width="100%" height={100} radius={0} />
       <View style={{ padding: spacing.md, gap: spacing.sm }}>
         <Skeleton width="75%" height={12} radius={6} />
@@ -100,22 +89,18 @@ const SkelCard = memo(function SkelCard({ c }) {
   );
 });
 
-const MiniCard = memo(function MiniCard({ item, c, onPress }) {
+const MiniCard = memo(function MiniCard({ item, c, isDark, onPress }) {
   return (
     <PressableScale
       onPress={() => {
         Haptics.selectionAsync();
         onPress();
       }}
-      // Bg ve border kaldırıldı — Devam Et card'larıyla tutarlı, beyaz container göze batmasın
-      // CategoryCover + text yeterli (image kart hissi zaten verir)
-      style={s.card}
+      style={[s.card, { backgroundColor: isDark ? "transparent" : c.bgElevated, borderWidth: isDark ? 0 : 1, borderColor: isDark ? "transparent" : c.border, borderRadius: radius.md, overflow: "hidden" }]}
       scaleDown={0.96}
     >
-      <View style={{ borderRadius: 13, overflow: "hidden" }}>
-        <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={100} />
-      </View>
-      <View style={{ paddingTop: 10, paddingHorizontal: 2 }}>
+      <CategoryCover difficulty={item.level} cat={item.category} height={100} showLabel={false} />
+      <View style={{ padding: 10 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
           <Text
             numberOfLines={1}
@@ -145,15 +130,9 @@ const s = StyleSheet.create({
   },
   title: { fontSize: fontSize.xl, lineHeight: 24, letterSpacing: 0.1 },
   sub: { fontSize: fontSize.sm, marginTop: 3, lineHeight: 16 },
-  seeAll: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 6,
-    borderRadius: radius.full,
-    borderWidth: 1,
-  },
   seeAllTxt: {
-    fontSize: fontSize.sm,
-    letterSpacing: 0.3,
+    fontSize: fontSize.md,
+    letterSpacing: 0.2,
   },
   card: {
     width: 192,

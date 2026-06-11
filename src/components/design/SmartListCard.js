@@ -107,11 +107,16 @@ export default function SmartListCard({
       onPressIn={onPressIn}
       onPressOut={onPressOut}
       style={[s.wrap, {
-        borderColor: fillColor + "55",
+        borderColor: fillColor + "77",
+        shadowColor: fillColor,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+        elevation: 3,
       }]}
     >
       <LinearGradient
-        colors={[fillColor + "33", fillColor + "0F"]}
+        colors={[fillColor + "55", fillColor + "22"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={StyleSheet.absoluteFill}
@@ -121,11 +126,11 @@ export default function SmartListCard({
         pointerEvents="none"
         style={[
           s.shimmer,
-          { backgroundColor: fillColor + "22", transform: [{ translateX }, { rotate: "20deg" }] },
+          { backgroundColor: fillColor + "44", transform: [{ translateX }, { rotate: "20deg" }] },
         ]}
       />
 
-      <View style={[s.iconBox, { backgroundColor: fillColor + "22", borderColor: fillColor + "44" }]}>
+      <View style={[s.iconBox, { backgroundColor: fillColor + "33", borderColor: fillColor + "66" }]}>
         {iconPath ? (
           <Icon d={iconPath} size={20} stroke={fillColor} sw={1.8} />
         ) : (
@@ -138,7 +143,7 @@ export default function SmartListCard({
           <Text style={[s.title, { color: c.textPrimary, fontFamily: c.fontBodyBold }]} numberOfLines={1}>
             {title}
           </Text>
-          <View style={[s.aiBadge, { backgroundColor: fillColor + "22", borderColor: fillColor + "55" }]}>
+          <View style={[s.aiBadge, { backgroundColor: fillColor + "33", borderColor: fillColor + "66" }]}>
             <Text style={{ fontSize: fontSize.xs, color: fillColor, fontFamily: c.fontBodyBold, letterSpacing: 0.5 }}>
               AKILLI
             </Text>
@@ -174,7 +179,7 @@ const s = StyleSheet.create({
     position: "absolute",
     top: -40,
     bottom: -40,
-    width: 80,
+    width: 100,
   },
   iconBox: {
     width: 52,

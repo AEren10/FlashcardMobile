@@ -79,10 +79,10 @@ export const CATEGORIES = [
 ];
 
 export const TIER_COLORS = {
-  bronze:    { color: "#C17B5A", label: "Bronz" },
-  silver:    { color: "#A8B0B5", label: "Gümüş" },
-  gold:      { color: "#D4AE5E", label: "Altın" },
-  legendary: { color: "#92ABC0", label: "Efsane" },
+  bronze:    { color: "#E08850", label: "Bronz" },
+  silver:    { color: "#6CB4D9", label: "Gümüş" },
+  gold:      { color: "#F0B429", label: "Altın" },
+  legendary: { color: "#A855F7", label: "Efsane" },
 };
 
 /**

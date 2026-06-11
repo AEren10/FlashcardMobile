@@ -3,7 +3,7 @@
  * Persist edilen son-görülen eşiği AsyncStorage'da tutar.
  * Daha önce görülen rozet tekrar gösterilmez.
  */
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { STREAK_BADGES, WORDS_BADGES } from "../lib/badges";
 
@@ -26,10 +26,11 @@ export default function useBadgeWatcher({ streakDays, totalWords, enabled = true
     })();
   }, []);
 
+  const candidatesRef = useRef([]);
+
   useEffect(() => {
     if (!enabled || seenBadges == null) return;
 
-    // Find the highest unlocked badge that hasn't been seen.
     const candidates = [];
     for (const b of STREAK_BADGES) {
       if (streakDays >= b.threshold) {
@@ -44,14 +45,15 @@ export default function useBadgeWatcher({ streakDays, totalWords, enabled = true
       }
     }
 
+    candidatesRef.current = candidates;
+
     if (candidates.length > 0) {
       const top = candidates[candidates.length - 1];
       setNewBadge({
-        emoji: top.emoji,
         icon: top.icon,
         color: top.color,
         label: top.label,
-        description: top.description || `${top.threshold}+ eşiği aşıldı, harikasın!`,
+        description: `${top.threshold}+ eşiği aşıldı, harikasın!`,
         _seenKey: top._seenKey,
       });
     }
@@ -59,7 +61,8 @@ export default function useBadgeWatcher({ streakDays, totalWords, enabled = true
 
   const dismiss = useCallback(async () => {
     if (!newBadge) return;
-    const next = [...(seenBadges || []), newBadge._seenKey];
+    const allKeys = candidatesRef.current.map((c) => c._seenKey);
+    const next = [...(seenBadges || []), ...allKeys];
     setSeenBadges(next);
     setNewBadge(null);
     try {

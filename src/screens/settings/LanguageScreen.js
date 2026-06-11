@@ -4,12 +4,13 @@
  */
 import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Pressable, StyleSheet, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "../../contexts/ToastContext";
 import Icon, { ICONS } from "../../components/design/Icon";
 
 const STORAGE_KEY = "@fc:lang";
@@ -21,6 +22,7 @@ const LANGS = [
 
 export default function LanguageScreen({ navigation }) {
   const { c } = useTheme();
+  const toast = useToast();
   const s = useMemo(() => makeStyles(c), [c]);
   const [selected, setSelected] = useState("tr");
 
@@ -35,10 +37,7 @@ export default function LanguageScreen({ navigation }) {
     setSelected(code);
     await AsyncStorage.setItem(STORAGE_KEY, code);
     if (code === "en") {
-      Alert.alert(
-        "Yakında",
-        "İngilizce desteği yakında gelecek. Tercihin kaydedildi."
-      );
+      toast?.show?.({ message: "İngilizce desteği yakında gelecek. Tercihin kaydedildi.", type: "info" });
     }
   };
 

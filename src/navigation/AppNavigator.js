@@ -90,7 +90,6 @@ import AchievementModal from "../components/design/AchievementModal";
 
 // Import Screens
 import HomeScreen from "../screens/home/HomeScreen";
-import ExamHomeScreen from "../screens/home/ExamHomeScreen";
 import MyListsScreen from "../screens/mylists/MyListsScreen";
 import CreateListScreen from "../screens/mylists/CreateListScreen";
 import FavoritesScreen from "../screens/favorites/FavoritesScreen";
@@ -134,7 +133,7 @@ import AchievementsScreen from "../screens/achievements/AchievementsScreen";
 import OnboardingScreen, { hasSeenOnboarding } from "../screens/onboarding/OnboardingScreen";
 
 // Theme
-import { T } from "../themes/tokens";
+import { useTheme } from "../contexts/ThemeContext";
 import TabBar from "../components/design/TabBar";
 
 // Navigation Stacks
@@ -148,17 +147,18 @@ const ProfileStack = createNativeStackNavigator();
 
 // Loading Screen Component
 function LoadingScreen() {
+  const { c } = useTheme();
   return (
     <View
       style={{
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: T.bg,
+        backgroundColor: c.bgBase,
       }}
     >
-      <ActivityIndicator size="large" color={T.lime} />
-      <Text style={{ marginTop: 16, fontSize: 16, color: T.textSec, fontFamily: T.fontBody }}>
+      <ActivityIndicator size="large" color={c.accent} />
+      <Text style={{ marginTop: 16, fontSize: 16, color: c.textSec, fontFamily: c.fontBody }}>
         Yükleniyor...
       </Text>
     </View>
@@ -195,17 +195,6 @@ function HomeStackNavigator() {
           // Replace sonrası önceki ekran detach edilmesin → cross-fade gerçek olur
           detachPreviousScreen: false,
           // Blur'da donmasın — geri dönüşte instant göründüğü için
-          freezeOnBlur: false,
-        }}
-      />
-      <HomeStack.Screen
-        name="ExamHome"
-        component={ExamHomeScreen}
-        options={{
-          animation: "fade",
-          animationDuration: 260,
-          animationTypeForReplace: "pop",
-          detachPreviousScreen: false,
           freezeOnBlur: false,
         }}
       />
@@ -258,6 +247,11 @@ function HomeStackNavigator() {
         name="ListExplorer"
         component={ListExplorerScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <HomeStack.Screen
+        name="CreateList"
+        component={CreateListScreen}
+        options={{ presentation: "card", animation: "slide_from_bottom" }}
       />
     </HomeStack.Navigator>
   );
@@ -319,6 +313,11 @@ function FavoritesStackNavigator() {
         name="Quiz"
         component={QuizScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <FavoritesStack.Screen
+        name="CreateList"
+        component={CreateListScreen}
+        options={{ presentation: "card", animation: "slide_from_bottom" }}
       />
     </FavoritesStack.Navigator>
   );
@@ -415,6 +414,11 @@ function ProfileStackNavigator() {
         name="TermsOfService"
         component={TermsOfServiceScreen}
         options={{ presentation: "card", animation: "slide_from_right" }}
+      />
+      <ProfileStack.Screen
+        name="CreateList"
+        component={CreateListScreen}
+        options={{ presentation: "card", animation: "slide_from_bottom" }}
       />
     </ProfileStack.Navigator>
   );

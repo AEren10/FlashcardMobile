@@ -241,7 +241,6 @@ export default function PublicProfileScreen({ route }) {
                   <View style={styles.coverWrap}>
                     <CategoryCover
                       difficulty={l.level}
-                      imageUrl={l.image_url}
                       height={70}
                       showLabel={false}
                     />

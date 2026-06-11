@@ -4,7 +4,7 @@
  */
 import { spacing } from "../../themes/tokens";
 import React, { useState, useEffect, useCallback, useLayoutEffect, useMemo, useRef } from "react";
-import { View, StyleSheet, Alert, Share } from "react-native";
+import { View, StyleSheet, Share } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
@@ -20,10 +20,11 @@ import { toggleFavorite, selectIsFavorite } from "../../store/favoritesSlice";
 import useDifficultyTint from "../../hooks/useDifficultyTint";
 
 import FlashcardHeader from "./components/FlashcardHeader";
-import FlashcardCardArea from "./components/FlashcardCardArea";
+import WordListArea from "./components/WordListArea";
 import FlashcardCTAs from "./components/FlashcardCTAs";
-import { Skeleton, SkeletonFlipCard } from "../../components/design/Skeleton";
+import { Skeleton } from "../../components/design/Skeleton";
 import StarRating from "../../components/design/StarRating";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
 import { getListRating, rateList } from "../../supabase/ratings";
 
 export default function FlashcardDetailScreen({ route, navigation }) {
@@ -39,9 +40,9 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [isOwner, setIsOwner] = useState(paramIsOwner ?? false);
   const [rating, setRating] = useState({ avg: 0, count: 0, userRating: null });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // silent: skeleton flash önleme (Quiz/Study'den geri dönerken background refresh)
   const fetchWords = useCallback(async (silent = false) => {
@@ -129,31 +130,23 @@ export default function FlashcardDetailScreen({ route, navigation }) {
   const title = listTitle ?? "Liste";
 
   const handleDelete = useCallback(() => {
-    Alert.alert(
-      "Listeyi Sil",
-      "Bu listeyi silmek istediğine emin misin? Bu işlem geri alınamaz.",
-      [
-        { text: "Vazgeç", style: "cancel" },
-        {
-          text: "Sil",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              const res = await supabaseApiService.deleteList(listId);
-              if (res.success) {
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                navigation.goBack();
-              } else {
-                Alert.alert("Hata", res.error || "Liste silinemedi.");
-              }
-            } catch {
-              Alert.alert("Hata", "Liste silinirken bir sorun oluştu.");
-            }
-          },
-        },
-      ]
-    );
-  }, [listId, navigation]);
+    setShowDeleteConfirm(true);
+  }, []);
+
+  const confirmDelete = useCallback(async () => {
+    setShowDeleteConfirm(false);
+    try {
+      const res = await supabaseApiService.deleteList(listId);
+      if (res.success) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        navigation.goBack();
+      } else {
+        toast?.show?.({ message: res.error || "Liste silinemedi.", type: "error" });
+      }
+    } catch {
+      toast?.show?.({ message: "Liste silinirken bir sorun oluştu.", type: "error" });
+    }
+  }, [listId, navigation, toast]);
 
   const handleShare = useCallback(async () => {
     Haptics.selectionAsync();
@@ -170,15 +163,6 @@ export default function FlashcardDetailScreen({ route, navigation }) {
     } catch {}
   }, [title, words, listId]);
 
-  const handleComplete = () => {
-    // Kart önizlemesi bitti → direkt Study (SRS) sayfasına yönlendir
-    navigation.navigate("Study", {
-      listId,
-      listTitle: title,
-      listLevel,
-    });
-  };
-
   if (loading) {
     return (
       <View style={s.root}>
@@ -190,12 +174,15 @@ export default function FlashcardDetailScreen({ route, navigation }) {
             <Skeleton width={36} height={36} radius={12} />
           </View>
           <Skeleton width="40%" height={14} radius={6} style={{ alignSelf: "center" }} />
-          <View style={{ flex: 1, justifyContent: "center" }}>
-            <SkeletonFlipCard />
+          <View style={{ flex: 1, gap: 8, paddingHorizontal: 18, marginTop: 12 }}>
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} width="100%" height={62} radius={12} />
+            ))}
           </View>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <Skeleton width="48%" height={50} radius={14} />
-            <Skeleton width="48%" height={50} radius={14} />
+          <View style={{ flexDirection: "row", gap: 10, paddingHorizontal: 22 }}>
+            <Skeleton width="31%" height={70} radius={12} />
+            <Skeleton width="31%" height={70} radius={12} />
+            <Skeleton width="31%" height={70} radius={12} />
           </View>
         </SafeAreaView>
       </View>
@@ -269,13 +256,7 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           />
         </View>
 
-        <FlashcardCardArea
-          words={words}
-          currentIndex={currentIndex}
-          setCurrentIndex={setCurrentIndex}
-          onComplete={handleComplete}
-          listId={listId}
-        />
+        <WordListArea words={words} tint={tint} listId={listId} />
 
         <FlashcardCTAs
           wordCount={words.length}
@@ -294,6 +275,15 @@ export default function FlashcardDetailScreen({ route, navigation }) {
           }
         />
       </SafeAreaView>
+      <ConfirmDialog
+        visible={showDeleteConfirm}
+        title="Listeyi Sil"
+        message="Bu listeyi silmek istediğine emin misin? Bu işlem geri alınamaz."
+        confirmText="Sil"
+        onConfirm={confirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        destructive
+      />
     </View>
   );
 }

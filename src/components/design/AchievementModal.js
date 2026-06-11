@@ -140,9 +140,9 @@ export default function AchievementModal({ visible, badge, onClose }) {
       <Animated.View style={[StyleSheet.absoluteFill, { opacity: backdrop }]}>
         <LinearGradient
           colors={[
-            "rgba(0,0,0,0.88)",
-            tint + "33",
-            "rgba(0,0,0,0.92)",
+            "rgba(0,0,0,0.94)",
+            tint + "44",
+            "rgba(0,0,0,0.96)",
           ]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}

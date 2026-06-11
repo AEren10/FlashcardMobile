@@ -159,9 +159,9 @@ export default function MilestoneModal({ milestone, visible, onDismiss }) {
         {/* Backdrop gradient — koyu üstten alta */}
         <LinearGradient
           colors={[
-            "rgba(0,0,0,0.85)",
-            color + "33",
-            "rgba(0,0,0,0.92)",
+            "rgba(0,0,0,0.94)",
+            color + "44",
+            "rgba(0,0,0,0.96)",
           ]}
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
@@ -342,7 +342,7 @@ const s = StyleSheet.create({
     top: H / 2 - 220,
     width: 240,
     height: 240,
-    borderRadius: radius.sm0,
+    borderRadius: 120,
   },
   badgeWrap: {
     marginBottom: 36,

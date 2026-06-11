@@ -69,7 +69,7 @@ function Wheel({ values, initial, onChange, c, format }) {
         }}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
+          { useNativeDriver: true }
         )}
         scrollEventThrottle={16}
         onMomentumScrollEnd={handleMomentumEnd}

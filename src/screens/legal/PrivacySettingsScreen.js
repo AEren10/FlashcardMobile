@@ -5,14 +5,16 @@
  */
 import { radius, spacing } from "../../themes/tokens";
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, Switch, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "../../contexts/ToastContext";
 import { getConsent, setConsent } from "../../lib/analyticsConsent";
 
 export default function PrivacySettingsScreen({ navigation }) {
   const { c } = useTheme();
+  const toast = useToast();
   const s = useMemo(() => makeStyles(c), [c]);
   const [allowed, setAllowed] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -27,10 +29,7 @@ export default function PrivacySettingsScreen({ navigation }) {
   const handleToggle = async (next) => {
     setAllowed(next);
     await setConsent(next);
-    Alert.alert(
-      "Kaydedildi",
-      "Tercihin bir sonraki açılışta etkili olacak. Şimdi yeniden başlatmak ister misin?"
-    );
+    toast?.show?.({ message: "Tercihin bir sonraki açılışta etkili olacak.", type: "success" });
   };
 
   if (!loaded) return null;

@@ -14,6 +14,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useAuth } from "../../contexts/AuthContext";
 import { useProfile } from "../../contexts/ProfileContext";
 import { getStudyStats, getDailyActivity } from "../../supabase/progress";
+import { getCached, setCache } from "../../lib/dataCache";
 import { getLists } from "../../supabase/database";
 import Icon, { ICONS } from "../../components/design/Icon";
 import AnimatedFlame from "../../components/design/AnimatedFlame";
@@ -43,11 +44,19 @@ export default function ProfileScreen() {
 
   const s = useMemo(() => makeStyles(c), [c]);
 
+  // Anında cache'den geri yükle
+  useEffect(() => {
+    getCached("profileStats").then((c) => c && setStats(c));
+  }, []);
+
   const loadStats = useCallback(() => {
     if (isGuestUser()) return;
     setStatsError(false);
     Promise.allSettled([getStudyStats(), getDailyActivity(7)]).then(([sr, dr]) => {
-      if (sr.status === "fulfilled" && sr.value) setStats(sr.value); else setStatsError(true);
+      if (sr.status === "fulfilled" && sr.value) {
+        setStats(sr.value);
+        setCache("profileStats", sr.value);
+      } else setStatsError(true);
       if (dr.status === "fulfilled" && Array.isArray(dr.value)) setDays(dr.value);
     });
   }, [isGuestUser]);
@@ -151,15 +160,21 @@ export default function ProfileScreen() {
               onPress={() => navigation.navigate("Roadmap")}
               style={({ pressed }) => [
                 s.levelChip,
-                { backgroundColor: userLevel.color + "14", borderColor: userLevel.color + "44", transform: [{ scale: pressed ? 0.97 : 1 }] },
+                { overflow: "hidden", borderColor: userLevel.color, shadowColor: userLevel.color, shadowOpacity: 0.35, shadowRadius: 10, shadowOffset: { width: 0, height: 0 }, elevation: 4, transform: [{ scale: pressed ? 0.97 : 1 }] },
               ]}
             >
-              <View style={[s.levelIconWrap, { backgroundColor: userLevel.color + "22" }]}>
-                <Icon d={userLevel.icon} size={14} stroke={userLevel.color} fill={userLevel.color + "33"} sw={1.7} />
+              <LinearGradient
+                colors={[userLevel.color, userLevel.color + "BB"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <View style={[s.levelIconWrap, { backgroundColor: "rgba(255,255,255,0.2)" }]}>
+                <Icon d={userLevel.icon} size={14} stroke="#FFFFFF" fill="rgba(255,255,255,0.3)" sw={1.7} />
               </View>
-              <Text style={[s.levelTitle, { color: userLevel.color, fontFamily: c.fontBodyBold }]}>{userLevel.title}</Text>
-              <View style={[s.levelDot, { backgroundColor: userLevel.color + "66" }]} />
-              <Text style={[s.levelSub, { color: userLevel.color, fontFamily: c.fontBody }]}>Seviye {userLevel.lv}</Text>
+              <Text style={[s.levelTitle, { color: "#FFFFFF", fontFamily: c.fontBodyBold }]}>{userLevel.title}</Text>
+              <View style={[s.levelDot, { backgroundColor: "rgba(255,255,255,0.5)" }]} />
+              <Text style={[s.levelSub, { color: "rgba(255,255,255,0.9)", fontFamily: c.fontBody }]}>Seviye {userLevel.lv}</Text>
             </Pressable>
           </View>
 
@@ -186,12 +201,13 @@ export default function ProfileScreen() {
 
           {/* 3 stat tile — Kelime / Seans / Doğruluk */}
           <View style={s.tileRow}>
-            <ProfileTile value={stats.totalWords} label="Kelime" accent={c.warning} c={c} s={s} />
-            <ProfileTile value={stats.totalSessions} label="Seans" accent={c.cobalt} c={c} s={s} />
+            <ProfileTile value={stats.totalWords} label="Kelime" accent={c.warning} icon={ICONS.books} c={c} s={s} />
+            <ProfileTile value={stats.totalSessions} label="Seans" accent={c.cobalt} icon={ICONS.bolt} c={c} s={s} />
             <ProfileTile
               value={`%${stats.totalSessions ? Math.round((stats.totalWords / Math.max(stats.totalSessions * 10, 1)) * 100) : 0}`}
               label="Doğruluk"
               accent={c.success}
+              icon={ICONS.check}
               c={c} s={s}
             />
           </View>
@@ -271,7 +287,7 @@ export default function ProfileScreen() {
                       onPress={() => navigation.navigate("FlashcardDetail", { listId: item.id, listTitle: item.title, listLevel: item.level, listIsPublic: item.is_public })}
                       style={({ pressed }) => [s.listCard, { transform: [{ scale: pressed ? 0.98 : 1 }] }]}
                     >
-                      <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={72} showLabel={false} />
+                      <CategoryCover difficulty={item.level} cat={item.category} height={72} showLabel={false} />
                       <View style={s.listCardBody}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: spacing.xs }}>
                           <Text style={[s.listCardTitle, { flex: 1 }]} numberOfLines={1}>{item.title}</Text>
@@ -294,12 +310,20 @@ export default function ProfileScreen() {
   );
 }
 
-function ProfileTile({ value, label, accent, c, s }) {
+function ProfileTile({ value, label, accent, icon, c, s }) {
   return (
-    <View style={[s.tile, { borderTopColor: accent, borderColor: accent + "44", shadowColor: accent }]}>
-      <View style={[s.tileHalo, { backgroundColor: accent + "55" }]} />
-      <Text style={[s.tileVal, { color: accent }]}>{value}</Text>
-      <Text style={s.tileLbl}>{label}</Text>
+    <View style={[s.tile, { borderColor: accent + "66", shadowColor: accent, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 3 }, elevation: 4 }]}>
+      <LinearGradient
+        colors={[accent, accent + "CC"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={StyleSheet.absoluteFill}
+      />
+      <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.2)", alignItems: "center", justifyContent: "center", marginBottom: 8 }}>
+        <Icon d={icon} size={16} stroke="#FFFFFF" sw={2} />
+      </View>
+      <Text style={{ fontFamily: c.fontBodyBold, fontSize: 28, color: "#FFFFFF", lineHeight: 32 }}>{value}</Text>
+      <Text style={{ fontFamily: c.fontBodySemi, fontSize: 11, color: "rgba(255,255,255,0.75)", marginTop: 4, letterSpacing: 0.5, textTransform: "uppercase" }}>{label}</Text>
     </View>
   );
 }
@@ -339,17 +363,14 @@ function makeStyles(c) {
     levelDot: { width: 3, height: 3, borderRadius: 1.5 },
     levelSub: { fontSize: fontSize.sm, letterSpacing: 0.2, opacity: 0.85 },
     // streak hero
-    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1, borderColor: c.border, padding: spacing.lg, marginBottom: 14 },
+    streakHero: { flexDirection: "row", alignItems: "center", backgroundColor: c.accent + "0A", borderRadius: radius.md, borderWidth: 1.5, borderColor: c.accent + "44", padding: spacing.lg, marginBottom: 14 },
     streakNum: { fontFamily: c.fontNum, fontSize: fontSize["2xl"], color: c.textPrimary, lineHeight: 30 },
     streakCap: { fontFamily: c.fontBody, fontSize: fontSize.sm, color: c.textSec, marginTop: 2 },
     listChip: { flexDirection: "row", alignItems: "center", gap: spacing.xs, paddingHorizontal: 10, paddingVertical: 5, borderRadius: radius.full, backgroundColor: c.accent + "14", borderWidth: 1, borderColor: c.accent + "44", marginRight: spacing.sm },
     listChipTxt: { fontFamily: c.fontBodySemi, fontSize: fontSize.xs, color: c.accent },
     // stat tiles
     tileRow: { flexDirection: "row", gap: 10, marginBottom: spacing.lg },
-    tile: { flex: 1, backgroundColor: c.bgElevated, borderRadius: radius.md, borderWidth: 1.5, borderColor: c.border, borderTopWidth: 3, padding: 14, paddingTop: spacing.md, alignItems: "center", overflow: "hidden" },
-    tileHalo: { position: "absolute", top: -22, width: 80, height: 40, borderRadius: radius.full, opacity: 0.9 },
-    tileVal: { fontFamily: c.fontNum, fontSize: fontSize["2xl"] },
-    tileLbl: { fontFamily: c.fontBody, fontSize: fontSize.xs, color: c.textSec, marginTop: 2 },
+    tile: { flex: 1, borderRadius: radius.lg, borderWidth: 1.5, padding: 16, paddingTop: 18, paddingBottom: 18, alignItems: "center", overflow: "hidden" },
     // error
     errorBanner: { flexDirection: "row", alignItems: "center", gap: spacing.sm, paddingVertical: 10, paddingHorizontal: 14, borderRadius: radius.sm, backgroundColor: c.warning + "1A", borderWidth: 1, borderColor: c.warning + "55", marginBottom: 14 },
     errorTxt: { flex: 1, fontFamily: c.fontBodySemi, fontSize: fontSize.sm },

@@ -15,6 +15,7 @@ import Icon from "../../components/design/Icon";
 import RoadmapHeader from "./components/RoadmapHeader";
 import RoadmapNode from "./components/RoadmapNode";
 import { Skeleton } from "../../components/design/Skeleton";
+import { getCached, setCache } from "../../lib/dataCache";
 
 export default function RoadmapScreen({ navigation }) {
   const { c } = useTheme();
@@ -25,12 +26,13 @@ export default function RoadmapScreen({ navigation }) {
   const level = useUserLevel(stats.totalWords);
 
   useEffect(() => {
+    getCached("roadmapStats").then((v) => v && setStats(v));
     if (!isAuthenticated()) {
       setLoading(false);
       return;
     }
     getStudyStats()
-      .then((d) => setStats(d || stats))
+      .then((d) => { if (d) { setStats(d); setCache("roadmapStats", d); } })
       .catch(() => {})
       .finally(() => setLoading(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps

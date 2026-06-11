@@ -103,7 +103,7 @@ function DayDot({ filled, isToday, sessions, label, delay, c, s }) {
         style={[
           s.dot,
           filled
-            ? { backgroundColor: c.accentGlow, borderColor: c.borderAccent, shadowColor: c.accent, shadowOpacity: isToday ? 0.5 : 0.2 }
+            ? { backgroundColor: c.warning + "22", borderColor: c.warning + "66", shadowColor: isToday ? (c.coral || c.warning) : c.warning, shadowOpacity: isToday ? 0.5 : 0.25 }
             : { backgroundColor: c.bgSurface, borderColor: c.border },
           isToday && { borderWidth: 2 },
         ]}
@@ -112,8 +112,8 @@ function DayDot({ filled, isToday, sessions, label, delay, c, s }) {
           <Icon
             d={ICONS.flame}
             size={20}
-            stroke={isToday ? c.warning : c.accent}
-            fill={isToday ? c.warning : c.accent}
+            stroke={isToday ? (c.coral || c.warning) : c.warning}
+            fill={isToday ? (c.coral || c.warning) : c.warning}
             sw={1.3}
           />
         ) : (
@@ -124,7 +124,7 @@ function DayDot({ filled, isToday, sessions, label, delay, c, s }) {
         style={[
           s.label,
           {
-            color: isToday ? c.accent : filled ? c.textSec : c.textMuted,
+            color: isToday ? (c.coral || c.warning) : filled ? c.warning : c.textMuted,
             fontFamily: isToday ? c.fontBodyBold : c.fontBody,
           },
         ]}

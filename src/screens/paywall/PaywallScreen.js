@@ -15,16 +15,17 @@ import {
   Pressable,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useToast } from "../../contexts/ToastContext";
 import { usePremium } from "../../contexts/PremiumContext";
 import { getOfferings, purchase, restore } from "../../lib/purchases";
 import Icon, { ICONS } from "../../components/design/Icon";
 import PressableScale from "../../components/design/PressableScale";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
 import { track, EVENTS } from "../../lib/track";
 
 const FEATURES = [
@@ -39,12 +40,14 @@ const FEATURES = [
 
 export default function PaywallScreen({ navigation, route }) {
   const { c } = useTheme();
+  const toast = useToast();
   const { refresh, isStub } = usePremium();
   const source = route?.params?.source || "unknown";
   const [offerings, setOfferings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState("yearly");
   const [purchasing, setPurchasing] = useState(false);
+  const [confirmPkg, setConfirmPkg] = useState(null);
 
   useEffect(() => {
     track(EVENTS.PAYWALL_VIEW, { source });
@@ -56,21 +59,7 @@ export default function PaywallScreen({ navigation, route }) {
       .catch(() => setLoading(false));
   }, [source]);
 
-  const handlePurchase = async () => {
-    if (purchasing) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const pkg = offerings?.[selected];
-    if (!pkg) {
-      Alert.alert("Hata", "Paket bulunamadı.");
-      return;
-    }
-    if (isStub) {
-      Alert.alert(
-        "Test modu",
-        "Henüz RevenueCat anahtarı yapılandırılmamış. .env'e EXPO_PUBLIC_RC_IOS_KEY / EXPO_PUBLIC_RC_ANDROID_KEY ekleyin."
-      );
-      return;
-    }
+  const doPurchase = async (pkg) => {
     setPurchasing(true);
     const r = await purchase(pkg);
     setPurchasing(false);
@@ -82,12 +71,27 @@ export default function PaywallScreen({ navigation, route }) {
       track(EVENTS.PAYWALL_PURCHASE, { source, package: selected, result: "success" });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await refresh();
-      Alert.alert("🎉 Pro aktif!", "Tüm özellikler açıldı. Teşekkürler!");
+      toast?.show?.({ message: "Pro aktif! Tüm özellikler açıldı.", type: "success", duration: 3000 });
       navigation.goBack();
     } else {
       track(EVENTS.PAYWALL_PURCHASE, { source, package: selected, result: "failed", error: r.error });
-      Alert.alert("Satın alma başarısız", r.error || "Lütfen tekrar dene.");
+      toast?.show?.({ message: r.error || "Satın alma başarısız. Lütfen tekrar dene.", type: "error" });
     }
+  };
+
+  const handlePurchase = () => {
+    if (purchasing) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const pkg = offerings?.[selected];
+    if (!pkg) {
+      toast?.show?.({ message: "Paket bulunamadı.", type: "error" });
+      return;
+    }
+    if (isStub) {
+      toast?.show?.({ message: "Henüz RevenueCat anahtarı yapılandırılmamış.", type: "info" });
+      return;
+    }
+    setConfirmPkg(pkg);
   };
 
   const handleRestore = async () => {
@@ -95,10 +99,10 @@ export default function PaywallScreen({ navigation, route }) {
     const r = await restore();
     if (r.success) {
       await refresh();
-      Alert.alert("Geri yüklendi", "Pro statün aktif.");
+      toast?.show?.({ message: "Pro statün aktif.", type: "success" });
       navigation.goBack();
     } else {
-      Alert.alert("Önceki satın alma yok", r.error || "Cihazında geri yüklenecek bir abonelik bulunamadı.");
+      toast?.show?.({ message: r.error || "Geri yüklenecek abonelik bulunamadı.", type: "error" });
     }
   };
 
@@ -273,6 +277,19 @@ export default function PaywallScreen({ navigation, route }) {
           )}
         </ScrollView>
       </SafeAreaView>
+
+      <ConfirmDialog
+        visible={!!confirmPkg}
+        title="Satın Alma"
+        message={confirmPkg ? `${confirmPkg.product?.title || "Seçili paket"} paketini satın almak istediğine emin misin?` : ""}
+        confirmText="Satın Al"
+        onConfirm={() => {
+          const pkg = confirmPkg;
+          setConfirmPkg(null);
+          doPurchase(pkg);
+        }}
+        onCancel={() => setConfirmPkg(null)}
+      />
     </View>
   );
 }

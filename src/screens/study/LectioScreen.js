@@ -20,7 +20,6 @@ import {
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import * as Speech from "expo-speech";
 import { speak as ttsSpeak } from "../../lib/tts";
 import * as Haptics from "expo-haptics";
 import { GestureDetector, Gesture, GestureHandlerRootView } from "react-native-gesture-handler";

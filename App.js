@@ -57,10 +57,12 @@ async function configureAudioModeOnce() {
     const { Audio } = require("expo-av");
     await Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
+      allowsRecordingIOS: false,
       staysActiveInBackground: false,
       shouldDuckAndroid: true,
-      interruptionModeAndroid: 1, // DUCK_OTHERS
     });
+    const { warmUp } = require("./src/lib/tts");
+    warmUp();
   } catch {
     /* expo-av yoksa stub */
   }
@@ -69,21 +71,12 @@ configureAudioModeOnce();
 import ConsentModal from "./src/components/ConsentModal";
 import DynamicStatusBar from "./src/components/design/DynamicStatusBar";
 import OfflineBanner from "./src/components/design/OfflineBanner";
-import {
-  useFonts as useSpaceGrotesk,
-  SpaceGrotesk_400Regular,
-  SpaceGrotesk_500Medium,
-  SpaceGrotesk_600SemiBold,
-  SpaceGrotesk_700Bold,
-} from "@expo-google-fonts/space-grotesk";
-import {
-  InstrumentSerif_400Regular_Italic,
-} from "@expo-google-fonts/instrument-serif";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-} from "@expo-google-fonts/inter";
+import { useFonts } from "expo-font";
+import { SpaceGrotesk_600SemiBold } from "@expo-google-fonts/space-grotesk/600SemiBold";
+import { SpaceGrotesk_700Bold } from "@expo-google-fonts/space-grotesk/700Bold";
+import { InstrumentSerif_400Regular_Italic } from "@expo-google-fonts/instrument-serif/400Regular_Italic";
+import { Inter_400Regular } from "@expo-google-fonts/inter/400Regular";
+import { Inter_500Medium } from "@expo-google-fonts/inter/500Medium";
 import { View, ActivityIndicator } from "react-native";
 
 startAutoFlush();
@@ -91,15 +84,12 @@ startAutoFlush();
 bootstrapReminders().catch(() => {});
 
 function App() {
-  const [fontsLoaded] = useSpaceGrotesk({
-    SpaceGrotesk_400Regular,
-    SpaceGrotesk_500Medium,
+  const [fontsLoaded] = useFonts({
     SpaceGrotesk_600SemiBold,
     SpaceGrotesk_700Bold,
     InstrumentSerif_400Regular_Italic,
     Inter_400Regular,
     Inter_500Medium,
-    Inter_600SemiBold,
   });
 
   // Consent state: null = soruluyor, true = onaylı, false = reddedildi

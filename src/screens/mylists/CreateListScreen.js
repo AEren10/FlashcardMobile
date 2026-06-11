@@ -11,7 +11,6 @@ import {
   Pressable,
   ScrollView,
   TextInput,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -26,6 +25,7 @@ import { useAchievements } from "../../contexts/AchievementsContext";
 import useImageUpload from "../../hooks/useImageUpload";
 import useListEditor from "../../hooks/useListEditor";
 import { useToast } from "../../contexts/ToastContext";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
 import BulkAddModal from "./components/BulkAddModal";
 import { invalidatePublicLists } from "../../hooks/usePublicLists";
 import { makeDebouncedLookup } from "../../lib/wordLookup";
@@ -42,6 +42,9 @@ export default function CreateListScreen({ route }) {
   const [saving, setSaving] = useState(false);
   const savingRef = useRef(false); // double-tap için sync lock
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [showStudyConfirm, setShowStudyConfirm] = useState(false);
+  const [showPublicConfirm, setShowPublicConfirm] = useState(false);
+  const [savedListRef, setSavedListRef] = useState(null);
   // Her satırdaki 3 input için ref — onSubmitEditing'de next field'a focus
   const wordRefs = useRef([]);
   const meaningRefs = useRef([]);
@@ -115,14 +118,17 @@ export default function CreateListScreen({ route }) {
     try {
       await img.pick();
     } catch (e) {
-      Alert.alert("İzin gerekli", e.message);
+      toast?.show?.({ message: e.message, type: "error" });
     }
   };
 
   const onSave = async () => {
     if (savingRef.current) return; // double-tap koruması (sync)
     const err = editor.validate();
-    if (err) return Alert.alert("Eksik bilgi", err);
+    if (err) {
+      toast?.show?.({ message: err, type: "error" });
+      return;
+    }
     savingRef.current = true;
     setSaving(true);
     try {
@@ -131,7 +137,7 @@ export default function CreateListScreen({ route }) {
         try {
           finalUrl = await img.upload(img.asset);
         } catch {
-          Alert.alert("Uyarı", "Görsel yüklenemedi, mevcut görsel korunacak.");
+          toast?.show?.({ message: "Görsel yüklenemedi, mevcut görsel korunacak.", type: "info" });
         }
       }
       const saved = await editor.save(finalUrl);
@@ -149,31 +155,13 @@ export default function CreateListScreen({ route }) {
         (w) => w.word.trim() && w.meaning.trim()
       ).length;
       if (!editor.isEdit && saved?.id && validWordCount > 0) {
-        Alert.alert(
-          "Liste hazır!",
-          `${validWordCount} kelime ile listeyi şimdi çalışmak ister misin?`,
-          [
-            {
-              text: "Sonra",
-              style: "cancel",
-              onPress: () => navigation.goBack(),
-            },
-            {
-              text: "Şimdi Çalış",
-              onPress: () => {
-                navigation.replace("Study", {
-                  listId: saved.id,
-                  listTitle: editor.title.trim(),
-                });
-              },
-            },
-          ]
-        );
+        setSavedListRef({ id: saved.id, title: editor.title.trim(), wordCount: validWordCount });
+        setShowStudyConfirm(true);
       } else {
         navigation.goBack();
       }
     } catch (e) {
-      Alert.alert("Hata", e.message);
+      toast?.show?.({ message: e.message, type: "error" });
     } finally {
       setSaving(false);
       savingRef.current = false;
@@ -389,18 +377,7 @@ export default function CreateListScreen({ route }) {
               <Pressable
                 onPress={() => {
                   if (!editor.isPublic) {
-                    // ilk açış: onay sor
-                    Alert.alert(
-                      "Listeyi herkese açıyorsun",
-                      "Bu listeyi diğer kullanıcılar Keşfet sekmesinde görür ve çalışabilir. Onaylıyor musun?",
-                      [
-                        { text: "Vazgeç", style: "cancel" },
-                        {
-                          text: "Public Yap",
-                          onPress: () => editor.setIsPublic(true),
-                        },
-                      ]
-                    );
+                    setShowPublicConfirm(true);
                   } else {
                     editor.setIsPublic(false);
                   }
@@ -454,6 +431,36 @@ export default function CreateListScreen({ route }) {
             }
             return added;
           }}
+        />
+        <ConfirmDialog
+          visible={showStudyConfirm}
+          title="Liste hazır!"
+          message={savedListRef ? `${savedListRef.wordCount} kelime ile listeyi şimdi çalışmak ister misin?` : ""}
+          confirmText="Şimdi Çalış"
+          onConfirm={() => {
+            setShowStudyConfirm(false);
+            if (savedListRef) {
+              navigation.replace("Study", {
+                listId: savedListRef.id,
+                listTitle: savedListRef.title,
+              });
+            }
+          }}
+          onCancel={() => {
+            setShowStudyConfirm(false);
+            navigation.goBack();
+          }}
+        />
+        <ConfirmDialog
+          visible={showPublicConfirm}
+          title="Listeyi herkese açıyorsun"
+          message="Bu listeyi diğer kullanıcılar Keşfet sekmesinde görür ve çalışabilir. Onaylıyor musun?"
+          confirmText="Public Yap"
+          onConfirm={() => {
+            setShowPublicConfirm(false);
+            editor.setIsPublic(true);
+          }}
+          onCancel={() => setShowPublicConfirm(false)}
         />
       </View>
     </KeyboardAvoidingView>

@@ -46,7 +46,7 @@ export default function FlipCard({
   onReport,
   disabled = false,
 }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
   const rot = useSharedValue(0);
   const glintFront = useSharedValue(0);
   const glintBack = useSharedValue(0);
@@ -101,7 +101,7 @@ export default function FlipCard({
     ttsSpeak(String(word));
   }, [word]);
 
-  const s = useMemo(() => makeStyles(c), [c]);
+  const s = useMemo(() => makeStyles(c, isDark), [c, isDark]);
 
   const frontStyle = useAnimatedStyle(() => ({
     transform: [{ perspective: 1400 }, { rotateY: `${rot.value}deg` }],
@@ -123,12 +123,12 @@ export default function FlipCard({
   const content = (
     <>
       {/* FRONT — purely visual, pointerEvents="none" */}
-      <Animated.View style={[s.face, { borderColor: c.borderAccent, shadowColor: c.accent }, frontStyle]} pointerEvents="none">
-        <LinearGradient colors={[c.bgElevated, c.bgSurface]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
+      <Animated.View style={[s.face, { borderColor: isDark ? c.accent + "30" : c.borderAccent, shadowColor: c.accent }, frontStyle]} pointerEvents="none">
+        <LinearGradient colors={isDark ? [c.bgElevated, c.bgCard] : [c.bgElevated, c.bgSurface]} start={{ x: 0.15, y: 0 }} end={{ x: 0.85, y: 1 }} style={StyleSheet.absoluteFill} />
         {/* Köşeden gelen ince diagonal ışık — sol üst */}
         <View style={s.cornerGlow}>
           <LinearGradient
-            colors={[c.cobalt + "20", "transparent"]}
+            colors={[c.accent + (isDark ? "18" : "20"), "transparent"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0.6, y: 0.7 }}
             style={StyleSheet.absoluteFill}
@@ -170,12 +170,12 @@ export default function FlipCard({
       </Animated.View>
 
       {/* BACK — purely visual, pointerEvents="none" */}
-      <Animated.View style={[s.face, { borderColor: c.cobaltGlow, shadowColor: c.cobalt }, backStyle]} pointerEvents="none">
-        <LinearGradient colors={[c.bgSurface, c.bgElevated]} start={{ x: 0.15, y: 1 }} end={{ x: 0.85, y: 0 }} style={StyleSheet.absoluteFill} />
+      <Animated.View style={[s.face, { borderColor: isDark ? c.cobalt + "30" : c.cobaltGlow, shadowColor: c.cobalt }, backStyle]} pointerEvents="none">
+        <LinearGradient colors={isDark ? [c.bgCard, c.bgElevated] : [c.bgSurface, c.bgElevated]} start={{ x: 0.15, y: 1 }} end={{ x: 0.85, y: 0 }} style={StyleSheet.absoluteFill} />
         {/* Köşeden gelen ince diagonal ışık — sağ alt */}
         <View style={s.cornerGlowBack}>
           <LinearGradient
-            colors={["transparent", c.cobalt + "20"]}
+            colors={["transparent", c.cobalt + (isDark ? "18" : "20")]}
             start={{ x: 0.4, y: 0.3 }}
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
@@ -280,7 +280,7 @@ export default function FlipCard({
   );
 }
 
-function makeStyles(c) {
+function makeStyles(c, isDark) {
   return StyleSheet.create({
     stage: {
       width: "100%",
@@ -296,11 +296,11 @@ function makeStyles(c) {
       borderRadius: radius.xl,
       overflow: "hidden",
       padding: 22,
-      borderWidth: 1.2,
+      borderWidth: isDark ? 1 : 1.2,
       backfaceVisibility: "hidden",
       shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.18,
-      shadowRadius: 20,
+      shadowOpacity: isDark ? 0.35 : 0.18,
+      shadowRadius: isDark ? 22 : 20,
       elevation: 6,
     },
     cornerGlow: {
@@ -324,7 +324,7 @@ function makeStyles(c) {
     glint: {
       position: "absolute",
       top: 0, bottom: 0, left: 0, right: 0,
-      backgroundColor: "rgba(255,255,255,0.32)",
+      backgroundColor: isDark ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.32)",
       transform: [{ translateX: -400 }],
     },
     topRow: {

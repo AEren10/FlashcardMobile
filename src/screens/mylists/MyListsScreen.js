@@ -12,7 +12,6 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert,
   Share,
 } from "react-native";
 import * as Linking from "expo-linking";
@@ -46,6 +45,8 @@ import EmptyState from "../../components/EmptyState";
 import { SkeletonListCard } from "../../components/design/Skeleton";
 import { FlameRefreshControl } from "../../components/design/FlameRefresh";
 import usePublicLists, { invalidatePublicLists } from "../../hooks/usePublicLists";
+import { useToast } from "../../contexts/ToastContext";
+import ConfirmDialog from "../../components/design/ConfirmDialog";
 
 const TABS = ["Listelerim", "Favoriler", "Keşfet"];
 const SORTS = [
@@ -69,6 +70,11 @@ export default function MyListsScreen() {
   const [myLists, setMyLists] = useState([]);
   const [myListsLoading, setMyListsLoading] = useState(true);
   const [sortKey, setSortKey] = useState("newest");
+  const toast = useToast();
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showRegisterConfirm, setShowRegisterConfirm] = useState(false);
+  const [actionSheetTarget, setActionSheetTarget] = useState(null);
   const {
     lists: publicLists,
     loading: publicLoading,
@@ -107,64 +113,29 @@ export default function MyListsScreen() {
     (item) => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const isOwner = userId && item.user_id === userId;
-      // Deep link AppNavigator linking config'iyle uyumlu olmalı: MainTabs > Home > FlashcardDetail
-      // Tam path: "home/list/:listId" (Home stack altındaki FlashcardDetail = "list/:listId")
-      const shareLink = Linking.createURL(`/home/list/${item.id}`);
-      const buttons = [];
-
-      buttons.push({
-        text: "Paylaş",
-        onPress: async () => {
-          try {
-            await Share.share({
-              message: `"${item.title}" listesini incele: ${shareLink}`,
-              url: shareLink,
-              title: item.title,
-            });
-            triggerAchievement?.("list_shared");
-          } catch {}
-        },
-      });
-
       if (isOwner) {
-        buttons.push({
-          text: "Düzenle",
-          onPress: () => navigation.navigate("CreateList", { listId: item.id }),
-        });
-        buttons.push({
-          text: "Sil",
-          style: "destructive",
-          onPress: () => {
-            Alert.alert(
-              "Listeyi sil?",
-              `"${item.title}" ve içindeki kelimeler kalıcı silinecek.`,
-              [
-                { text: "Vazgeç", style: "cancel" },
-                {
-                  text: "Sil",
-                  style: "destructive",
-                  onPress: async () => {
-                    await supabaseApiService.deleteList(item.id);
-                    await invalidatePublicLists();
-                    refresh();
-                  },
-                },
-              ]
-            );
-          },
-        });
+        setDeleteTarget(item);
+        setShowDeleteConfirm(true);
       } else {
-        buttons.push({
-          text: "Çalışmaya Başla",
-          onPress: () =>
-            navigation.navigate("Study", { listId: item.id, listTitle: item.title }),
-        });
+        const shareLink = Linking.createURL(`/home/list/${item.id}`);
+        Share.share({
+          message: `"${item.title}" listesini incele: ${shareLink}`,
+          url: shareLink,
+          title: item.title,
+        }).then(() => triggerAchievement?.("list_shared")).catch(() => {});
       }
-      buttons.push({ text: "İptal", style: "cancel" });
-      Alert.alert(item.title, "İşlem seç", buttons);
     },
-    [userId, navigation, load]
+    [userId, triggerAchievement]
   );
+
+  const confirmDeleteList = useCallback(async () => {
+    if (!deleteTarget) return;
+    setShowDeleteConfirm(false);
+    await supabaseApiService.deleteList(deleteTarget.id);
+    await invalidatePublicLists();
+    refresh();
+    setDeleteTarget(null);
+  }, [deleteTarget, refresh]);
 
   const favoriteSet = useMemo(() => new Set(favIds.map(String)), [favIds]);
   const favoritesList = useMemo(
@@ -318,14 +289,7 @@ export default function MyListsScreen() {
                 isGuest={isGuestUser()}
                 onCreate={() => {
                   if (isGuestUser()) {
-                    Alert.alert(
-                      "Kayıt gerekli",
-                      "Kendi listeni oluşturmak için hesap açmalısın. Kayıt olmak istiyor musun?",
-                      [
-                        { text: "Vazgeç", style: "cancel" },
-                        { text: "Kayıt Ol", onPress: () => signOut?.() ?? null },
-                      ]
-                    );
+                    setShowRegisterConfirm(true);
                     return;
                   }
                   navigation.navigate("CreateList");
@@ -362,6 +326,23 @@ export default function MyListsScreen() {
           />
         )}
       </SafeAreaView>
+      <ConfirmDialog
+        visible={showDeleteConfirm}
+        title="Listeyi sil?"
+        message={deleteTarget ? `"${deleteTarget.title}" ve içindeki kelimeler kalıcı silinecek.` : ""}
+        confirmText="Sil"
+        onConfirm={confirmDeleteList}
+        onCancel={() => { setShowDeleteConfirm(false); setDeleteTarget(null); }}
+        destructive
+      />
+      <ConfirmDialog
+        visible={showRegisterConfirm}
+        title="Kayıt gerekli"
+        message="Kendi listeni oluşturmak için hesap açmalısın. Kayıt olmak istiyor musun?"
+        confirmText="Kayıt Ol"
+        onConfirm={() => { setShowRegisterConfirm(false); signOut?.(); }}
+        onCancel={() => setShowRegisterConfirm(false)}
+      />
     </View>
   );
 }
@@ -385,7 +366,7 @@ function ListCard({ item, fav, c, s, onOpen, onLongPress }) {
         },
       ]}
     >
-      <CategoryCover difficulty={item.level} cat={item.category} imageUrl={item.image_url} height={72}>
+      <CategoryCover difficulty={item.level} cat={item.category} height={72} showLabel={false}>
         {item.is_public && (
           <View style={s.publicBadge}>
             <Text style={s.publicBadgeTxt}>Public</Text>

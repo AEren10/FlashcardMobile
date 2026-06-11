@@ -2,9 +2,10 @@
  * RoadmapHeader — kullanıcının mevcut seviye + XP progress bar + sonraki ünvan.
  */
 import { radius, spacing } from "../../../themes/tokens";
-import React, { useEffect, useRef } from "react";
-import { View, Text, StyleSheet, Animated, Easing } from "react-native";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import RAnimated, { useSharedValue, useAnimatedStyle, withTiming, Easing as REasing } from "react-native-reanimated";
 import { useTheme } from "../../../contexts/ThemeContext";
 import useCountUp from "../../../hooks/useCountUp";
 import Icon, { ICONS } from "../../../components/design/Icon";
@@ -12,21 +13,18 @@ import Icon, { ICONS } from "../../../components/design/Icon";
 export default function RoadmapHeader({ level }) {
   const { c } = useTheme();
   const xpAnim = useCountUp(level.xp, 1200);
-  const fill = useRef(new Animated.Value(0)).current;
+  const fill = useSharedValue(0);
 
   useEffect(() => {
-    Animated.timing(fill, {
-      toValue: level.progress,
+    fill.value = withTiming(level.progress, {
       duration: 1400,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
-  }, [level.progress, fill]);
+      easing: REasing.out(REasing.cubic),
+    });
+  }, [level.progress]);
 
-  const fillWidth = fill.interpolate({
-    inputRange: [0, 1],
-    outputRange: ["0%", "100%"],
-  });
+  const fillStyle = useAnimatedStyle(() => ({
+    width: `${Math.round(fill.value * 100)}%`,
+  }));
 
   return (
     <View style={[s.wrap, { backgroundColor: c.bgElevated, borderColor: c.border }]}>
@@ -58,8 +56,8 @@ export default function RoadmapHeader({ level }) {
       </View>
 
       <View style={[s.track, { backgroundColor: c.bgSurface }]}>
-        <Animated.View
-          style={[s.fill, { width: fillWidth, backgroundColor: level.color }]}
+        <RAnimated.View
+          style={[s.fill, fillStyle, { backgroundColor: level.color }]}
         />
       </View>
 

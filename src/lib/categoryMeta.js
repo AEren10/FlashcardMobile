@@ -28,8 +28,8 @@ export const CATEGORIES = {
     name: "Sınav Hazırlık",
     subtitle: "YDS · YÖKDİL · IELTS · TOEFL",
     icon: ICONS.target,
-    stops: ["#D4AE5E", "#B08A3F", "#7E5F22"],
-    accent: "#D4AE5E",
+    stops: ["#F0C050", "#E8A425", "#C88A18"],
+    accent: "#E8A425",
     aliases: ["sınav", "exam-prep", "yds", "yokdil", "yökdil", "ielts", "toefl", "yks"],
   },
   daily: {
@@ -37,8 +37,8 @@ export const CATEGORIES = {
     name: "Günlük Hayat",
     subtitle: "Konuşma, sokak, ev",
     icon: ICONS.sun,
-    stops: ["#C4D9CC", "#A8C5B4", "#7FA896"],
-    accent: "#A8C5B4",
+    stops: ["#5CD898", "#34B878", "#22905C"],
+    accent: "#34B878",
     aliases: ["daily-life", "günlük", "everyday", "learning"],
   },
   business: {
@@ -46,8 +46,8 @@ export const CATEGORIES = {
     name: "İş & Kariyer",
     subtitle: "Profesyonel İngilizce",
     icon: ICONS.briefcase,
-    stops: ["#ADBDD4", "#8BA4C4", "#6A84A8"],
-    accent: "#8BA4C4",
+    stops: ["#70AAE8", "#4A90D8", "#2E72B5"],
+    accent: "#4A90D8",
     aliases: ["iş", "kariyer", "career", "work"],
   },
   travel: {
@@ -55,8 +55,8 @@ export const CATEGORIES = {
     name: "Seyahat",
     subtitle: "Yolda, havaalanında, otelde",
     icon: ICONS.plane,
-    stops: ["#DBBF88", "#C8A96E", "#A68B52"],
-    accent: "#C8A96E",
+    stops: ["#F0B840", "#E8A425", "#D08E18"],
+    accent: "#E8A425",
     aliases: ["seyahat", "trip"],
   },
   academic: {
@@ -73,8 +73,8 @@ export const CATEGORIES = {
     name: "Teknoloji",
     subtitle: "Yazılım, AI, internet",
     icon: ICONS.laptop,
-    stops: ["#7BAEC8", "#5A8FAB", "#3D6A85"],
-    accent: "#7BAEC8",
+    stops: ["#50B8E0", "#2E9CC8", "#1A80A8"],
+    accent: "#2E9CC8",
     aliases: ["technology", "teknoloji", "it"],
   },
   food: {
@@ -82,16 +82,16 @@ export const CATEGORIES = {
     name: "Yemek & Mutfak",
     subtitle: "Restoran, sipariş, tarif",
     icon: ICONS.food,
-    stops: ["#D49A7E", "#C17B5A", "#A05E3F"],
-    accent: "#C17B5A",
+    stops: ["#F08060", "#E06040", "#C04028"],
+    accent: "#E06040",
     aliases: ["yemek", "mutfak", "cuisine"],
   },
   learning: {
     slug: "learning",
     name: "Öğrenme",
     icon: ICONS.books,
-    stops: ["#8BA4C4", "#6A84A8", "#4A6580"],
-    accent: "#8BA4C4",
+    stops: ["#70AAE8", "#4A90D8", "#3070B0"],
+    accent: "#4A90D8",
     aliases: ["learn", "öğrenme", "education"],
   },
   popular: {
@@ -142,8 +142,8 @@ export const CATEGORIES = {
     name: "Ulaşım",
     subtitle: "Şehir içi & yolculuk",
     icon: ICONS.plane,
-    stops: ["#B8C5D6", "#7B95B8", "#4E6580"],
-    accent: "#7B95B8",
+    stops: ["#70A8D8", "#4888C0", "#306898"],
+    accent: "#4888C0",
     aliases: ["ulaşım", "transport", "yolculuk"],
   },
   arts: {
@@ -169,7 +169,7 @@ export const CATEGORIES = {
     name: "Sosyal Medya",
     subtitle: "Platform dili, mesajlaşma",
     icon: ICONS.user,
-    stops: ["#A8C5D6", "#7BAEC8", "#3D6A85"],
+    stops: ["#60B8E8", "#3898D0", "#2078B0"],
     accent: "#7BAEC8",
     aliases: ["sosyal", "social", "internet"],
   },
@@ -195,8 +195,8 @@ export const CATEGORIES = {
     slug: "other",
     name: "Diğer",
     icon: ICONS.books,
-    stops: ["#94A2B2", "#6B7785", "#48535F"],
-    accent: "#6B7785",
+    stops: ["#90A8C0", "#6888A8", "#486888"],
+    accent: "#6888A8",
     aliases: [],
   },
 };
@@ -252,7 +252,7 @@ export function getCategoryAccent(slug) {
 // HomeScreen'de slider sırası — en önemli/dolu olan üstte
 export const DISCOVERY_CATEGORIES = [
   "exam",            // YDS / YÖKDİL / IELTS / TOEFL / YKS-DİL — en ödeme istekli segment
-  "academic",        // Sınav-dışı akademik
+  // "academic" keşfet tabında gösterilmiyor — sınav modunda exam altında erişilebilir
   "business",        // İş & Kariyer
   "daily",           // Günlük + Renkler + Sayılar + Phrasal
   "social",          // Sosyal Medya + Internet (Z-gen için kritik)

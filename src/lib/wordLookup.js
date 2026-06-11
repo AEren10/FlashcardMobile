@@ -1,37 +1,52 @@
 /**
  * wordLookup — Kullanıcı kelime yazarken anlamı otomatik getir.
  *
- * 2 katmanlı strateji:
+ * 3 katmanlı strateji:
  *   1) AsyncStorage cache (sınırsız TTL) — 2.+ sefer instant
  *   2) Supabase RPC lookup_word(q) — 1. sefer ~60ms
- *
- * Kullanım:
- *   const data = await lookupWord("apple");
- *   // { word, meaning, example, example_tr } veya null
+ *   3) Free Dictionary API fallback — RPC'de yoksa
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import supabase from "../supabase/client";
 
 const CACHE_PREFIX = "@fc:dict:";
-const NULL_SENTINEL = "__NULL__"; // boş sonuç da cache'lensin (DB'yi tekrar dövme)
+const NULL_SENTINEL = "__NULL__";
 
-// In-memory hot cache — aynı oturumda AsyncStorage'a bile gitme
 const memCache = new Map();
 
 const normalize = (s) => String(s || "").trim().toLowerCase();
+
+async function fetchFreeDictionary(word) {
+  try {
+    const res = await fetch(
+      `https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const entry = json?.[0];
+    if (!entry) return null;
+    const def = entry.meanings?.[0]?.definitions?.[0];
+    return {
+      word: entry.word || word,
+      meaning: def?.definition || "",
+      example: def?.example || null,
+      example_tr: null,
+    };
+  } catch {
+    return null;
+  }
+}
 
 export async function lookupWord(raw) {
   const q = normalize(raw);
   if (!q || q.length < 2) return null;
 
-  // L1: memory
   if (memCache.has(q)) {
     const v = memCache.get(q);
     return v === NULL_SENTINEL ? null : v;
   }
 
-  // L2: AsyncStorage
   try {
     const stored = await AsyncStorage.getItem(CACHE_PREFIX + q);
     if (stored != null) {
@@ -43,29 +58,29 @@ export async function lookupWord(raw) {
       memCache.set(q, parsed);
       return parsed;
     }
-  } catch {
-    // cache okuma hatası -> görmezden gel, RPC'ye geç
-  }
+  } catch {}
 
-  // L3: Supabase RPC
+  let row = null;
+
   try {
     const { data, error } = await supabase.rpc("lookup_word", { q });
-    if (error) return null;
+    if (!error && Array.isArray(data) && data.length > 0) {
+      row = data[0];
+    }
+  } catch {}
 
-    const row = Array.isArray(data) && data.length > 0 ? data[0] : null;
-    const toCache = row || NULL_SENTINEL;
-
-    memCache.set(q, toCache);
-    // fire-and-forget — UI'ı tutma
-    AsyncStorage.setItem(
-      CACHE_PREFIX + q,
-      row ? JSON.stringify(row) : NULL_SENTINEL
-    ).catch(() => {});
-
-    return row;
-  } catch {
-    return null;
+  if (!row) {
+    row = await fetchFreeDictionary(q);
   }
+
+  const toCache = row || NULL_SENTINEL;
+  memCache.set(q, toCache);
+  AsyncStorage.setItem(
+    CACHE_PREFIX + q,
+    row ? JSON.stringify(row) : NULL_SENTINEL
+  ).catch(() => {});
+
+  return row;
 }
 
 /** Debounce yardımcısı — input-as-you-type için */
